@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>رفيق الحفظ</title>
-<meta name="description" content="رفيق الحفظ: موقع لحفظ القرآن الكريم ومراجعته">
+<meta name="description" content="رفيق الحفظ: منصة لحفظ القرآن الكريم ومراجعته، للصغار والكبار">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Amiri+Quran&family=IBM+Plex+Sans+Arabic:wght@400;500;600&family=Reem+Kufi:wght@500;700&display=swap">
@@ -12,15 +12,43 @@
 <body>
 <div class="wrap" dir="rtl" lang="ar">
   <header class="top">
-    <h1 class="brand">رفيق الحفظ</h1>
-    <span class="sync" id="sync" role="status"></span>
+    <a class="brand" href="#/">رفيق الحفظ</a>
+    <nav class="nav" id="nav" aria-label="التنقل الرئيسي">
+      <a href="#/" data-nav="home">الرئيسية</a>
+      <a href="#/dashboard" data-nav="dashboard">لوحتي</a>
+      <a href="#/mushaf" data-nav="mushaf">المصحف</a>
+      <a href="#/about" data-nav="about">عن المنصة</a>
+    </nav>
   </header>
 
-  <main id="home" style="display:contents">
-    <nav class="kidbar" aria-label="الأطفال">
-      <div class="kids" id="kids"></div>
-      <button type="button" class="btn" id="parentBtn">ركن الأهل ⚙</button>
-    </nav>
+  <nav class="kidbar" aria-label="الأطفال">
+    <div class="kids" id="kids"></div>
+    <button type="button" class="btn" id="parentBtn">ركن الأهل ⚙</button>
+  </nav>
+
+  <!-- الرئيسية -->
+  <main class="page" id="page-home" data-page="home" tabindex="-1" hidden>
+    <section class="hero">
+      <h2>احفظ القرآن خطوة بخطوة</h2>
+      <p>منصة عربية لحفظ القرآن الكريم ومراجعته، لكل طفل فيها ملفه الخاص ونجومه وأوسمته.</p>
+      <div class="acts">
+        <a class="btn primary" href="#/mushaf">ابدأ الحفظ</a>
+        <a class="btn" href="#/dashboard">لوحتي</a>
+      </div>
+    </section>
+    <ul class="feats">
+      <li><b>علّم ما حفظت</b><span>علّم كل آية أو السورة كاملة، وشاهد تقدّمك يكبر.</span></li>
+      <li><b>وضع التسميع</b><span>تُخفى الآية إلا كلمتها الأولى، فتقرأ من حفظك ثم تتحقق.</span></li>
+      <li><b>مراجعة متباعدة</b><span>تُذكّرك المنصة بكل سورة في موعدها: يوم ثم يومان وهكذا حتى ٣٠ يومًا.</span></li>
+      <li><b>ملف لكل طفل</b><span>وضع للصغار بخط كبير ونجوم، ووضع للقرّاء، وركن خاص بالأهل.</span></li>
+      <li><b>التفسير الميسّر</b><span>تفسير مختصر تحت كل آية لمن يقرأ.</span></li>
+      <li><b>نجوم وأوسمة</b><span>نجمة لكل آية محفوظة، وأوسمة تُفتح مع التقدّم.</span></li>
+    </ul>
+  </main>
+
+  <!-- لوحتي -->
+  <main class="page" id="page-dashboard" data-page="dashboard" tabindex="-1" hidden>
+    <h2 class="ptitle">لوحتي</h2>
     <section class="summary" aria-label="ملخص الحفظ">
       <div class="big"><b id="sAyat">٠</b><span>آية محفوظة من ٦٬٢٣٦</span></div>
       <div class="bar"><i id="sBar" style="width:0%"></i></div>
@@ -33,9 +61,13 @@
         <div class="fact"><small>أيام متتالية</small><strong id="sStreak">٠</strong></div>
       </div>
     </section>
-
+    <section class="today" id="today" aria-label="اليوم"></section>
     <section class="rewards" id="rewards" aria-label="النجوم والأوسمة"></section>
+  </main>
 
+  <!-- المصحف -->
+  <main class="page" id="page-mushaf" data-page="mushaf" tabindex="-1" hidden>
+    <h2 class="ptitle">المصحف</h2>
     <div class="tools">
       <input class="search" id="q" type="search" placeholder="ابحث باسم السورة أو رقمها" aria-label="بحث في السور">
       <div class="chips" id="chips">
@@ -46,12 +78,12 @@
       </div>
     </div>
     <ul class="list" id="list"><li class="empty">جارٍ تحميل المصحف…</li></ul>
-    <p class="foot">نص المصحف بالرسم العثماني من موسوعة القرآن الكريم (quranenc.com). التفسير: «التفسير الميسّر» عبر مشروع tafsir_api المفتوح.</p>
   </main>
 
-  <main id="surah" hidden style="display:contents">
+  <!-- السورة -->
+  <main class="page" id="page-surah" data-page="surah" tabindex="-1" hidden>
     <div class="shead">
-      <button type="button" class="btn" id="back">→ السور</button>
+      <a class="btn" id="back" href="#/mushaf">→ السور</a>
       <span class="grow"></span>
       <a class="btn" id="listen" target="_blank" rel="noopener" href="https://quran.com">استماع للسورة ↗</a>
       <button type="button" class="btn" id="veilBtn" aria-pressed="false">وضع التسميع</button>
@@ -69,7 +101,23 @@
       </div>
     </section>
   </main>
+
+  <!-- عن المنصة -->
+  <main class="page" id="page-about" data-page="about" tabindex="-1" hidden>
+    <h2 class="ptitle">عن المنصة</h2>
+    <section class="prose">
+      <h3>المصادر</h3>
+      <p>نص المصحف بالرسم العثماني من موسوعة القرآن الكريم (quranenc.com) عبر حزمة quran-json. التفسير: «التفسير الميسّر» عبر مشروع tafsir_api المفتوح. لا تُعدَّل هذه النصوص ولا يُولَّد أي نص ديني جديد.</p>
+      <h3>كيف تعمل المراجعة؟</h3>
+      <p>عند حفظ أول آية من سورة تُجدول مراجعتها بعد يوم. كلما أتقنتَ المراجعة تضاعفت المدة (يومان، أربعة، ثمانية…) حتى ٣٠ يومًا، وإن احتجت إعادة عادت إلى يوم واحد.</p>
+      <h3>خصوصيتك</h3>
+      <p>لا حسابات ولا خوادم. تقدّم كل طفل محفوظ على هذا الجهاز وهذا المتصفح فقط ولا يُرسل إلى أي مكان.</p>
+    </section>
+  </main>
+
+  <footer class="foot">نص المصحف بالرسم العثماني من موسوعة القرآن الكريم (quranenc.com). التفسير: «التفسير الميسّر» عبر مشروع tafsir_api المفتوح.</footer>
 </div>
+
 <dialog id="gate" class="dlg" aria-labelledby="gateT">
   <form method="dialog" id="gateForm">
     <h2 id="gateT">ركن الأهل</h2>
