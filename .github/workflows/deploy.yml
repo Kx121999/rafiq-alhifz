@@ -24,6 +24,8 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm ci
+      # a failing test stops the deploy
+      - run: npm test
       # build runs the data check (114 surahs, 6236 ayat) before bundling
       - run: npm run build
       - uses: actions/upload-pages-artifact@v3

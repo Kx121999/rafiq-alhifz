@@ -5,6 +5,7 @@
 ```bash
 npm install
 npm run dev      # تشغيل محلي
+npm test         # الاختبارات الآلية (Vitest)
 npm run check    # فحص سلامة البيانات (114 سورة، 6236 آية)
 npm run build    # يفحص البيانات ثم يبني dist/ للنشر
 ```

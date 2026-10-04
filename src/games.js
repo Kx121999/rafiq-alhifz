@@ -56,7 +56,7 @@ function distinctOptions(correct, make, count) {
   return out.length === count ? shuffle(out) : null;
 }
 
-function buildComplete(prev) {
+export function buildComplete(prev) {
   const pool = eligible(3, 16); if (!pool.length) return null;
   let a = pick(pool); for (let t = 0; t < 5 && pool.length > 1 && prev && a.id === prev.id && a.i === prev.i; t++) a = pick(pool);
   const w = words(a.t), cut = Math.ceil(w.length / 2), tailLen = w.length - cut, correct = w.slice(cut).join(' ');
@@ -67,7 +67,7 @@ function buildComplete(prev) {
   return { a, prompt: w.slice(0, cut).join(' ') + ' …', options: opts, correct, full: a.t };
 }
 
-function buildMissing(prev) {
+export function buildMissing(prev) {
   const pool = eligible(2, 30); if (!pool.length) return null;
   let a = pick(pool); for (let t = 0; t < 5 && pool.length > 1 && prev && a.id === prev.id && a.i === prev.i; t++) a = pick(pool);
   const w = words(a.t), h = Math.floor(Math.random() * w.length), correct = w[h];
@@ -139,7 +139,7 @@ function choiceRound() {
 }
 
 /* ordering: three consecutive memorised ayat, tapped in the right order */
-function buildOrder() {
+export function buildOrder() {
   const rs = runs(); if (!rs.length) return null;
   const r = pick(rs), items = [0, 1, 2].map(k => ({ n: k, t: Q[r.id - 1].v[r.i + k] }));
   let mixed = shuffle(items); for (let t = 0; t < 20 && mixed.every((x, k) => x.n === k); t++) mixed = shuffle(items);

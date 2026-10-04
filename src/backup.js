@@ -24,7 +24,11 @@ export function downloadBackup() {
 }
 
 export function lastExport() {
-  try { const d = new Date(localStorage.getItem(LAST_EXPORT)); return isNaN(d) ? null : d } catch (e) { return null }
+  try {
+    const raw = localStorage.getItem(LAST_EXPORT);
+    if (!raw) return null;   // new Date(null) would be 1970, not "never"
+    const d = new Date(raw); return isNaN(d) ? null : d;
+  } catch (e) { return null }
 }
 
 /** Keeps only well-formed surah records; returns the cleaned progress object and how many records were dropped. */

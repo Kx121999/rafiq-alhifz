@@ -24,4 +24,8 @@ function precacheManifest() {
 }
 
 // Relative base so the built site works from any subfolder (e.g. GitHub Pages).
-export default defineConfig({ base: './', plugins: [precacheManifest()] });
+export default defineConfig({
+  base: './',
+  plugins: [precacheManifest()],
+  test: { environment: 'jsdom', include: ['tests/**/*.test.js'], setupFiles: ['tests/setup.js'] },
+});
