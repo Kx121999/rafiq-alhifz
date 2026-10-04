@@ -162,3 +162,6 @@ footer.foot{margin-top:8px}
 .planform,.planview{align-self:stretch;display:flex;flex-direction:column;gap:12px;align-items:flex-start}
 .planview .bar,.planview .facts{align-self:stretch}
 .today .acts{display:flex;gap:8px;flex-wrap:wrap}
+
+.importbox{display:flex;flex-direction:column;gap:8px;border-top:1px solid var(--line);padding-top:10px}
+.importbox p{margin:0}

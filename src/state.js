@@ -57,6 +57,19 @@ export function setPlan(plan) { const k = activeKid(); if (!k) return; if (plan)
 export const lastSurah = () => (activeKid() || {}).last || 0;
 export function setLast(id) { const k = activeKid(); if (!k || k.last === id) return; k.last = id; persist() }
 
+/** A deep copy of every profile, for backups. */
+export function snapshot() { save(); return clone(store) }
+
+/** Adds imported (already validated) profiles as new children, or replaces everything with them. */
+export function applyImport(list, mode) {
+  if (!list.length) return;
+  save();
+  const fresh = list.map(k => ({ ...clone(k), id: newId() }));
+  if (mode === 'replace') { store.kids = fresh; store.active = fresh[0].id }
+  else store.kids.push(...fresh);
+  adopt(activeKid().S); persist();
+}
+
 export function switchKid(id) {
   if (!store.kids.some(k => k.id === id)) return;
   save(); store.active = id; adopt(activeKid().S); persist();

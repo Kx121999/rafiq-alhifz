@@ -16,7 +16,7 @@ const ymd = d => d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0
 
 /** Progress against a plan: ayat left, ayat per day needed, days left, and the next surah to work on. */
 export function planStats(p) {
-  const pr = PRESETS[p.id]; if (!pr || !Q.length) return null;
+  const pr = Object.hasOwn(PRESETS, p.id) ? PRESETS[p.id] : null; if (!pr || !Q.length) return null;
   const ids = []; for (let i = pr.from; i <= pr.to; i++) ids.push(i);
   if (pr.order === 'desc') ids.reverse();
   let total = 0, left = 0;

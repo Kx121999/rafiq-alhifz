@@ -1,7 +1,8 @@
 // Child profiles: the switcher bar, rewards (stars and badges), and the parent corner behind a math gate.
 import { $, AR, day } from './util.js';
 import { Q } from './data.js';
-import { S, mem, kids, activeKid, switchKid, addKid, updateKid, removeKid, save, ICONS, MODES } from './state.js';
+import { S, mem, kids, activeKid, switchKid, addKid, updateKid, removeKid, save, applyImport, ICONS, MODES } from './state.js';
+import { downloadBackup, lastExport, parseBackup } from './backup.js';
 
 let onChange = () => {};
 export const onKidsChange = fn => { onChange = fn };
@@ -91,6 +92,40 @@ function renderParent() {
     card.append(el('h3', '', k.icon + ' ' + k.name), name, icons, modes, foot);
     box.appendChild(card);
   });
+  box.appendChild(backupSection());
+}
+
+/* ---------- backup: export / import ---------- */
+function backupSection() {
+  const card = el('section', 'kcard');
+  const msg = el('p', 'note'); msg.setAttribute('role', 'status');
+  const choice = el('div', 'importbox'); choice.hidden = true;
+  const when = lastExport();
+  const hint = el('p', 'note', when ? 'آخر نسخة احتياطية: ' + when.toLocaleDateString('ar-EG', { day: 'numeric', month: 'long', year: 'numeric' }) + '.' : 'لم تُصدَّر نسخة احتياطية بعد. صدّر نسخة بين الحين والآخر، فالتقدّم محفوظ في هذا المتصفح فقط.');
+  const exp = el('button', 'btn primary', 'تصدير نسخة احتياطية'); exp.type = 'button';
+  exp.addEventListener('click', () => { downloadBackup(); msg.textContent = 'تم تنزيل الملف. احتفظ به في مكان آمن، ويمكنك استيراده على أي جهاز.'; hint.textContent = 'آخر نسخة احتياطية: اليوم.' });
+  const file = el('input'); file.type = 'file'; file.accept = 'application/json,.json'; file.hidden = true;
+  const imp = el('button', 'btn', 'استيراد من ملف'); imp.type = 'button';
+  imp.addEventListener('click', () => file.click());
+  file.addEventListener('change', async () => {
+    const f = file.files[0]; file.value = ''; choice.hidden = true; choice.textContent = ''; msg.textContent = '';
+    if (!f) return;
+    const r = parseBackup(f.size > 2e6 ? null : await f.text());
+    if (r.error) { msg.textContent = r.error; return }
+    const names = r.kids.map(k => k.icon + ' ' + k.name).join('، ');
+    choice.append(el('p', '', 'يحتوي الملف على ' + AR(r.kids.length) + (r.kids.length === 1 ? ' طفل: ' : ' أطفال: ') + names + '.' + (r.skipped ? ' (تم تجاهل ' + AR(r.skipped) + ' عنصر غير صالح)' : '')));
+    const add = el('button', 'btn primary', 'إضافتهم إلى الأطفال الحاليين'); add.type = 'button';
+    add.addEventListener('click', () => { applyImport(r.kids, 'append'); msg.textContent = 'تمت الإضافة.'; refresh(true) });
+    const rep = el('button', 'btn danger', 'استبدال كل البيانات الحالية'); rep.type = 'button';
+    rep.addEventListener('click', () => {
+      if (confirm('سيُحذف كل ما في هذا المتصفح الآن ويُستبدل بمحتوى الملف. هل صدّرتَ نسخة احتياطية أولًا؟ لا يمكن التراجع.')) { applyImport(r.kids, 'replace'); msg.textContent = 'تم الاستبدال.'; refresh(true) }
+    });
+    const no = el('button', 'btn', 'إلغاء'); no.type = 'button'; no.addEventListener('click', () => { choice.hidden = true; choice.textContent = '' });
+    const acts = el('div', 'acts'); acts.append(add, rep, no); choice.append(acts); choice.hidden = false;
+  });
+  const acts = el('div', 'acts'); acts.append(exp, imp, file);
+  card.append(el('h3', '', 'النسخ الاحتياطي'), hint, acts, choice, msg);
+  return card;
 }
 
 function refresh(rerenderParent) { applyMode(); renderKidBar(); if (rerenderParent) renderParent(); onChange() }
