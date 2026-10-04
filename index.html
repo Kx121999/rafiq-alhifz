@@ -5,6 +5,15 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>رفيق الحفظ</title>
 <meta name="description" content="رفيق الحفظ: منصة لحفظ القرآن الكريم ومراجعته، للصغار والكبار">
+<meta name="theme-color" content="#f1f5f1" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0c1613" media="(prefers-color-scheme: dark)">
+<meta property="og:type" content="website">
+<meta property="og:locale" content="ar_AR">
+<meta property="og:title" content="رفيق الحفظ">
+<meta property="og:description" content="منصة لحفظ القرآن الكريم ومراجعته، لكل طفل ملفه ونجومه وأوسمته.">
+<link rel="manifest" href="/manifest.webmanifest">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="/icons/apple-touch-icon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Amiri+Quran&family=IBM+Plex+Sans+Arabic:wght@400;500;600&family=Reem+Kufi:wght@500;700&display=swap">
@@ -23,6 +32,8 @@
     </nav>
   </header>
 
+  <p class="note netnote" id="netNote" role="status" hidden>أنت غير متصل بالإنترنت. المصحف وتقدّمك يعملان، أما الصوت فيحتاج إنترنت.</p>
+
   <nav class="kidbar" aria-label="الأطفال">
     <div class="kids" id="kids"></div>
     <button type="button" class="btn" id="parentBtn">ركن الأهل ⚙</button>
@@ -36,6 +47,7 @@
       <div class="acts">
         <a class="btn primary" href="#/mushaf">ابدأ الحفظ</a>
         <a class="btn" href="#/dashboard">لوحتي</a>
+        <button type="button" class="btn" id="installBtn" hidden>ثبّت التطبيق</button>
       </div>
     </section>
     <ul class="feats">
@@ -148,6 +160,8 @@
       <p>نص المصحف بالرسم العثماني من موسوعة القرآن الكريم (quranenc.com) عبر حزمة quran-json. التفسير: «التفسير الميسّر» عبر مشروع tafsir_api المفتوح. لا تُعدَّل هذه النصوص ولا يُولَّد أي نص ديني جديد.</p>
       <h3>كيف تعمل المراجعة؟</h3>
       <p>عند حفظ أول آية من سورة تُجدول مراجعتها بعد يوم. كلما أتقنتَ المراجعة تضاعفت المدة (يومان، أربعة، ثمانية…) حتى ٣٠ يومًا، وإن احتجت إعادة عادت إلى يوم واحد.</p>
+      <h3>تثبيت التطبيق والعمل بدون إنترنت</h3>
+      <p>بعد فتح الموقع مرة واحدة يعمل المصحف والتفسير وتقدّمك بدون إنترنت. على أندرويد وكروم يظهر زر «ثبّت التطبيق» في الصفحة الرئيسية. على أيفون: زر المشاركة في سفاري ثم «إضافة إلى الشاشة الرئيسية». الصوت وحده يحتاج إنترنت.</p>
       <h3>خصوصيتك</h3>
       <p>لا حسابات ولا خوادم. تقدّم كل طفل محفوظ على هذا الجهاز وهذا المتصفح فقط ولا يُرسل إلى أي مكان.</p>
     </section>
@@ -155,6 +169,8 @@
 
   <footer class="foot">نص المصحف بالرسم العثماني من موسوعة القرآن الكريم (quranenc.com). التفسير: «التفسير الميسّر» عبر مشروع tafsir_api المفتوح. التلاوات: everyayah.com. · <a href="#/about">عن المنصة</a></footer>
 </div>
+
+<div id="updateBar" class="updatebar" role="status" hidden><span>تم تحديث الموقع.</span> <button type="button" class="btn primary" id="updateReload">تحديث الآن</button></div>
 
 <div id="celebrate" class="celebrate" role="status" aria-live="polite" hidden></div>
 

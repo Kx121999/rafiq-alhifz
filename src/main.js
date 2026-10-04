@@ -7,6 +7,7 @@ import { view, renderSurah, toggleTafsir } from './surah.js';
 import { go, onPage, onShown, startRouter, route } from './router.js';
 import { pageIn, revealAyah, celebrate, motionReady } from './motion.js';
 import { initPlayer, loadSurah, playFrom, stopPlayer } from './player.js';
+import { initPwa } from './pwa.js';
 import { renderToday } from './dashboard.js';
 import { renderReview, onReviewGraded, clearReviewNote, dueList } from './review.js';
 import { renderPlan, onPlanChanged } from './plan.js';
@@ -96,7 +97,7 @@ $('revGood').addEventListener('click', () => onGrade(true));
 $('revBad').addEventListener('click', () => onGrade(false));
 
 /* ---------- boot ---------- */
-initKids(); onKidsChange(render); initPlayer();
+initKids(); onKidsChange(render); initPlayer(); initPwa();
 startRouter();
 loadQuran().then(() => { render(); motionReady(); route() })
   .catch(() => { $('list').innerHTML = '<li class="empty">تعذّر تحميل نص المصحف. أعد فتح الصفحة للمحاولة مرة أخرى.</li>' });
