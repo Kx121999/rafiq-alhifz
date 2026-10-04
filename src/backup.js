@@ -50,6 +50,18 @@ function cleanProgress(S, skip) {
   return out;
 }
 
+/** The activity log: only ISO-date keys with small non-negative whole numbers; all-zero days are dropped. */
+function cleanLog(log) {
+  if (!log || typeof log !== 'object') return null;
+  const out = {};
+  for (const [d, e] of Object.entries(log).slice(0, 400)) {
+    if (!DATE.test(d) || !e || typeof e !== 'object') continue;
+    const v = { a: int(e.a, 0, 1e5, 0), r: int(e.r, 0, 1e5, 0), w: int(e.w, 0, 1e5, 0), g: int(e.g, 0, 1e5, 0) };
+    if (v.a || v.r || v.w || v.g) out[d] = v;
+  }
+  return Object.keys(out).length ? out : null;
+}
+
 function cleanKid(k, idx, skip) {
   if (!k || typeof k !== 'object' || !k.S || typeof k.S !== 'object') { skip.kids++; return null }
   const kid = {
@@ -61,6 +73,8 @@ function cleanKid(k, idx, skip) {
   const p = k.plan;
   if (p && Object.hasOwn(PRESETS, p.id) && DATE.test(p.start) && Number.isInteger(p.weeks) && p.weeks >= 1 && p.weeks <= 104) kid.plan = { id: p.id, weeks: p.weeks, start: p.start };
   if (Number.isInteger(k.last) && k.last >= 1 && k.last <= 114) kid.last = k.last;
+  const log = cleanLog(k.log);
+  if (log) kid.log = log;
   if (k.game && Number.isInteger(k.game.stars) && k.game.stars >= 0 && k.game.stars <= 1e6) kid.game = { stars: k.game.stars };
   return kid;
 }

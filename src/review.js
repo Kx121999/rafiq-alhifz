@@ -1,6 +1,6 @@
 import { $, AR, day, days, el } from './util.js';
 import { Q } from './data.js';
-import { S, mem, isDue, grade, weakList, setWeak, save } from './state.js';
+import { S, mem, isDue, grade, weakList, masterWeak, save } from './state.js';
 import { revealAyah } from './motion.js';
 
 /** Surahs whose review is due today, in surah order. */
@@ -67,7 +67,7 @@ export function renderWeak() {
   card.append(tx, el('p', 'note', 'اقرأ الآية من حفظك ثم اضغطها لتتحقق.'));
   const good = el('button', 'btn primary', 'أتقنتُها'), again = el('button', 'btn', 'ما زالت ضعيفة'), open = el('a', 'btn', 'افتح السورة');
   good.type = again.type = 'button'; open.href = '#/surah/' + a.id;
-  good.addEventListener('click', () => { setWeak(a.id, a.i, false); save(); weakNote = 'أحسنت! أتقنتَ الآية ' + AR(a.i + 1) + ' من سورة ' + c.n + '.'; renderWeak(); onGraded() });
+  good.addEventListener('click', () => { masterWeak(a.id, a.i); save(); weakNote = 'أحسنت! أتقنتَ الآية ' + AR(a.i + 1) + ' من سورة ' + c.n + '.'; renderWeak(); onGraded() });
   again.addEventListener('click', () => { weakIdx++; weakNote = ''; renderWeak() });
   const acts = el('div', 'acts'); acts.append(good, again, open); card.appendChild(acts);
   box.appendChild(card);

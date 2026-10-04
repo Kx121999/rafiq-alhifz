@@ -136,3 +136,27 @@ describe('weak ayat in backups', () => {
     expect(out[110]).not.toHaveProperty('w');
   });
 });
+
+describe('activity log in backups', () => {
+  it('round-trips and keeps only sane entries', async () => {
+    const { state, backup } = await setup();
+    state.bump(3); state.addGameStars(2);
+    const r = backup.parseBackup(JSON.stringify(backup.buildBackup()));
+    expect(r.kids[0].log['2026-05-01']).toEqual({ a: 3, r: 0, w: 0, g: 2 });
+  });
+
+  it('drops bad dates, junk values and empty days, and clamps numbers', async () => {
+    const { backup } = await setup();
+    const log = {
+      '2026-05-01': { a: 2, r: 'x', w: -4, g: 9e9 },    // r/w/g are junk -> 0, g clamps to 0 (out of range)
+      'yesterday': { a: 1 },                              // not a date
+      '2026-04-30': { a: 0, r: 0, w: 0, g: 0 },           // empty
+      '2026-04-29': 'many',                               // not an object
+      '2026-04-28': { a: 1.5 },                           // not a whole number
+    };
+    const k = backup.parseBackup(file([kid({ log })])).kids[0];
+    expect(k.log).toEqual({ '2026-05-01': { a: 2, r: 0, w: 0, g: 0 } });
+    expect(backup.parseBackup(file([kid({ log: 'nope' })])).kids[0].log).toBeUndefined();
+    expect(backup.parseBackup(file([kid({ log: {} })])).kids[0].log).toBeUndefined();
+  });
+});

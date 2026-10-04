@@ -61,8 +61,24 @@ export function setLast(id) { const k = activeKid(); if (!k || k.last === id) re
 export const gameStars = () => ((activeKid() || {}).game || {}).stars || 0;
 export function addGameStars(n) {
   const k = activeKid(); if (!k || !(n > 0)) return;
-  k.game = { stars: Math.min(1e6, gameStars() + Math.floor(n)) }; persist();
+  k.game = { stars: Math.min(1e6, gameStars() + Math.floor(n)) }; addLog('g', Math.floor(n)); persist();
 }
+
+/* Activity log for the weekly report: per day {a: ayat memorised, r: surah reviews, w: weak ayat mastered, g: game stars}.
+   Daily totals only (not every tap), kept for LOG_DAYS days, as an optional field log on the child. */
+const LOG_DAYS = 90;
+function addLog(field, n) {
+  const k = activeKid(); if (!k || !n) return;
+  const log = k.log || (k.log = {}), d = day();
+  const e = log[d] || (log[d] = { a: 0, r: 0, w: 0, g: 0 });
+  e[field] = Math.max(0, (e[field] || 0) + n);
+  if (!e.a && !e.r && !e.w && !e.g) delete log[d];
+  const cutoff = day(-LOG_DAYS);
+  for (const key of Object.keys(log)) if (key < cutoff) delete log[key];
+}
+export const activityLog = () => (activeKid() || {}).log || {};
+/** Marks a weak ayah as mastered (as opposed to un-flagging it by mistake) and counts it for the report. */
+export function masterWeak(id, i) { if (!setWeak(id, i, false)) return false; addLog('w', 1); return true }
 
 /** A deep copy of every profile, for backups. */
 export function snapshot() { save(); return clone(store) }
@@ -108,6 +124,7 @@ export const mem = id => { const r = rec(id); if (!r) return 0; let c = 0; for (
 export const isDue = id => { const r = rec(id); return !!r && mem(id) > 0 && r.d <= day() };
 
 export function bump(delta) {
+  addLog('a', delta);
   if (S.day !== day()) { S.day = day(); S.n = 0 }
   S.n = Math.max(0, S.n + delta);
   if (delta > 0 && S.last !== day()) { S.streak = (S.last === day(-1) ? S.streak : 0) + 1; S.last = day() }
@@ -145,6 +162,6 @@ export function weakList() {
 /** Spaced review: doubles the interval up to 30 days, or resets to 1 day. Returns the new interval. */
 export function grade(id, good) {
   const r = rec(id); if (!r) return null;
-  r.i = good ? Math.min(30, Math.max(1, r.i) * 2) : 1; r.d = day(r.i); save();
+  r.i = good ? Math.min(30, Math.max(1, r.i) * 2) : 1; r.d = day(r.i); addLog('r', 1); save();
   return r.i;
 }

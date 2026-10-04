@@ -3,6 +3,7 @@ import { $, AR, day } from './util.js';
 import { Q } from './data.js';
 import { S, mem, gameStars, kids, activeKid, switchKid, addKid, updateKid, removeKid, save, applyImport, ICONS, MODES } from './state.js';
 import { downloadBackup, lastExport, parseBackup } from './backup.js';
+import { go } from './router.js';
 
 let onChange = () => {};
 export const onKidsChange = fn => { onChange = fn };
@@ -84,6 +85,9 @@ function renderParent() {
       modes.appendChild(b);
     });
     const foot = el('div', 'acts');
+    const rep = el('button', 'btn', 'تقرير الأسبوع'); rep.type = 'button';
+    rep.addEventListener('click', () => { if (!act || k.id !== act.id) switchKid(k.id); $('parent').close(); go('/report') });
+    foot.appendChild(rep);
     if (!act || k.id !== act.id) { const sw = el('button', 'btn', 'تحويل إلى ' + k.name); sw.type = 'button'; sw.addEventListener('click', () => { switchKid(k.id); refresh(true) }); foot.appendChild(sw) }
     if (kids().length > 1) {
       const del = el('button', 'btn danger', 'حذف'); del.type = 'button';

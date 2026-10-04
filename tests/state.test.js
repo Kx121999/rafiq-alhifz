@@ -268,3 +268,65 @@ describe('weak ayat', () => {
     expect(again.state.weakList()).toEqual([]);
   });
 });
+
+describe('activity log', () => {
+  async function logSetup(date = '2026-05-01') {
+    today(date);
+    const b = await boot();
+    return b;
+  }
+
+  it('is empty at first and does not appear on a profile with no activity', async () => {
+    const { state } = await logSetup();
+    expect(state.activityLog()).toEqual({});
+    expect(state.activeKid()).not.toHaveProperty('log');
+  });
+
+  it('counts ayat memorised today (and un-memorising takes them back, never below zero)', async () => {
+    const { state } = await logSetup();
+    state.bump(state.setAyah(112, 0, true)); state.bump(state.setAyah(112, 1, true)); state.bump(state.setAyah(112, 2, true));
+    expect(state.activityLog()['2026-05-01'].a).toBe(3);
+    state.bump(state.setAyah(112, 2, false));
+    expect(state.activityLog()['2026-05-01'].a).toBe(2);
+    for (let k = 0; k < 5; k++) state.bump(-1);
+    expect(state.activityLog()['2026-05-01']).toBeUndefined();      // an all-zero day is dropped
+  });
+
+  it('counts a whole-surah bump as one entry of the right size', async () => {
+    const { state, Q } = await logSetup();
+    let d = 0; for (let i = 0; i < Q[113].v.length; i++) d += state.setAyah(114, i, true);
+    state.bump(d);
+    expect(state.activityLog()['2026-05-01'].a).toBe(6);
+  });
+
+  it('counts surah reviews, mastered weak ayat and game stars separately', async () => {
+    const { state, Q } = await logSetup();
+    memoriseAll(state, Q, 112);
+    state.grade(112, true); state.grade(112, false);
+    state.setWeak(112, 0, true); state.setWeak(112, 1, true);
+    expect(state.masterWeak(112, 0)).toBe(true);
+    expect(state.masterWeak(112, 0)).toBe(false);              // already clear: not counted twice
+    state.setWeak(112, 1, false);                              // un-flagging by mistake is not "mastering"
+    state.addGameStars(4);
+    expect(state.activityLog()['2026-05-01']).toMatchObject({ r: 2, w: 1, g: 4 });
+  });
+
+  it('keeps one entry per day and forgets days older than 90', async () => {
+    const { state } = await logSetup('2026-01-01');
+    state.bump(1);
+    today('2026-02-01'); state.bump(2);
+    expect(Object.keys(state.activityLog()).sort()).toEqual(['2026-01-01', '2026-02-01']);
+    today('2026-05-01'); state.bump(1);                        // 2026-01-01 is 120 days old, 2026-02-01 is 89
+    expect(Object.keys(state.activityLog()).sort()).toEqual(['2026-02-01', '2026-05-01']);
+  });
+
+  it('belongs to one child and survives a reload', async () => {
+    const { state } = await logSetup();
+    state.bump(2); state.save();
+    state.addKid({ name: 'يوسف', icon: '🌙', mode: 'reader' });
+    expect(state.activityLog()).toEqual({});
+    const again = await boot({ 'hifz-kids-v1': localStorage.getItem('hifz-kids-v1') });
+    again.state.switchKid(again.state.kids()[0].id);
+    expect(again.state.activityLog()['2026-05-01'].a).toBe(2);
+  });
+});

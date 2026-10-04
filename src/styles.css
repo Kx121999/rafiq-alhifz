@@ -256,3 +256,28 @@ footer.foot{margin-top:8px}
 .hittx{font-family:var(--quran);font-size:1.5rem;line-height:2.2;margin:0}
 .hittx mark{background:var(--gold-soft);color:var(--gold);border-radius:6px;padding:0 .15em}
 .ay.found{background:var(--gold-soft);border-radius:10px;transition:background .6s}
+
+/* ---- weekly report: fixed light "paper" colours so it reads the same on screen and on paper ---- */
+.weektabs{display:flex;gap:6px;flex-wrap:wrap}
+.weektabs a[aria-current="true"]{background:var(--accent-soft);border-color:var(--accent);color:var(--accent)}
+.report{--fg:#12261f;--muted:#5b6f67;--line:#d5dfd9;--accent:#0e6b50;--accent-soft:#dcefe7;--gold:#a97a1c;--gold-soft:#f5ead0;--surface:#fff;background:#fffdf6;color:#12261f;border:3px double #a97a1c;border-radius:6px;padding:28px 20px;display:flex;flex-direction:column;gap:14px;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+.report p,.report h2,.report h3{margin:0}
+.report h3{font-family:var(--display);font-weight:500;font-size:1.15rem;color:#0e6b50;margin-top:6px}
+.rep-brand{font-family:var(--display);color:#0e6b50;font-size:1.1rem}
+.rep-name{font-family:var(--display);font-size:2rem;line-height:1.4;overflow-wrap:anywhere}
+.rep-range{color:#5b6f67}
+.rtiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px}
+.rtile{background:#fff;border:1px solid #d5dfd9;border-radius:10px;padding:10px 12px;display:flex;flex-direction:column;gap:2px}
+.rtile b{font-family:var(--display);font-size:1.5rem;color:#0e6b50;font-variant-numeric:tabular-nums}
+.rtile small{color:#5b6f67}
+.rchart{display:grid;grid-template-columns:repeat(7,1fr);gap:8px;align-items:end}
+.rcol{display:flex;flex-direction:column;align-items:center;gap:4px;min-width:0}
+.rcol b{font-size:.85rem;min-height:1.2em;font-variant-numeric:tabular-nums}
+.rcol small{font-size:.75rem;color:#5b6f67}
+.rbar{width:100%;height:110px;background:#eef3ef;border-radius:8px;display:flex;align-items:flex-end;overflow:hidden}
+.rbar i{display:block;width:100%;background:#0e6b50;border-radius:8px 8px 0 0}
+.rrows{list-style:none;margin:0;padding:0;display:flex;flex-direction:column}
+.rrows li{display:flex;justify-content:space-between;gap:12px;padding:8px 0;border-bottom:1px solid #d5dfd9}
+.rrows b{font-weight:600;text-align:end}
+.rep-note{color:#5b6f67;font-size:.85rem}
+@media print{.report{break-inside:avoid}}

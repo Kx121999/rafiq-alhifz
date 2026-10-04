@@ -9,6 +9,7 @@ import { pageIn, revealAyah, celebrate, motionReady } from './motion.js';
 import { initPlayer, loadSurah, playFrom, stopPlayer } from './player.js';
 import { initPwa } from './pwa.js';
 import { initSearch, openSearch } from './search.js';
+import { renderReport } from './report.js';
 import { renderToday } from './dashboard.js';
 import { renderReview, renderWeak, onReviewGraded, clearReviewNote, dueList } from './review.js';
 import { renderPlan, onPlanChanged } from './plan.js';
@@ -49,6 +50,7 @@ onShown(page => {
   if (page !== 'surah') stopPlayer(); else setTimeout(jumpToAyah, 450);
   if (page === 'search' && !$('sq').value) $('sq').focus();
 });
+onPage('report', arg => { view.cur = 0; if (Q.length) renderReport(+arg || 0) });
 onPage('search', arg => { view.cur = 0; openSearch(arg) });
 onPage('surah', (arg, ayah) => {
   const id = +arg; if (!(id >= 1 && id <= 114)) return false;
@@ -69,6 +71,7 @@ onPage('certificate', arg => {
 });
 onGameStars(() => { renderRewards(); renderAchievements() });
 $('printCert').addEventListener('click', () => window.print());
+$('printReport').addEventListener('click', () => window.print());
 onReviewGraded(() => { renderSummary(); renderToday(); renderRewards(); updateDue() });
 onPlanChanged(() => { renderSummary(); renderToday() });
 for (const p of ['dashboard', 'mushaf']) onPage(p, () => { view.cur = 0; render() });
