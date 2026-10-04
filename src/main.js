@@ -6,6 +6,7 @@ import { renderSummary, renderList, setFilter } from './home.js';
 import { view, renderSurah, toggleTafsir } from './surah.js';
 import { go, onPage, onShown, startRouter, route } from './router.js';
 import { pageIn, revealAyah, celebrate, motionReady } from './motion.js';
+import { initPlayer, loadSurah, playFrom, stopPlayer } from './player.js';
 import { renderToday } from './dashboard.js';
 import { renderReview, onReviewGraded, clearReviewNote, dueList } from './review.js';
 import { renderPlan, onPlanChanged } from './plan.js';
@@ -33,11 +34,11 @@ function checkCompleted(id, wasComplete) {
 }
 
 /* ---------- routes ---------- */
-onShown(pageIn);
+onShown(page => { pageIn(page); if (page !== 'surah') stopPlayer() });
 onPage('surah', arg => {
   const id = +arg; if (!(id >= 1 && id <= 114)) return false;
   if (!Q.length) { view.cur = 0; return }   // quran.json still loading: boot re-routes once it arrives
-  view.cur = id; view.veil = isDue(id); setLast(id); renderSurah(true);
+  view.cur = id; view.veil = isDue(id); setLast(id); renderSurah(true); loadSurah(id);
   document.title = 'سورة ' + Q[id - 1].n + ' · رفيق الحفظ';
 });
 for (const p of ['home', 'about']) onPage(p, () => { view.cur = 0 });
@@ -75,6 +76,7 @@ $('allBtn').addEventListener('click', () => {
 });
 $('ayat').addEventListener('click', e => {
   const li = e.target.closest('.ay'); if (!li) return;
+  if (e.target.closest('.pl')) { playFrom(+li.dataset.i); return }
   if (e.target.closest('.tf')) { toggleTafsir(li); return }
   if (e.target.closest('.tfx')) return;
   if (e.target.closest('.ck')) {
@@ -94,7 +96,7 @@ $('revGood').addEventListener('click', () => onGrade(true));
 $('revBad').addEventListener('click', () => onGrade(false));
 
 /* ---------- boot ---------- */
-initKids(); onKidsChange(render);
+initKids(); onKidsChange(render); initPlayer();
 startRouter();
 loadQuran().then(() => { render(); motionReady(); route() })
   .catch(() => { $('list').innerHTML = '<li class="empty">تعذّر تحميل نص المصحف. أعد فتح الصفحة للمحاولة مرة أخرى.</li>' });

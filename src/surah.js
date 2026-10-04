@@ -27,7 +27,9 @@ export function renderSurah(full) {
       const body = document.createElement('div'); body.className = 'body';
       const tf = document.createElement('button'); tf.type = 'button'; tf.className = 'tf'; tf.textContent = 'التفسير'; tf.setAttribute('aria-expanded', 'false');
       const tfx = document.createElement('div'); tfx.className = 'tfx'; tfx.hidden = true;
-      body.append(tx, tf, tfx); li.append(body, ck); ol.appendChild(li);
+      const pl = document.createElement('button'); pl.type = 'button'; pl.className = 'pl'; pl.textContent = '▶ استمع'; pl.setAttribute('aria-label', 'استمع من الآية ' + AR(i + 1));
+      const row = document.createElement('div'); row.className = 'arow'; row.append(pl, tf);
+      body.append(tx, row, tfx); li.append(body, ck); ol.appendChild(li);
     });
   }
   ol.querySelectorAll('.ck').forEach((ck, i) => ck.setAttribute('aria-pressed', !!r && r.m[i] === '1'));
