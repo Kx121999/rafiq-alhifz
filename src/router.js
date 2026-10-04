@@ -32,3 +32,5 @@ export function route() {
 }
 
 export const startRouter = () => { window.addEventListener('hashchange', route); route() };
+/** Stops listening for hash changes (used by tests so one test's router cannot react to the next test's navigation). */
+export const stopRouter = () => window.removeEventListener('hashchange', route);

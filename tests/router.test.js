@@ -1,6 +1,7 @@
-import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 
-const PAGES = ['home', 'dashboard', 'mushaf', 'review', 'plan', 'games', 'achievements', 'certificate', 'surah', 'about'];
+// every page the router knows, so navigating to any of them finds its element
+const PAGES = ['home', 'dashboard', 'mushaf', 'search', 'review', 'plan', 'games', 'achievements', 'certificate', 'report', 'surah', 'about'];
 const tick = () => new Promise(r => setTimeout(r, 0));
 
 async function setup() {
@@ -17,6 +18,7 @@ const current = () => [...document.querySelectorAll('#nav a')].filter(a => a.get
 describe('router', () => {
   let r;
   beforeEach(async () => { r = await setup() });
+  afterEach(() => r.stopRouter());
 
   it('shows the home page for an empty or unknown path', async () => {
     r.startRouter(); expect(visible()).toEqual(['home']);
