@@ -8,11 +8,14 @@ import { go, onPage, startRouter, route } from './router.js';
 import { renderToday } from './dashboard.js';
 import { renderReview, onReviewGraded, clearReviewNote, dueList } from './review.js';
 import { renderPlan, onPlanChanged } from './plan.js';
+import { renderGames, onGameStars, resetGame } from './games.js';
+import { renderAchievements, renderCertificate } from './achievements.js';
 import { initKids, onKidsChange, renderRewards, applyMode } from './kids.js';
 
 function render() {
   if (!Q.length) return;
-  applyMode(); renderSummary(); renderToday(); renderRewards(); renderList(); renderReview(); renderPlan(); updateDue();
+  applyMode(); renderSummary(); renderToday(); renderRewards(); renderList(); renderReview(); renderPlan(); updateDue(); renderAchievements();
+  if (!$('page-games').hidden) renderGames();
   if (view.cur) renderSurah(false);
 }
 function updateDue() {
@@ -31,6 +34,15 @@ onPage('surah', arg => {
 for (const p of ['home', 'about']) onPage(p, () => { view.cur = 0 });
 onPage('review', () => { view.cur = 0; clearReviewNote(); render() });
 onPage('plan', () => { view.cur = 0; render() });
+onPage('games', () => { view.cur = 0; resetGame(); render(); renderGames() });
+onPage('achievements', () => { view.cur = 0; render() });
+onPage('certificate', arg => {
+  view.cur = 0; if (!Q.length) return;
+  if (!renderCertificate(+arg)) return '/achievements';
+  document.title = 'شهادة سورة ' + Q[+arg - 1].n + ' · رفيق الحفظ';
+});
+onGameStars(() => { renderRewards(); renderAchievements() });
+$('printCert').addEventListener('click', () => window.print());
 onReviewGraded(() => { renderSummary(); renderToday(); renderRewards(); updateDue() });
 onPlanChanged(() => { renderSummary(); renderToday() });
 for (const p of ['dashboard', 'mushaf']) onPage(p, () => { view.cur = 0; render() });

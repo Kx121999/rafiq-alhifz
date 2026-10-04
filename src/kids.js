@@ -1,7 +1,7 @@
 // Child profiles: the switcher bar, rewards (stars and badges), and the parent corner behind a math gate.
 import { $, AR, day } from './util.js';
 import { Q } from './data.js';
-import { S, mem, kids, activeKid, switchKid, addKid, updateKid, removeKid, save, applyImport, ICONS, MODES } from './state.js';
+import { S, mem, gameStars, kids, activeKid, switchKid, addKid, updateKid, removeKid, save, applyImport, ICONS, MODES } from './state.js';
 import { downloadBackup, lastExport, parseBackup } from './backup.js';
 
 let onChange = () => {};
@@ -28,7 +28,7 @@ function totals() {
   let ay = 0, done = 0;
   Q.forEach((c, k) => { const m = mem(k + 1); ay += m; if (m === c.v.length) done++ });
   const streak = (S.last === day() || S.last === day(-1)) ? S.streak : 0;
-  return { ay, done, streak };
+  return { ay, done, streak, games: gameStars() };
 }
 const BADGES = [
   { icon: '🌱', name: 'البداية', ok: t => t.ay >= 1 },
@@ -37,10 +37,12 @@ const BADGES = [
   { icon: '🏆', name: 'خمس سور', ok: t => t.done >= 5 },
   { icon: '🔥', name: 'أسبوع متواصل', ok: t => t.streak >= 7 },
   { icon: '👑', name: 'مئة آية', ok: t => t.ay >= 100 },
+  { icon: '🎮', name: 'لاعب نشيط', ok: t => t.games >= 10 },
+  { icon: '🎯', name: 'بطل الألعاب', ok: t => t.games >= 50 },
 ];
 
-export function renderRewards() {
-  const box = $('rewards'); box.textContent = '';
+export function renderRewards(id = 'rewards') {
+  const box = $(id); box.textContent = '';
   const t = totals();
   const stars = el('p', 'stars'); stars.append(el('span', 'big-star', '⭐'), el('b', '', AR(t.ay)), ' نجمة');
   const row = el('ul', 'badges');
@@ -50,7 +52,8 @@ export function renderRewards() {
     li.title = on ? 'حصلتَ على وسام ' + b.name : 'وسام ' + b.name + ' لم يُفتح بعد';
     row.appendChild(li);
   });
-  box.append(stars, row);
+  const games = el('p', 'stars game'); games.append(el('span', 'big-star', '🎮'), el('b', '', AR(t.games)), ' نجمة ألعاب (منفصلة عن نجوم الحفظ)');
+  box.append(stars, games, row);
 }
 
 /* ---------- parent corner ---------- */

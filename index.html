@@ -14,12 +14,12 @@
   <header class="top">
     <a class="brand" href="#/">رفيق الحفظ</a>
     <nav class="nav" id="nav" aria-label="التنقل الرئيسي">
-      <a href="#/" data-nav="home">الرئيسية</a>
       <a href="#/dashboard" data-nav="dashboard">لوحتي</a>
       <a href="#/mushaf" data-nav="mushaf">المصحف</a>
       <a href="#/review" data-nav="review">المراجعة<span class="count" id="dueCount" hidden></span></a>
       <a href="#/plan" data-nav="plan">الخطة</a>
-      <a href="#/about" data-nav="about">عن المنصة</a>
+      <a href="#/games" data-nav="games">ألعاب</a>
+      <a href="#/achievements" data-nav="achievements">إنجازاتي</a>
     </nav>
   </header>
 
@@ -94,6 +94,28 @@
     <section class="today" id="planBox"></section>
   </main>
 
+  <!-- ألعاب -->
+  <main class="page" id="page-games" data-page="games" tabindex="-1" hidden>
+    <h2 class="ptitle">ألعاب</h2>
+    <section class="today" id="gameBox"></section>
+  </main>
+
+  <!-- إنجازاتي -->
+  <main class="page" id="page-achievements" data-page="achievements" tabindex="-1" hidden>
+    <h2 class="ptitle">إنجازاتي</h2>
+    <section class="rewards" id="achRewards" aria-label="النجوم والأوسمة"></section>
+    <section class="today" id="achSurahs"></section>
+  </main>
+
+  <!-- الشهادة -->
+  <main class="page" id="page-certificate" data-page="certificate" tabindex="-1" hidden>
+    <div class="noprint certbar">
+      <a class="btn" href="#/achievements">→ إنجازاتي</a>
+      <button type="button" class="btn primary" id="printCert">طباعة الشهادة</button>
+    </div>
+    <article class="cert" id="cert" aria-label="شهادة إتمام الحفظ"></article>
+  </main>
+
   <!-- السورة -->
   <main class="page" id="page-surah" data-page="surah" tabindex="-1" hidden>
     <div class="shead">
@@ -129,7 +151,7 @@
     </section>
   </main>
 
-  <footer class="foot">نص المصحف بالرسم العثماني من موسوعة القرآن الكريم (quranenc.com). التفسير: «التفسير الميسّر» عبر مشروع tafsir_api المفتوح.</footer>
+  <footer class="foot">نص المصحف بالرسم العثماني من موسوعة القرآن الكريم (quranenc.com). التفسير: «التفسير الميسّر» عبر مشروع tafsir_api المفتوح. · <a href="#/about">عن المنصة</a></footer>
 </div>
 
 <dialog id="gate" class="dlg" aria-labelledby="gateT">

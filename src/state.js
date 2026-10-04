@@ -57,6 +57,13 @@ export function setPlan(plan) { const k = activeKid(); if (!k) return; if (plan)
 export const lastSurah = () => (activeKid() || {}).last || 0;
 export function setLast(id) { const k = activeKid(); if (!k || k.last === id) return; k.last = id; persist() }
 
+/** Game stars are kept apart from memorisation stars: they reward play, not progress. Optional field game: {stars}. */
+export const gameStars = () => ((activeKid() || {}).game || {}).stars || 0;
+export function addGameStars(n) {
+  const k = activeKid(); if (!k || !(n > 0)) return;
+  k.game = { stars: Math.min(1e6, gameStars() + Math.floor(n)) }; persist();
+}
+
 /** A deep copy of every profile, for backups. */
 export function snapshot() { save(); return clone(store) }
 

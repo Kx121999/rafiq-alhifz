@@ -5,3 +5,4 @@ export const days = n => n === 1 ? 'يوم واحد' : n === 2 ? 'يومين' : 
 export const norm = s => s.replace(/[ً-ٰٟ]/g, '').replace(/[أإآ]/g, 'ا').replace(/ة/g, 'ه').replace(/ى/g, 'ي').trim();
 export const el = (tag, cls, text) => { const e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e };
 export const ayahs = n => n === 1 ? 'آية واحدة' : n === 2 ? 'آيتان' : n <= 10 ? AR(n) + ' آيات' : AR(n) + ' آية';
+export const nujum = n => n === 1 ? 'نجمة واحدة' : n === 2 ? 'نجمتان' : n <= 10 ? AR(n) + ' نجوم' : AR(n) + ' نجمة';

@@ -51,6 +51,7 @@ function cleanKid(k, idx, skip) {
   const p = k.plan;
   if (p && Object.hasOwn(PRESETS, p.id) && DATE.test(p.start) && Number.isInteger(p.weeks) && p.weeks >= 1 && p.weeks <= 104) kid.plan = { id: p.id, weeks: p.weeks, start: p.start };
   if (Number.isInteger(k.last) && k.last >= 1 && k.last <= 114) kid.last = k.last;
+  if (k.game && Number.isInteger(k.game.stars) && k.game.stars >= 0 && k.game.stars <= 1e6) kid.game = { stars: k.game.stars };
   return kid;
 }
 

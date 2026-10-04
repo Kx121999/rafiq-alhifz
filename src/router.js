@@ -1,10 +1,10 @@
 // Hash router: #/ #/dashboard #/mushaf #/surah/<n> #/about. Works on static hosting with no server rules.
 import { $ } from './util.js';
 
-const TITLES = { home: '', dashboard: 'لوحتي', mushaf: 'المصحف', review: 'المراجعة', plan: 'الخطة', surah: 'السورة', about: 'عن المنصة' };
+const TITLES = { home: '', dashboard: 'لوحتي', mushaf: 'المصحف', review: 'المراجعة', plan: 'الخطة', games: 'ألعاب', achievements: 'إنجازاتي', certificate: 'شهادة', surah: 'السورة', about: 'عن المنصة' };
 const handlers = {};
 
-/** Register a callback run when a page opens: fn(arg) may return false to cancel (e.g. bad surah id). */
+/** Register a callback run when a page opens: fn(arg) may return false (go to the mushaf) or a path string to redirect. */
 export const onPage = (name, fn) => { handlers[name] = fn };
 
 export const go = path => { if (location.hash === '#' + path) route(); else location.hash = path };
@@ -12,10 +12,12 @@ export const go = path => { if (location.hash === '#' + path) route(); else loca
 export function route() {
   const [name = '', arg] = location.hash.replace(/^#\/?/, '').split('/');
   const page = name in TITLES ? name : 'home';
-  if (handlers[page] && handlers[page](arg) === false) { go('/mushaf'); return }
+  const r = handlers[page] && handlers[page](arg);
+  if (r === false) { go('/mushaf'); return }
+  if (typeof r === 'string') { go(r); return }
   document.querySelectorAll('.page').forEach(p => { p.hidden = p.dataset.page !== page });
   document.querySelectorAll('#nav a').forEach(a => {
-    const on = a.dataset.nav === page || (page === 'surah' && a.dataset.nav === 'mushaf');
+    const on = a.dataset.nav === page || (page === 'surah' && a.dataset.nav === 'mushaf') || (page === 'certificate' && a.dataset.nav === 'achievements');
     on ? a.setAttribute('aria-current', 'page') : a.removeAttribute('aria-current');
   });
   if (page !== 'surah') document.title = TITLES[page] ? TITLES[page] + ' · رفيق الحفظ' : 'رفيق الحفظ';
