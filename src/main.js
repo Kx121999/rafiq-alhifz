@@ -1,10 +1,11 @@
 import './styles.css';
 import { $, AR, days } from './util.js';
 import { Q, loadQuran } from './data.js';
-import { S, save, rec, mem, isDue, bump, setAyah, grade, setLast } from './state.js';
+import { S, save, rec, mem, isDue, bump, setAyah, grade, setLast, activeKid } from './state.js';
 import { renderSummary, renderList, setFilter } from './home.js';
 import { view, renderSurah, toggleTafsir } from './surah.js';
-import { go, onPage, startRouter, route } from './router.js';
+import { go, onPage, onShown, startRouter, route } from './router.js';
+import { pageIn, revealAyah, celebrate, motionReady } from './motion.js';
 import { renderToday } from './dashboard.js';
 import { renderReview, onReviewGraded, clearReviewNote, dueList } from './review.js';
 import { renderPlan, onPlanChanged } from './plan.js';
@@ -24,7 +25,15 @@ function updateDue() {
 }
 const refreshStats = () => { renderSummary(); renderToday(); renderRewards(); updateDue() };
 
+/** Celebrates when a surah goes from incomplete to fully memorised. */
+function checkCompleted(id, wasComplete) {
+  const c = Q[id - 1]; if (wasComplete || mem(id) !== c.v.length) return;
+  const k = activeKid();
+  celebrate('أتممتَ حفظ سورة ' + c.n + '، ما شاء الله', !!k && k.mode === 'young');
+}
+
 /* ---------- routes ---------- */
+onShown(pageIn);
 onPage('surah', arg => {
   const id = +arg; if (!(id >= 1 && id <= 114)) return false;
   if (!Q.length) { view.cur = 0; return }   // quran.json still loading: boot re-routes once it arrives
@@ -60,19 +69,21 @@ $('gPlus').addEventListener('click', () => { S.goal = Math.min(50, S.goal + 1); 
 /* ---------- surah ---------- */
 $('veilBtn').addEventListener('click', () => { view.veil = !view.veil; $('ayat').querySelectorAll('.shown').forEach(x => x.classList.remove('shown')); renderSurah(false) });
 $('allBtn').addEventListener('click', () => {
-  const tot = Q[view.cur - 1].v.length, on = mem(view.cur) !== tot; let d = 0;
+  const tot = Q[view.cur - 1].v.length, was = mem(view.cur) === tot, on = !was; let d = 0;
   for (let i = 0; i < tot; i++) d += setAyah(view.cur, i, on);
-  bump(d); save(); renderSurah(false); refreshStats();
+  bump(d); save(); renderSurah(false); refreshStats(); checkCompleted(view.cur, was);
 });
 $('ayat').addEventListener('click', e => {
   const li = e.target.closest('.ay'); if (!li) return;
   if (e.target.closest('.tf')) { toggleTafsir(li); return }
   if (e.target.closest('.tfx')) return;
-  if (e.target.closest('.ck')) { const i = +li.dataset.i, r = rec(view.cur); bump(setAyah(view.cur, i, !(r && r.m[i] === '1'))); save(); renderSurah(false); refreshStats() }
-  else if (view.veil) li.classList.toggle('shown');
+  if (e.target.closest('.ck')) {
+    const i = +li.dataset.i, r = rec(view.cur), was = mem(view.cur) === Q[view.cur - 1].v.length;
+    bump(setAyah(view.cur, i, !(r && r.m[i] === '1'))); save(); renderSurah(false); refreshStats(); checkCompleted(view.cur, was);
+  } else if (view.veil && li.classList.toggle('shown')) revealAyah(li);
 });
 $('ayat').addEventListener('keydown', e => {
-  if ((e.key === 'Enter' || e.key === ' ') && e.target.classList.contains('tx') && view.veil) { e.preventDefault(); e.target.closest('.ay').classList.toggle('shown') }
+  if ((e.key === 'Enter' || e.key === ' ') && e.target.classList.contains('tx') && view.veil) { e.preventDefault(); const li = e.target.closest('.ay'); if (li.classList.toggle('shown')) revealAyah(li) }
 });
 function onGrade(good) {
   const i = grade(view.cur, good); if (i == null) return;
@@ -85,5 +96,5 @@ $('revBad').addEventListener('click', () => onGrade(false));
 /* ---------- boot ---------- */
 initKids(); onKidsChange(render);
 startRouter();
-loadQuran().then(() => { render(); route() })
+loadQuran().then(() => { render(); motionReady(); route() })
   .catch(() => { $('list').innerHTML = '<li class="empty">تعذّر تحميل نص المصحف. أعد فتح الصفحة للمحاولة مرة أخرى.</li>' });

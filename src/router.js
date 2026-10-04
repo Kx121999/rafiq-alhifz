@@ -3,6 +3,9 @@ import { $ } from './util.js';
 
 const TITLES = { home: '', dashboard: 'لوحتي', mushaf: 'المصحف', review: 'المراجعة', plan: 'الخطة', games: 'ألعاب', achievements: 'إنجازاتي', certificate: 'شهادة', surah: 'السورة', about: 'عن المنصة' };
 const handlers = {};
+let shown = () => {};
+/** Called with the page name after a page has been shown (used for entrance animation). */
+export const onShown = fn => { shown = fn };
 
 /** Register a callback run when a page opens: fn(arg) may return false (go to the mushaf) or a path string to redirect. */
 export const onPage = (name, fn) => { handlers[name] = fn };
@@ -23,6 +26,7 @@ export function route() {
   if (page !== 'surah') document.title = TITLES[page] ? TITLES[page] + ' · رفيق الحفظ' : 'رفيق الحفظ';
   window.scrollTo(0, 0);
   $('page-' + page).focus({ preventScroll: true });
+  shown(page);
 }
 
 export const startRouter = () => { window.addEventListener('hashchange', route); route() };

@@ -205,3 +205,8 @@ footer.foot{margin-top:8px}
   .wrap{padding:0;max-width:none}
   .cert{border-width:4px;min-height:170mm;justify-content:center;break-inside:avoid}
 }
+
+/* ---- motion ---- */
+.celebrate{position:fixed;inset-inline:0;bottom:28px;margin-inline:auto;width:max-content;max-width:90vw;z-index:50;pointer-events:none;background:var(--gold-soft);color:var(--fg);border:1.5px solid var(--gold);border-radius:99px;padding:12px 24px;font-family:var(--display);font-size:1.15rem;text-align:center}
+.celebrate p{margin:0}
+.fx-star{position:fixed;bottom:70px;font-size:1.6rem;pointer-events:none;z-index:49}

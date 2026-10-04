@@ -3,6 +3,7 @@
 import { $, AR, el, norm, nujum } from './util.js';
 import { Q } from './data.js';
 import { S, activeKid, addGameStars } from './state.js';
+import { correct, wrong } from './motion.js';
 
 const ROUNDS = 5, PUZZLES = 3;
 const LETTER = /[ء-يٱ-ۓ]/;
@@ -128,7 +129,7 @@ function choiceRound() {
     const b = el('button', 'btn opt', o); b.type = 'button';
     b.addEventListener('click', () => {
       opts.querySelectorAll('button').forEach(x => { x.disabled = true; if (x.textContent === q.correct) x.classList.add('right') });
-      if (o === q.correct) { G.stars++; fb.textContent = 'أحسنت! ⭐' } else { b.classList.add('wrong'); fb.textContent = 'ليست هذه. الصحيح مُلوَّن بالأخضر.' }
+      if (o === q.correct) { G.stars++; fb.textContent = 'أحسنت! ⭐'; correct(b) } else { b.classList.add('wrong'); wrong(b); fb.textContent = 'ليست هذه. الصحيح مُلوَّن بالأخضر.' }
       const full = el('p', 'quizfull', q.full); box.insertBefore(full, fb);
       nextBtn(box, G.round === G.total);
     });
@@ -153,8 +154,8 @@ function orderRound() {
   q.items.forEach(it => {
     const b = el('button', 'ordcard'); b.type = 'button'; b.append(el('span', 'ordn'), el('span', 'tx', it.t));
     b.addEventListener('click', () => {
-      if (it.n !== q.got) { q.mistakes++; fb.textContent = 'ليست هذه الآية التالية، جرّب غيرها.'; return }
-      q.got++; b.disabled = true; b.classList.add('right'); b.firstChild.textContent = AR(q.got); fb.textContent = '';
+      if (it.n !== q.got) { q.mistakes++; fb.textContent = 'ليست هذه الآية التالية، جرّب غيرها.'; wrong(b); return }
+      q.got++; b.disabled = true; b.classList.add('right'); correct(b); b.firstChild.textContent = AR(q.got); fb.textContent = '';
       if (q.got === 3) {
         const s = q.mistakes === 0 ? 2 : 1; G.stars += s; fb.textContent = 'أحسنت! +' + AR(s) + ' ⭐';
         nextBtn(box, G.round === G.total);
