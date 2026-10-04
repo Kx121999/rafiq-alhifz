@@ -17,6 +17,8 @@
       <a href="#/" data-nav="home">الرئيسية</a>
       <a href="#/dashboard" data-nav="dashboard">لوحتي</a>
       <a href="#/mushaf" data-nav="mushaf">المصحف</a>
+      <a href="#/review" data-nav="review">المراجعة<span class="count" id="dueCount" hidden></span></a>
+      <a href="#/plan" data-nav="plan">الخطة</a>
       <a href="#/about" data-nav="about">عن المنصة</a>
     </nav>
   </header>
@@ -78,6 +80,18 @@
       </div>
     </div>
     <ul class="list" id="list"><li class="empty">جارٍ تحميل المصحف…</li></ul>
+  </main>
+
+  <!-- المراجعة -->
+  <main class="page" id="page-review" data-page="review" tabindex="-1" hidden>
+    <h2 class="ptitle">مراجعة اليوم</h2>
+    <section class="today" id="reviewBox" role="status" aria-live="polite"></section>
+  </main>
+
+  <!-- الخطة -->
+  <main class="page" id="page-plan" data-page="plan" tabindex="-1" hidden>
+    <h2 class="ptitle">خطة الحفظ</h2>
+    <section class="today" id="planBox"></section>
   </main>
 
   <!-- السورة -->

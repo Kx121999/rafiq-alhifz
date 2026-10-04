@@ -1,28 +1,38 @@
 import './styles.css';
-import { $, days } from './util.js';
+import { $, AR, days } from './util.js';
 import { Q, loadQuran } from './data.js';
-import { S, save, rec, mem, isDue, bump, setAyah, grade } from './state.js';
+import { S, save, rec, mem, isDue, bump, setAyah, grade, setLast } from './state.js';
 import { renderSummary, renderList, setFilter } from './home.js';
 import { view, renderSurah, toggleTafsir } from './surah.js';
 import { go, onPage, startRouter, route } from './router.js';
 import { renderToday } from './dashboard.js';
+import { renderReview, onReviewGraded, clearReviewNote, dueList } from './review.js';
+import { renderPlan, onPlanChanged } from './plan.js';
 import { initKids, onKidsChange, renderRewards, applyMode } from './kids.js';
 
 function render() {
   if (!Q.length) return;
-  applyMode(); renderSummary(); renderToday(); renderRewards(); renderList();
+  applyMode(); renderSummary(); renderToday(); renderRewards(); renderList(); renderReview(); renderPlan(); updateDue();
   if (view.cur) renderSurah(false);
 }
-const refreshStats = () => { renderSummary(); renderToday(); renderRewards() };
+function updateDue() {
+  const n = dueList().length, c = $('dueCount');
+  c.textContent = AR(n); c.hidden = !n; c.setAttribute('aria-label', '' + n + ' مراجعات مستحقة');
+}
+const refreshStats = () => { renderSummary(); renderToday(); renderRewards(); updateDue() };
 
 /* ---------- routes ---------- */
 onPage('surah', arg => {
   const id = +arg; if (!(id >= 1 && id <= 114)) return false;
   if (!Q.length) { view.cur = 0; return }   // quran.json still loading: boot re-routes once it arrives
-  view.cur = id; view.veil = isDue(id); renderSurah(true);
+  view.cur = id; view.veil = isDue(id); setLast(id); renderSurah(true);
   document.title = 'سورة ' + Q[id - 1].n + ' · رفيق الحفظ';
 });
 for (const p of ['home', 'about']) onPage(p, () => { view.cur = 0 });
+onPage('review', () => { view.cur = 0; clearReviewNote(); render() });
+onPage('plan', () => { view.cur = 0; render() });
+onReviewGraded(() => { renderSummary(); renderToday(); renderRewards(); updateDue() });
+onPlanChanged(() => { renderSummary(); renderToday() });
 for (const p of ['dashboard', 'mushaf']) onPage(p, () => { view.cur = 0; render() });
 
 /* ---------- index ---------- */

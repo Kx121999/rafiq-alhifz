@@ -152,3 +152,13 @@ footer.foot{margin-top:8px}
 [data-mode="young"] .ck[aria-pressed="true"]::after{display:none}
 [data-mode="young"] .btn,[data-mode="young"] .chip,[data-mode="young"] .row{min-height:48px;font-size:1.05rem}
 [data-mode="young"] .name{font-size:1.4rem}
+
+/* ---- review and plan pages ---- */
+.count{display:inline-grid;place-items:center;min-width:1.4em;height:1.4em;padding-inline:.3em;margin-inline-start:6px;border-radius:99px;background:var(--gold);color:#fff;font-size:.72rem;font-weight:600;line-height:1}
+.revcard{align-self:stretch;display:flex;flex-direction:column;gap:6px}
+.revcard h3{font-family:var(--display);font-weight:500;font-size:1.8rem;margin:0}
+.revcard .meta,.planview .good,.today .good{margin:0}
+.good{color:var(--accent);font-weight:500}
+.planform,.planview{align-self:stretch;display:flex;flex-direction:column;gap:12px;align-items:flex-start}
+.planview .bar,.planview .facts{align-self:stretch}
+.today .acts{display:flex;gap:8px;flex-wrap:wrap}

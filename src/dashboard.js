@@ -1,25 +1,36 @@
-import { $, AR } from './util.js';
+import { $, AR, ayahs, el } from './util.js';
 import { Q } from './data.js';
-import { mem, isDue } from './state.js';
+import { mem, isDue, kidPlan, lastSurah } from './state.js';
+import { planStats } from './plan.js';
 
-const el = (tag, cls, text) => { const e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e };
+const link = (href, text, cls = 'btn') => { const a = el('a', cls, text); a.href = href; return a };
 
-/** "Today" card on the dashboard: surahs due for review, or a nudge to start. */
+/** "Today" card on the dashboard: continue, reviews due, plan target, or a nudge to start. */
 export function renderToday() {
   const box = $('today'); box.textContent = '';
   if (!Q.length) return;
   const due = [], doing = [];
   Q.forEach((c, k) => { const id = k + 1, m = mem(id); if (isDue(id)) due.push(id); else if (m > 0 && m < c.v.length) doing.push(id) });
   box.appendChild(el('h3', '', 'اليوم'));
+
+  const last = lastSurah(), p = kidPlan(), st = p && planStats(p);
+  const acts = el('div', 'acts');
+  if (last) acts.appendChild(link('#/surah/' + last, 'كمّل من حيث وقفت: سورة ' + Q[last - 1].n, 'btn primary'));
+  if (due.length) acts.appendChild(link('#/review', 'ابدأ المراجعة (' + AR(due.length) + ')', last ? 'btn' : 'btn primary'));
+  if (acts.children.length) box.appendChild(acts);
+
+  if (st && st.left > 0) {
+    box.appendChild(el('p', 'note', 'خطتك (' + st.pr.name + '): ورد اليوم ' + ayahs(st.daily) + '، والسورة التالية: ' + Q[st.next - 1].n + '.'));
+    box.appendChild(link('#/surah/' + st.next, 'افتح سورة ' + Q[st.next - 1].n));
+  } else if (!st) box.appendChild(link('#/plan', 'ضع خطة حفظ'));
+
   const list = el('ul', 'links');
-  const link = (id, note) => {
-    const li = el('li'), a = el('a', 'btn', 'سورة ' + Q[id - 1].n + ' · ' + note); a.href = '#/surah/' + id; li.appendChild(a); list.appendChild(li);
-  };
-  due.slice(0, 5).forEach(id => link(id, 'مراجعة اليوم'));
-  doing.slice(0, 3).forEach(id => link(id, 'أكمل الحفظ (' + AR(mem(id)) + ' من ' + AR(Q[id - 1].v.length) + ')'));
+  doing.filter(id => id !== last).slice(0, 3).forEach(id => {
+    const li = el('li'); li.appendChild(link('#/surah/' + id, 'سورة ' + Q[id - 1].n + ' · أكمل الحفظ (' + AR(mem(id)) + ' من ' + AR(Q[id - 1].v.length) + ')')); list.appendChild(li);
+  });
   if (list.children.length) box.appendChild(list);
-  else {
+  if (!last && !due.length && !doing.length) {
     box.appendChild(el('p', 'note', 'لم تبدأ حفظ أي سورة بعد. اختر سورة من المصحف وعلّم الآيات التي تحفظها.'));
-    const a = el('a', 'btn primary', 'ابدأ الحفظ'); a.href = '#/mushaf'; box.appendChild(a);
+    box.appendChild(link('#/mushaf', 'ابدأ الحفظ', 'btn primary'));
   }
 }

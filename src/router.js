@@ -1,7 +1,7 @@
 // Hash router: #/ #/dashboard #/mushaf #/surah/<n> #/about. Works on static hosting with no server rules.
 import { $ } from './util.js';
 
-const TITLES = { home: '', dashboard: 'لوحتي', mushaf: 'المصحف', surah: 'السورة', about: 'عن المنصة' };
+const TITLES = { home: '', dashboard: 'لوحتي', mushaf: 'المصحف', review: 'المراجعة', plan: 'الخطة', surah: 'السورة', about: 'عن المنصة' };
 const handlers = {};
 
 /** Register a callback run when a page opens: fn(arg) may return false to cancel (e.g. bad surah id). */

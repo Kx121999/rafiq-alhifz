@@ -51,6 +51,12 @@ export const activeKid = () => store.kids.find(k => k.id === store.active) || nu
 
 export function save() { const k = activeKid(); if (!k) return; k.S = clone(S); persist() }
 
+/* Optional per-child fields, absent on older profiles: plan {id, weeks, start} and last (the surah opened most recently). */
+export const kidPlan = () => (activeKid() || {}).plan || null;
+export function setPlan(plan) { const k = activeKid(); if (!k) return; if (plan) k.plan = plan; else delete k.plan; persist() }
+export const lastSurah = () => (activeKid() || {}).last || 0;
+export function setLast(id) { const k = activeKid(); if (!k || k.last === id) return; k.last = id; persist() }
+
 export function switchKid(id) {
   if (!store.kids.some(k => k.id === id)) return;
   save(); store.active = id; adopt(activeKid().S); persist();
