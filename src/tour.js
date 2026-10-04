@@ -67,6 +67,7 @@ export function openTour() {
   const k = activeKid(); if (!k) return;
   step = 0; draft = { name: k.name === 'طفلي' ? '' : k.name, friend: k.friend || 'rafiq', mode: k.mode };
   render(); $('tour').showModal();
+  ($('tourName') || document.querySelector('#tourBody .primary')).focus();   // showModal() puts focus on the first button; the main action should have it
 }
 
 export function initTour(opts = {}) {

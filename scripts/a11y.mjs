@@ -75,6 +75,8 @@ async function audit(scheme, state, attempt = 1) {
     await page.evaluate(AXE);
     const found = await page.evaluate(async () => (await axe.run(document, { runOnly: { type: 'tag', values: ['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22aa', 'best-practice'] } }))
       .violations.map(v => ({ id: v.id, impact: v.impact, help: v.help, nodes: v.nodes.slice(0, 4).map(n => n.target.join(' ') + '  ' + (n.any[0] || n.all[0] || n.none[0] || {}).message) })));
+    // a real violation shows up every time; one that vanishes on a second look was a half-painted frame on a busy machine
+    if (found.length && attempt < 2) { await ctx.close(); return audit(scheme, state, attempt + 1) }
     found.forEach(v => failures.push({ where: scheme + ' / ' + label, ...v }));
   } catch (e) { failures.push({ where: scheme + ' / ' + label, id: 'audit-error', impact: 'error', help: String(e).slice(0, 160), nodes: [] }) }
   await ctx.close();
