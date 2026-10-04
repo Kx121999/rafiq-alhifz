@@ -27,7 +27,7 @@ export function renderReview() {
   const card = el('article', 'revcard');
   card.append(
     el('p', 'note', 'المتبقي اليوم: ' + AR(due.length) + (due.length === 1 ? ' سورة' : ' سور')),
-    el('h3', '', 'سورة ' + c.n),
+    el('h2', '', 'سورة ' + c.n),
     el('p', 'meta', 'حفظتَ ' + AR(mem(id)) + ' من ' + AR(c.v.length) + ' آية'),
     el('p', 'note', 'افتح السورة وسمّع ما حفظتَه من غير نظر، ثم ارجع وقيّم مراجعتك.'));
   const open = el('a', 'btn', 'افتح السورة للتسميع'); open.href = '#/surah/' + id;
@@ -48,7 +48,7 @@ let weakIdx = 0, weakNote = '';
 export function renderWeak() {
   const box = $('weakBox'); box.textContent = '';
   if (!Q.length) return;
-  box.appendChild(el('h3', '', 'آيات تحتاج تثبيتًا'));
+  box.appendChild(el('h2', '', 'آيات تحتاج تثبيتًا'));
   if (weakNote) box.appendChild(el('p', 'good', weakNote));
   const list = weakList();
   if (!list.length) {

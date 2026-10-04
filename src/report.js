@@ -30,7 +30,7 @@ export function renderReport(offset = 0) {
   const dates = weekDays(offset), log = activityLog(), sum = summarize(log, dates);
 
   box.appendChild(el('p', 'rep-brand', 'رفيق الحفظ · التقرير الأسبوعي'));
-  box.appendChild(el('h2', 'rep-name', k.icon + ' ' + k.name));
+  box.appendChild(el('h1', 'rep-name', k.icon + ' ' + k.name));
   box.appendChild(el('p', 'rep-range', fmt(dates[0], { day: 'numeric', month: 'long' }) + ' – ' + fmt(dates[6], { day: 'numeric', month: 'long', year: 'numeric' })));
 
   const tiles = el('div', 'rtiles');
@@ -51,7 +51,7 @@ export function renderReport(offset = 0) {
     col.append(el('b', '', p.a ? AR(p.a) : ''), bar, el('small', '', fmt(p.d, { weekday: 'short' })));
     chart.appendChild(col);
   });
-  box.append(el('h3', '', 'الآيات الجديدة يوميًا'), chart);
+  box.append(el('h2', '', 'الآيات الجديدة يوميًا'), chart);
 
   // overall standing (now, not per week)
   let memorised = 0, done = 0;
@@ -69,7 +69,7 @@ export function renderReport(offset = 0) {
   row('نجوم الألعاب (الإجمالي)', nujum(((k.game || {}).stars) || 0));
   const p = kidPlan(), st = p && planStats(p);
   if (st) row('الخطة: ' + st.pr.name, st.left === 0 ? 'اكتملت' : AR(st.done) + ' من ' + AR(st.total) + ' آية · الورد المطلوب ' + ayahs(st.daily));
-  box.append(el('h3', '', 'الوضع الحالي'), rows);
+  box.append(el('h2', '', 'الوضع الحالي'), rows);
 
   const empty = !Object.keys(log).length
     ? 'سجل النشاط يبدأ من أول مرة يُستخدم فيها الموقع بعد إضافة التقرير، لذلك لا توجد بيانات للأيام السابقة.'

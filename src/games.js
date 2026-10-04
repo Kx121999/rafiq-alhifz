@@ -169,7 +169,7 @@ function orderRound() {
 function finish() {
   const box = $('gameBox'); box.textContent = '';
   const n = G.stars; addGameStars(n); onStars();
-  box.append(el('h3', '', n ? 'أحسنت! حصلتَ على ' + nujum(n) + ' في الألعاب 🎮' : 'انتهت الجولة'),
+  box.append(el('h2', '', n ? 'أحسنت! حصلتَ على ' + nujum(n) + ' في الألعاب 🎮' : 'انتهت الجولة'),
     el('p', 'note', n ? '' : 'لا بأس، راجع آياتك ثم جرّب مرة أخرى.'));
   const again = el('button', 'btn primary', 'العب مرة أخرى'), back = el('button', 'btn', 'الألعاب');
   again.type = back.type = 'button';

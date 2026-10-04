@@ -11,7 +11,7 @@ export function renderToday() {
   if (!Q.length) return;
   const due = [], doing = [];
   Q.forEach((c, k) => { const id = k + 1, m = mem(id); if (isDue(id)) due.push(id); else if (m > 0 && m < c.v.length) doing.push(id) });
-  box.appendChild(el('h3', '', 'اليوم'));
+  box.appendChild(el('h2', '', 'اليوم'));
 
   const last = lastSurah(), p = kidPlan(), st = p && planStats(p);
   const acts = el('div', 'acts');

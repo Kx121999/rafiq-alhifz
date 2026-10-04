@@ -10,7 +10,7 @@ export function renderAchievements() {
   renderRewards('achRewards');
   const box = $('achSurahs'); box.textContent = '';
   if (!Q.length) return;
-  box.appendChild(el('h3', '', 'السور التي أتممتَ حفظها'));
+  box.appendChild(el('h2', '', 'السور التي أتممتَ حفظها'));
   const done = completed();
   if (!done.length) { box.appendChild(el('p', 'note', 'لم تُتمّ أي سورة بعد. عند إتمام سورة كاملة تظهر هنا مع شهادة يمكنك طباعتها.')); return }
   const ul = el('ul', 'links');
@@ -29,7 +29,7 @@ export function renderCertificate(id) {
   const date = new Date().toLocaleDateString('ar-EG', { day: 'numeric', month: 'long', year: 'numeric' });
   box.append(
     el('p', 'cert-brand', 'رفيق الحفظ'),
-    el('h2', 'cert-title', 'شهادة إتمام حفظ'),
+    el('h1', 'cert-title', 'شهادة إتمام حفظ'),
     el('p', 'cert-line', 'تشهد منصة رفيق الحفظ بأن'),
     el('p', 'cert-name', k.icon + ' ' + k.name),
     el('p', 'cert-line', 'قد أتمّ حفظ'),

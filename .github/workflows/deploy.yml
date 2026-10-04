@@ -32,8 +32,21 @@ jobs:
         with:
           path: dist
 
+  # axe-core on every page and key state, light and dark, plus a 320px reflow check
+  a11y:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run build
+      - run: npm run a11y
+
   deploy:
-    needs: build
+    needs: [build, a11y]
     runs-on: ubuntu-latest
     environment:
       name: github-pages

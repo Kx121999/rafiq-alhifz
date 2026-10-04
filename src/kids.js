@@ -50,6 +50,7 @@ export function renderRewards(id = 'rewards') {
   BADGES.forEach(b => {
     const on = b.ok(t), li = el('li', 'badge' + (on ? ' on' : ''));
     li.append(el('span', 'bicon', b.icon), el('span', 'bname', b.name));
+    if (!on) li.append(el('span', 'sr', 'لم يُفتح بعد'));
     li.title = on ? 'حصلتَ على وسام ' + b.name : 'وسام ' + b.name + ' لم يُفتح بعد';
     row.appendChild(li);
   });
