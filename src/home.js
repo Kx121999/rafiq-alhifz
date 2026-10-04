@@ -1,6 +1,6 @@
 import { $, AR, day, norm } from './util.js';
 import { Q } from './data.js';
-import { S, mem, isDue } from './state.js';
+import { S, activeKid, mem, isDue } from './state.js';
 
 let filter = 'all';
 export const setFilter = f => { filter = f };
@@ -9,10 +9,16 @@ export function renderSummary() {
   let ay = 0, done = 0;
   Q.forEach((c, k) => { const m = mem(k + 1); ay += m; if (m === c.v.length) done++ });
   $('sAyat').textContent = AR(ay);
-  $('sBar').style.width = (ay / 6236 * 100).toFixed(2) + '%';
+  // a visible sliver as soon as there is any progress, so a young child sees that something counts
+  $('sBar').style.width = (ay ? Math.max(3, ay / 6236 * 100) : 0).toFixed(2) + '%';
   $('sSurahs').textContent = AR(done) + ' من ١١٤';
   $('sToday').textContent = AR(S.n) + ' / ' + AR(S.goal);
   $('sStreak').textContent = AR((S.last === day() || S.last === day(-1)) ? S.streak : 0);
+  const k = activeKid();
+  $('greet').textContent = k ? 'أهلًا يا ' + k.name + ' ' + k.icon : 'أهلًا بك!';
+  // today's goal as star slots (at most 10 shown); the exact numbers are in the text next to them
+  const slots = Math.min(S.goal, 10), filled = Math.min(S.n, slots), g = $('goalStars'); g.textContent = '';
+  for (let i = 0; i < slots; i++) { const s = document.createElement('span'); s.textContent = i < filled ? '⭐' : '☆'; g.appendChild(s) }
 }
 
 export function renderList() {

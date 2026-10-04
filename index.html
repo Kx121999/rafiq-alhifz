@@ -5,8 +5,8 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>رفيق الحفظ</title>
 <meta name="description" content="رفيق الحفظ: منصة لحفظ القرآن الكريم ومراجعته، للصغار والكبار">
-<meta name="theme-color" content="#f1f5f1" media="(prefers-color-scheme: light)">
-<meta name="theme-color" content="#0c1613" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#fff6e5" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#101c2c" media="(prefers-color-scheme: dark)">
 <meta property="og:type" content="website">
 <meta property="og:locale" content="ar_AR">
 <meta property="og:title" content="رفيق الحفظ">
@@ -16,33 +16,36 @@
 <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Amiri+Quran&family=IBM+Plex+Sans+Arabic:wght@400;500;600&family=Reem+Kufi:wght@500;700&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Amiri+Quran&family=IBM+Plex+Sans+Arabic:wght@400;500;600&family=Reem+Kufi:wght@500;700&family=Baloo+Bhaijaan+2:wght@500;600;700;800&display=swap">
 </head>
 <body>
 <div class="wrap" dir="rtl" lang="ar">
   <header class="top">
-    <a class="brand" href="#/">رفيق الحفظ</a>
-    <nav class="nav" id="nav" aria-label="التنقل الرئيسي">
-      <a href="#/dashboard" data-nav="dashboard">لوحتي</a>
-      <a href="#/mushaf" data-nav="mushaf">المصحف</a>
-      <a href="#/search" data-nav="search">بحث</a>
-      <a href="#/review" data-nav="review">المراجعة<span class="count" id="dueCount" hidden></span></a>
-      <a href="#/plan" data-nav="plan">الخطة</a>
-      <a href="#/games" data-nav="games">ألعاب</a>
-      <a href="#/achievements" data-nav="achievements">إنجازاتي</a>
-    </nav>
+    <a class="brand" href="#/"><img class="logo" src="/mascot.svg" alt="" width="46" height="46"><span>رفيق الحفظ</span></a>
+    <div class="topacts">
+      <a class="iconbtn" href="#/search"><span aria-hidden="true">🔍</span><span>بحث</span></a>
+      <button type="button" class="iconbtn" id="parentBtn"><span aria-hidden="true">⚙️</span><span>الأهل</span></button>
+    </div>
   </header>
+
+  <nav class="nav" id="nav" aria-label="التنقل الرئيسي">
+    <a href="#/dashboard" data-nav="dashboard"><i aria-hidden="true">🏠</i><span>لوحتي</span></a>
+    <a href="#/mushaf" data-nav="mushaf"><i aria-hidden="true">📖</i><span>المصحف</span></a>
+    <a href="#/review" data-nav="review"><i aria-hidden="true">🔁</i><span>المراجعة</span><b class="count" id="dueCount" hidden></b></a>
+    <a href="#/games" data-nav="games"><i aria-hidden="true">🎮</i><span>ألعاب</span></a>
+    <a href="#/achievements" data-nav="achievements"><i aria-hidden="true">🏆</i><span>إنجازاتي</span></a>
+  </nav>
 
   <p class="note netnote" id="netNote" role="status" hidden>أنت غير متصل بالإنترنت. المصحف وتقدّمك يعملان، أما الصوت فيحتاج إنترنت.</p>
 
   <nav class="kidbar" aria-label="الأطفال">
     <div class="kids" id="kids"></div>
-    <button type="button" class="btn" id="parentBtn">ركن الأهل ⚙</button>
   </nav>
 
   <!-- الرئيسية -->
   <main class="page" id="page-home" data-page="home" tabindex="-1" hidden>
     <section class="hero">
+      <img class="mascot" src="/mascot.svg" alt="" width="150" height="150">
       <h1>احفظ القرآن خطوة بخطوة</h1>
       <p>منصة عربية لحفظ القرآن الكريم ومراجعته، لكل طفل فيها ملفه الخاص ونجومه وأوسمته.</p>
       <div class="acts">
@@ -52,31 +55,40 @@
       </div>
     </section>
     <ul class="feats">
-      <li><b>علّم ما حفظت</b><span>علّم كل آية أو السورة كاملة، وشاهد تقدّمك يكبر.</span></li>
-      <li><b>وضع التسميع</b><span>تُخفى الآية إلا كلمتها الأولى، فتقرأ من حفظك ثم تتحقق.</span></li>
-      <li><b>مراجعة متباعدة</b><span>تُذكّرك المنصة بكل سورة في موعدها: يوم ثم يومان وهكذا حتى ٣٠ يومًا.</span></li>
-      <li><b>ملف لكل طفل</b><span>وضع للصغار بخط كبير ونجوم، ووضع للقرّاء، وركن خاص بالأهل.</span></li>
-      <li><b>التفسير الميسّر</b><span>تفسير مختصر تحت كل آية لمن يقرأ.</span></li>
-      <li><b>نجوم وأوسمة</b><span>نجمة لكل آية محفوظة، وأوسمة تُفتح مع التقدّم.</span></li>
+      <li><i aria-hidden="true">📖</i><b>علّم ما حفظت</b><span>علّم كل آية أو السورة كاملة، وشاهد تقدّمك يكبر.</span></li>
+      <li><i aria-hidden="true">🙈</i><b>وضع التسميع</b><span>تُخفى الآية إلا كلمتها الأولى، فتقرأ من حفظك ثم تتحقق.</span></li>
+      <li><i aria-hidden="true">🔁</i><b>مراجعة متباعدة</b><span>تُذكّرك المنصة بكل سورة في موعدها: يوم ثم يومان وهكذا حتى ٣٠ يومًا.</span></li>
+      <li><i aria-hidden="true">🧒</i><b>ملف لكل طفل</b><span>وضع للصغار بخط كبير ونجوم، ووضع للقرّاء، وركن خاص بالأهل.</span></li>
+      <li><i aria-hidden="true">💡</i><b>التفسير الميسّر</b><span>تفسير مختصر تحت كل آية لمن يقرأ.</span></li>
+      <li><i aria-hidden="true">⭐</i><b>نجوم وأوسمة</b><span>نجمة لكل آية محفوظة، وأوسمة تُفتح مع التقدّم.</span></li>
     </ul>
   </main>
 
   <!-- لوحتي -->
   <main class="page" id="page-dashboard" data-page="dashboard" tabindex="-1" hidden>
-    <h1 class="ptitle">لوحتي</h1>
     <section class="summary" aria-label="ملخص الحفظ">
+      <h1 class="greet" id="greet">أهلًا بك!</h1>
       <div class="big"><b id="sAyat">٠</b><span>آية محفوظة من ٦٬٢٣٦</span></div>
       <div class="bar"><i id="sBar" style="width:0%"></i></div>
       <div class="facts">
-        <div class="fact"><small>سور مكتملة</small><strong id="sSurahs">٠ من ١١٤</strong></div>
-        <div class="fact"><small>وِرد اليوم</small>
+        <div class="fact"><small><span aria-hidden="true">🏅</span> سور مكتملة</small><strong id="sSurahs">٠ من ١١٤</strong></div>
+        <div class="fact"><small><span aria-hidden="true">🎯</span> وِرد اليوم</small>
           <strong class="step"><span id="sToday">٠ / ٥</span>
             <button type="button" id="gMinus" aria-label="تقليل الورد اليومي">−</button>
-            <button type="button" id="gPlus" aria-label="زيادة الورد اليومي">+</button></strong></div>
-        <div class="fact"><small>أيام متتالية</small><strong id="sStreak">٠</strong></div>
+            <button type="button" id="gPlus" aria-label="زيادة الورد اليومي">+</button></strong>
+          <div class="goalstars" id="goalStars" aria-hidden="true"></div></div>
+        <div class="fact"><small><span aria-hidden="true">🔥</span> أيام متتالية</small><strong id="sStreak">٠</strong></div>
       </div>
     </section>
     <section class="today" id="today" aria-label="اليوم"></section>
+    <nav class="tiles" aria-label="اختصارات">
+      <a class="tile" href="#/mushaf"><i aria-hidden="true">📖</i><b>المصحف</b></a>
+      <a class="tile" href="#/review"><i aria-hidden="true">🔁</i><b>المراجعة</b></a>
+      <a class="tile" href="#/games"><i aria-hidden="true">🎮</i><b>ألعاب</b></a>
+      <a class="tile" href="#/achievements"><i aria-hidden="true">🏆</i><b>إنجازاتي</b></a>
+      <a class="tile" href="#/plan"><i aria-hidden="true">🎯</i><b>الخطة</b></a>
+      <a class="tile" href="#/search"><i aria-hidden="true">🔍</i><b>بحث</b></a>
+    </nav>
     <section class="rewards" id="rewards" aria-label="النجوم والأوسمة"></section>
   </main>
 
@@ -155,7 +167,6 @@
     <div class="shead">
       <a class="btn" id="back" href="#/mushaf">→ السور</a>
       <span class="grow"></span>
-      <a class="btn" id="listen" target="_blank" rel="noopener" href="https://quran.com">استماع على Quran.com ↗</a>
       <button type="button" class="btn" id="veilBtn" aria-pressed="false">وضع التسميع</button>
       <button type="button" class="btn" id="allBtn">حفظتُ السورة كاملة</button>
     </div>
@@ -163,6 +174,7 @@
     <p class="note" id="veilNote" hidden>الآيات مخفية إلا كلمتها الأولى. اقرأ من حفظك ثم اضغط الآية لتتحقق.</p>
     <div class="basmala" id="basmala" hidden></div>
     <ol class="ayat" id="ayat"></ol>
+    <p class="listenlink"><a id="listen" target="_blank" rel="noopener" href="https://quran.com">أو استمع لهذه السورة على Quran.com ↗</a></p>
     <section class="review" id="review" hidden>
       <p id="revText"></p>
       <div class="acts">

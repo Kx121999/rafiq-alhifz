@@ -40,6 +40,16 @@ describe('router', () => {
     expect(current()).toEqual(['achievements']);
   });
 
+  it('lights the tab a page belongs to when the page itself is not a tab', async () => {
+    r.startRouter();
+    for (const [hash, tab] of [['#/plan', 'dashboard'], ['#/report', 'dashboard'], ['#/search', 'mushaf'], ['#/search/abc', 'mushaf']]) {
+      location.hash = hash; await tick();
+      expect(current(), hash).toEqual([tab]);
+    }
+    location.hash = '#/about'; await tick();
+    expect(current()).toEqual([]);                 // pages with no tab light none
+  });
+
   it('passes the path argument to the page handler', async () => {
     const seen = vi.fn(); r.onPage('surah', seen); r.startRouter();
     location.hash = '#/surah/114'; await tick();

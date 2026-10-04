@@ -38,7 +38,7 @@ const STATES = [
   ['achievements', '#/achievements'], ['certificate', '#/certificate/114'], ['report', '#/report'], ['about', '#/about'],
   ['surah (reader)', '#/surah/112'], ['surah (veil)', '#/surah/114', p => p.evaluate(() => document.getElementById('veilBtn').click())],
   ['surah (young child)', '#/surah/114', null, 'k2'], ['surah + tafsir', '#/surah/112', async p => { await p.evaluate(() => document.querySelector('.ay .tf').click()); await wait(800) }],
-  ['player settings', '#/surah/112', p => p.evaluate(() => { document.querySelector('#player details').open = true })],
+  ['player settings', '#/surah/112', p => p.evaluate(() => { document.getElementById('plToggle').click(); document.querySelector('#player details').open = true })],
   ['parent gate', '#/dashboard', p => p.evaluate(() => document.getElementById('parentBtn').click())], ['parent corner', '#/dashboard', openParent],
 ];
 
@@ -54,13 +54,18 @@ async function open(scheme, hash, width, height, active = 'k1') {
   // reduced motion: no animation to wait for, so axe never measures a half-faded element
   await page.emulateMediaFeatures([{ name: 'prefers-color-scheme', value: scheme }, { name: 'prefers-reduced-motion', value: 'reduce' }]);
   await page.evaluateOnNewDocument(s => { if (!localStorage.getItem('seeded')) { localStorage.setItem('hifz-kids-v1', s); localStorage.setItem('seeded', '1') } }, JSON.stringify({ active, kids: [salma, yousef] }));
-  await page.goto(BASE + hash, { waitUntil: 'networkidle0' }); await wait(500);
+  // 'load' plus a short, bounded wait for the web fonts (waiting for a silent network is slow and flaky)
+  await page.goto(BASE + hash, { waitUntil: 'load', timeout: 60000 });
+  await Promise.race([page.evaluate(() => document.fonts.ready), wait(8000)]); await wait(500);
   return { ctx, page };
 }
 
 const failures = [];
-async function audit(scheme, [label, hash, act, active]) {
-  const { ctx, page } = await open(scheme, hash, 430, 860, active);
+async function audit(scheme, state, attempt = 1) {
+  const [label, hash, act, active] = state;
+  let ctx, page;
+  try { ({ ctx, page } = await open(scheme, hash, 430, 860, active)) }
+  catch (e) { if (attempt < 2) return audit(scheme, state, attempt + 1); failures.push({ where: scheme + ' / ' + label, id: 'audit-error', impact: 'error', help: 'could not open the page: ' + String(e).slice(0, 120), nodes: [] }); return }
   try {
     if (act) { await act(page); await wait(300) }
     await page.evaluate(AXE);

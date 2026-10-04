@@ -2,6 +2,8 @@
 import { $ } from './util.js';
 
 const TITLES = { home: '', dashboard: 'لوحتي', mushaf: 'المصحف', search: 'بحث', review: 'المراجعة', plan: 'الخطة', games: 'ألعاب', achievements: 'إنجازاتي', certificate: 'شهادة', report: 'التقرير الأسبوعي', surah: 'السورة', about: 'عن المنصة' };
+/** Pages that are not a tab light up the tab they belong to. */
+const NAV_OF = { surah: 'mushaf', search: 'mushaf', certificate: 'achievements', plan: 'dashboard', report: 'dashboard' };
 const handlers = {};
 let shown = () => {};
 /** Called with the page name after a page has been shown (used for entrance animation). */
@@ -20,7 +22,7 @@ export function route() {
   if (typeof r === 'string') { go(r); return }
   document.querySelectorAll('.page').forEach(p => { p.hidden = p.dataset.page !== page });
   document.querySelectorAll('#nav a').forEach(a => {
-    const on = a.dataset.nav === page || (page === 'surah' && a.dataset.nav === 'mushaf') || (page === 'certificate' && a.dataset.nav === 'achievements');
+    const on = a.dataset.nav === (NAV_OF[page] || page);
     on ? a.setAttribute('aria-current', 'page') : a.removeAttribute('aria-current');
   });
   if (page !== 'surah') document.title = TITLES[page] ? TITLES[page] + ' · رفيق الحفظ' : 'رفيق الحفظ';

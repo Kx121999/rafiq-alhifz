@@ -110,7 +110,10 @@ export function initPlayer() {
   const prev = el('button', 'btn pl-step', 'السابقة'), play = el('button', 'pl-play', '▶'), next = el('button', 'btn pl-step', 'التالية');
   [prev, play, next].forEach(b => { b.type = 'button' });
   prev.setAttribute('aria-label', 'الآية السابقة'); next.setAttribute('aria-label', 'الآية التالية');
-  const label = el('span', 'pl-label'), row = el('div', 'pl-row'); row.append(play, prev, next, label);
+  const label = el('span', 'pl-label'), row = el('div', 'pl-row');
+  const tog = el('button', 'btn pl-step', '⋯'); tog.type = 'button'; tog.id = 'plToggle';
+  tog.setAttribute('aria-expanded', 'false'); tog.setAttribute('aria-controls', 'plMore'); tog.setAttribute('aria-label', 'المزيد: الانتقال بين الآيات والقارئ والتكرار والسرعة');
+  row.append(play, label, prev, next, tog);
   const seek = el('input'); seek.type = 'range'; seek.min = 1; seek.step = 1; seek.setAttribute('aria-label', 'الانتقال بين آيات السورة');
   const barWrap = el('div', 'pl-bar'), bar = el('i'); barWrap.appendChild(bar);
   const status = el('p', 'note pl-status'); status.setAttribute('role', 'status');
@@ -133,7 +136,9 @@ export function initPlayer() {
     select('تكرار الآية', REPEATS, pref.repeat, n => n === 1 ? 'مرة واحدة' : AR(n) + ' مرات', v => { pref.repeat = +v; write(KEY.repeat, +v); st.rep = 1; say('') }),
     select('السرعة', SPEEDS, pref.speed, n => AR(n) + '×', v => { pref.speed = +v; write(KEY.speed, +v); audio.defaultPlaybackRate = audio.playbackRate = +v }));
   sets.appendChild(fields);
-  box.append(row, seek, barWrap, status, sets);
+  const more = el('div', 'pl-more'); more.id = 'plMore'; more.hidden = true; more.append(seek, sets);
+  tog.addEventListener('click', () => { more.hidden = !more.hidden; tog.setAttribute('aria-expanded', String(!more.hidden)) });
+  box.append(row, barWrap, status, more);
   ui = { play, label, seek, bar, status };
 
   play.addEventListener('click', toggle);
