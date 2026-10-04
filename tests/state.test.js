@@ -212,3 +212,59 @@ describe('whole surahs', () => {
     expect(state.mem(114)).toBe(Q[113].v.length);
   });
 });
+
+describe('weak ayat', () => {
+  async function weakSetup() {
+    today('2026-05-01');
+    const booted = await boot();
+    [112, 114].forEach(id => memoriseAll(booted.state, booted.Q, id));
+    return booted.state;
+  }
+
+  it('only a memorised ayah can be marked weak', async () => {
+    const state = await weakSetup();
+    expect(state.setWeak(112, 1, true)).toBe(true);
+    expect(state.isWeak(112, 1)).toBe(true);
+    expect(state.setWeak(113, 0, true)).toBe(false);       // surah with no progress
+    expect(state.setAyah(110, 0, true)).toBe(1);
+    expect(state.setWeak(110, 2, true)).toBe(false);       // ayah 3 of 110 is not memorised
+    expect(state.setWeak(112, 1, true)).toBe(false);       // already weak: nothing changes
+  });
+
+  it('keeps the record shape when nothing is weak and drops the mask when the last one clears', async () => {
+    const state = await weakSetup();
+    expect(state.rec(112)).not.toHaveProperty('w');
+    state.setWeak(112, 0, true); state.setWeak(112, 2, true);
+    expect(state.rec(112).w).toBe('1010');
+    state.setWeak(112, 0, false); state.setWeak(112, 2, false);
+    expect(state.rec(112)).not.toHaveProperty('w');
+    expect(Object.keys(state.rec(112)).sort()).toEqual(['d', 'i', 'm']);
+  });
+
+  it('forgets a weak flag when the ayah is un-memorised', async () => {
+    const state = await weakSetup();
+    state.setWeak(112, 1, true);
+    state.setAyah(112, 1, false);
+    expect(state.isWeak(112, 1)).toBe(false);
+    state.setAyah(112, 1, true);
+    expect(state.isWeak(112, 1)).toBe(false);              // re-memorising starts clean
+  });
+
+  it('lists weak ayat in mushaf order across surahs', async () => {
+    const state = await weakSetup();
+    state.setWeak(114, 3, true); state.setWeak(112, 2, true); state.setWeak(112, 0, true);
+    expect(state.weakList()).toEqual([{ id: 112, i: 0 }, { id: 112, i: 2 }, { id: 114, i: 3 }]);
+  });
+
+  it('survives grading and a reload, and belongs to one child', async () => {
+    const state = await weakSetup();
+    state.setWeak(112, 1, true);
+    state.grade(112, true); state.grade(112, false);
+    expect(state.isWeak(112, 1)).toBe(true);
+    state.save();
+    const again = await boot({ 'hifz-kids-v1': localStorage.getItem('hifz-kids-v1') });
+    expect(again.state.isWeak(112, 1)).toBe(true);
+    again.state.addKid({ name: 'يوسف', icon: '🌙', mode: 'reader' });
+    expect(again.state.weakList()).toEqual([]);
+  });
+});

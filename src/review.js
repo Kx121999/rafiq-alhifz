@@ -1,6 +1,7 @@
 import { $, AR, day, days, el } from './util.js';
 import { Q } from './data.js';
-import { S, mem, isDue, grade } from './state.js';
+import { S, mem, isDue, grade, weakList, setWeak, save } from './state.js';
+import { revealAyah } from './motion.js';
 
 /** Surahs whose review is due today, in surah order. */
 export const dueList = () => Q.map((_, k) => k + 1).filter(isDue);
@@ -40,4 +41,34 @@ export function renderReview() {
   box.appendChild(card);
 }
 
-export const clearReviewNote = () => { note = '' };
+export const clearReviewNote = () => { note = ''; weakNote = '' };
+
+/* ---------- weak ayat: one at a time, from memory ---------- */
+let weakIdx = 0, weakNote = '';
+export function renderWeak() {
+  const box = $('weakBox'); box.textContent = '';
+  if (!Q.length) return;
+  box.appendChild(el('h3', '', 'آيات تحتاج تثبيتًا'));
+  if (weakNote) box.appendChild(el('p', 'good', weakNote));
+  const list = weakList();
+  if (!list.length) {
+    box.appendChild(el('p', 'note', 'لا توجد آيات ضعيفة. من صفحة أي سورة اضغط «علّمها ضعيفة» تحت الآية التي تتعثّر فيها لتظهر هنا.'));
+    return;
+  }
+  const a = list[weakIdx % list.length], c = Q[a.id - 1], text = c.v[a.i];
+  const card = el('article', 'weakq');
+  card.appendChild(el('p', 'note', 'المتبقي: ' + AR(list.length) + ' · سورة ' + c.n + ' · الآية ' + AR(a.i + 1)));
+  const sp = text.indexOf(' '), first = sp > 0 ? text.slice(0, sp) : '', rest = sp > 0 ? text.slice(sp) : text;
+  const tx = el('div', 'tx'); tx.tabIndex = 0; tx.setAttribute('role', 'button'); tx.setAttribute('aria-label', 'اكشف الآية');
+  tx.append(first, el('span', 'rest', rest));
+  const reveal = () => { if (!card.classList.contains('shown')) { card.classList.add('shown'); revealAyah(card) } };
+  tx.addEventListener('click', reveal);
+  tx.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); reveal() } });
+  card.append(tx, el('p', 'note', 'اقرأ الآية من حفظك ثم اضغطها لتتحقق.'));
+  const good = el('button', 'btn primary', 'أتقنتُها'), again = el('button', 'btn', 'ما زالت ضعيفة'), open = el('a', 'btn', 'افتح السورة');
+  good.type = again.type = 'button'; open.href = '#/surah/' + a.id;
+  good.addEventListener('click', () => { setWeak(a.id, a.i, false); save(); weakNote = 'أحسنت! أتقنتَ الآية ' + AR(a.i + 1) + ' من سورة ' + c.n + '.'; renderWeak(); onGraded() });
+  again.addEventListener('click', () => { weakIdx++; weakNote = ''; renderWeak() });
+  const acts = el('div', 'acts'); acts.append(good, again, open); card.appendChild(acts);
+  box.appendChild(card);
+}

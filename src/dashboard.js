@@ -1,6 +1,6 @@
 import { $, AR, ayahs, el } from './util.js';
 import { Q } from './data.js';
-import { mem, isDue, kidPlan, lastSurah } from './state.js';
+import { mem, isDue, kidPlan, lastSurah, weakList } from './state.js';
 import { planStats } from './plan.js';
 
 const link = (href, text, cls = 'btn') => { const a = el('a', cls, text); a.href = href; return a };
@@ -17,6 +17,8 @@ export function renderToday() {
   const acts = el('div', 'acts');
   if (last) acts.appendChild(link('#/surah/' + last, 'كمّل من حيث وقفت: سورة ' + Q[last - 1].n, 'btn primary'));
   if (due.length) acts.appendChild(link('#/review', 'ابدأ المراجعة (' + AR(due.length) + ')', last ? 'btn' : 'btn primary'));
+  const weak = weakList().length;
+  if (weak) acts.appendChild(link('#/review', 'ثبّت الآيات الضعيفة (' + AR(weak) + ')', 'btn'));
   if (acts.children.length) box.appendChild(acts);
 
   if (st && st.left > 0) {

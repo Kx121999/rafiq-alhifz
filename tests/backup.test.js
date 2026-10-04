@@ -107,3 +107,32 @@ describe('cleaning a tampered file', () => {
     expect(backup.lastExport()).toBeInstanceOf(Date);
   });
 });
+
+describe('weak ayat in backups', () => {
+  it('keeps a valid weak mask through a round trip', async () => {
+    const { state, Q, backup } = await setup();
+    memoriseAll(state, Q, 112); state.setWeak(112, 1, true);
+    const r = backup.parseBackup(JSON.stringify(backup.buildBackup()));
+    expect(r.kids[0].S.s[112].w).toBe('0100');
+  });
+
+  it('ignores a mask of the wrong length or with junk, and never flags an ayah that is not memorised', async () => {
+    const { Q, backup } = await setup();
+    const rec = (m, w) => ({ m, d: '2026-05-02', i: 1, w });
+    const s = {
+      112: rec('1111', '0100'),           // fine
+      113: rec('11100', '01'),            // wrong length
+      114: rec('111111', 'zzzzzz'),       // not a mask
+      108: rec('110', '011'),             // flags ayah 3, which is not memorised -> only ayah 2 survives
+      110: rec('111', '000'),             // all zero -> no mask
+    };
+    expect(Q[111].v.length).toBe(4);
+    const r = backup.parseBackup(file([kid({ S: { s, goal: 5, day: '2026-05-01', n: 0, streak: 0, last: '' } })]));
+    const out = r.kids[0].S.s;
+    expect(out[112].w).toBe('0100');
+    expect(out[113]).not.toHaveProperty('w');
+    expect(out[114]).not.toHaveProperty('w');
+    expect(out[108].w).toBe('010');
+    expect(out[110]).not.toHaveProperty('w');
+  });
+});

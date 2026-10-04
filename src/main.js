@@ -1,7 +1,7 @@
 import './styles.css';
 import { $, AR, days } from './util.js';
 import { Q, loadQuran } from './data.js';
-import { S, save, rec, mem, isDue, bump, setAyah, grade, setLast, activeKid } from './state.js';
+import { S, save, rec, mem, isDue, bump, setAyah, grade, setLast, activeKid, isWeak, setWeak, weakList } from './state.js';
 import { renderSummary, renderList, setFilter } from './home.js';
 import { view, renderSurah, toggleTafsir } from './surah.js';
 import { go, onPage, onShown, startRouter, route } from './router.js';
@@ -9,7 +9,7 @@ import { pageIn, revealAyah, celebrate, motionReady } from './motion.js';
 import { initPlayer, loadSurah, playFrom, stopPlayer } from './player.js';
 import { initPwa } from './pwa.js';
 import { renderToday } from './dashboard.js';
-import { renderReview, onReviewGraded, clearReviewNote, dueList } from './review.js';
+import { renderReview, renderWeak, onReviewGraded, clearReviewNote, dueList } from './review.js';
 import { renderPlan, onPlanChanged } from './plan.js';
 import { renderGames, onGameStars, resetGame } from './games.js';
 import { renderAchievements, renderCertificate } from './achievements.js';
@@ -17,13 +17,13 @@ import { initKids, onKidsChange, renderRewards, applyMode } from './kids.js';
 
 function render() {
   if (!Q.length) return;
-  applyMode(); renderSummary(); renderToday(); renderRewards(); renderList(); renderReview(); renderPlan(); updateDue(); renderAchievements();
+  applyMode(); renderSummary(); renderToday(); renderRewards(); renderList(); renderReview(); renderWeak(); renderPlan(); updateDue(); renderAchievements();
   if (!$('page-games').hidden) renderGames();
   if (view.cur) renderSurah(false);
 }
 function updateDue() {
-  const n = dueList().length, c = $('dueCount');
-  c.textContent = AR(n); c.hidden = !n; c.setAttribute('aria-label', '' + n + ' مراجعات مستحقة');
+  const n = dueList().length + weakList().length, c = $('dueCount');
+  c.textContent = AR(n); c.hidden = !n; c.setAttribute('aria-label', AR(n) + ' للمراجعة');
 }
 const refreshStats = () => { renderSummary(); renderToday(); renderRewards(); updateDue() };
 
@@ -77,6 +77,7 @@ $('allBtn').addEventListener('click', () => {
 });
 $('ayat').addEventListener('click', e => {
   const li = e.target.closest('.ay'); if (!li) return;
+  if (e.target.closest('.wk')) { const i = +li.dataset.i; setWeak(view.cur, i, !isWeak(view.cur, i)); save(); renderSurah(false); refreshStats(); return }
   if (e.target.closest('.pl')) { playFrom(+li.dataset.i); return }
   if (e.target.closest('.tf')) { toggleTafsir(li); return }
   if (e.target.closest('.tfx')) return;

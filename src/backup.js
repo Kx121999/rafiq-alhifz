@@ -39,7 +39,13 @@ function cleanProgress(S, skip) {
     const id = Number(key), ok = Number.isInteger(id) && id >= 1 && id <= 114 && r && typeof r.m === 'string' &&
       /^[01]+$/.test(r.m) && r.m.length === Q[id - 1].v.length && DATE.test(r.d) && Number.isInteger(r.i) && r.i >= 1 && r.i <= 30;
     if (!ok) { skip.n++; continue }
-    if (r.m.includes('1')) out.s[id] = { m: r.m, d: r.d, i: r.i };
+    if (!r.m.includes('1')) continue;
+    out.s[id] = { m: r.m, d: r.d, i: r.i };
+    // optional weak-ayat mask: must match the length and can only flag memorised ayat
+    if (typeof r.w === 'string' && /^[01]+$/.test(r.w) && r.w.length === r.m.length) {
+      const w = [...r.w].map((c, k) => (c === '1' && r.m[k] === '1' ? '1' : '0')).join('');
+      if (w.includes('1')) out.s[id].w = w;
+    }
   }
   return out;
 }

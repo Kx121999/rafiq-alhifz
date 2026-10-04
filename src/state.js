@@ -120,8 +120,26 @@ export function setAyah(id, i, on) {
   if ((r.m[i] === '1') === on) return 0;
   if (on && !r.m.includes('1')) { r.d = day(1); r.i = 1 }
   r.m = r.m.slice(0, i) + (on ? '1' : '0') + r.m.slice(i + 1);
+  if (!on && r.w) { r.w = r.w.slice(0, i) + '0' + r.w.slice(i + 1); if (!r.w.includes('1')) delete r.w }   // an ayah that is no longer memorised is no longer weak
   if (!r.m.includes('1')) delete S.s[id];
   return on ? 1 : -1;
+}
+
+/* Weak ayat: an optional mask w on a surah record (same length as m). Only memorised ayat can be weak. */
+export const isWeak = (id, i) => { const r = rec(id); return !!(r && r.w && r.w[i] === '1') };
+export function setWeak(id, i, on) {
+  const r = rec(id); if (!r || r.m[i] !== '1') return false;
+  const cur = r.w || '0'.repeat(r.m.length);
+  if ((cur[i] === '1') === on) return false;
+  const w = cur.slice(0, i) + (on ? '1' : '0') + cur.slice(i + 1);
+  if (w.includes('1')) r.w = w; else delete r.w;
+  return true;
+}
+/** Every weak ayah of the active child, in mushaf order. */
+export function weakList() {
+  const out = [];
+  for (const [key, r] of Object.entries(S.s)) if (r.w) for (let i = 0; i < r.w.length; i++) if (r.w[i] === '1' && r.m[i] === '1') out.push({ id: +key, i });
+  return out.sort((a, b) => a.id - b.id || a.i - b.i);
 }
 
 /** Spaced review: doubles the interval up to 30 days, or resets to 1 day. Returns the new interval. */

@@ -1,6 +1,6 @@
 import { $, AR, day } from './util.js';
 import { Q, loadTafsir } from './data.js';
-import { mem, rec } from './state.js';
+import { mem, rec, isWeak, weakList } from './state.js';
 
 /** The open surah (0 = index page) and whether recitation mode hides the ayat. */
 export const view = { cur: 0, veil: false };
@@ -8,7 +8,8 @@ export const view = { cur: 0, veil: false };
 export function renderSurah(full) {
   const cur = view.cur, c = Q[cur - 1], tot = c.v.length, m = mem(cur), r = rec(cur);
   $('stName').textContent = 'سورة ' + c.n; $('listen').href = 'https://quran.com/' + cur;
-  $('stMeta').textContent = (c.t ? 'مدنية' : 'مكية') + ' · حفظتَ ' + AR(m) + ' من ' + AR(tot) + ' آية';
+  const weak = weakList().filter(a => a.id === cur).length;
+  $('stMeta').textContent = (c.t ? 'مدنية' : 'مكية') + ' · حفظتَ ' + AR(m) + ' من ' + AR(tot) + ' آية' + (weak ? ' · ' + AR(weak) + ' تحتاج تثبيتًا' : '');
   $('allBtn').textContent = m === tot ? 'إلغاء حفظ السورة' : 'حفظتُ السورة كاملة';
   $('veilBtn').setAttribute('aria-pressed', view.veil); $('veilNote').hidden = !view.veil;
   const b = $('basmala'); b.hidden = (cur === 1 || cur === 9); b.textContent = Q[0].v[0];
@@ -28,11 +29,18 @@ export function renderSurah(full) {
       const tf = document.createElement('button'); tf.type = 'button'; tf.className = 'tf'; tf.textContent = 'التفسير'; tf.setAttribute('aria-expanded', 'false');
       const tfx = document.createElement('div'); tfx.className = 'tfx'; tfx.hidden = true;
       const pl = document.createElement('button'); pl.type = 'button'; pl.className = 'pl'; pl.textContent = '▶ استمع'; pl.setAttribute('aria-label', 'استمع من الآية ' + AR(i + 1));
-      const row = document.createElement('div'); row.className = 'arow'; row.append(pl, tf);
+      const wk = document.createElement('button'); wk.type = 'button'; wk.className = 'wk'; wk.hidden = true;
+      const row = document.createElement('div'); row.className = 'arow'; row.append(pl, wk, tf);
       body.append(tx, row, tfx); li.append(body, ck); ol.appendChild(li);
     });
   }
   ol.querySelectorAll('.ck').forEach((ck, i) => ck.setAttribute('aria-pressed', !!r && r.m[i] === '1'));
+  ol.querySelectorAll('.wk').forEach((wk, i) => {
+    const memorised = !!r && r.m[i] === '1', weakNow = isWeak(cur, i);
+    wk.hidden = !memorised; wk.setAttribute('aria-pressed', weakNow);
+    wk.textContent = weakNow ? '⚑ ضعيفة' : '⚐ علّمها ضعيفة';
+    wk.setAttribute('aria-label', (weakNow ? 'إلغاء تعليم الآية ' : 'علّم الآية ') + AR(i + 1) + (weakNow ? ' كضعيفة' : ' كضعيفة تحتاج تثبيتًا'));
+  });
   const rv = $('review'); rv.hidden = !m;
   if (m) {
     const due = r.d <= day();
