@@ -12,6 +12,7 @@ import { initSearch, openSearch } from './search.js';
 import { renderReport } from './report.js';
 import { initTour, needsTour, openTour } from './tour.js';
 import { renderToday } from './dashboard.js';
+import { renderAdhkar, refreshAdhkar } from './adhkar.js';
 import { renderReview, renderWeak, onReviewGraded, clearReviewNote, dueList } from './review.js';
 import { renderPlan, onPlanChanged } from './plan.js';
 import { renderGames, onGameStars, resetGame } from './games.js';
@@ -22,6 +23,7 @@ function render() {
   if (!Q.length) return;
   applyMode(); renderSummary(); renderToday(); renderRewards(); renderList(); renderReview(); renderWeak(); renderPlan(); updateDue(); renderAchievements();
   if (!$('page-games').hidden) renderGames();
+  refreshAdhkar();
   if (view.cur) renderSurah(false);
 }
 function updateDue() {
@@ -63,6 +65,7 @@ onPage('surah', (arg, ayah) => {
 for (const p of ['home', 'about']) onPage(p, () => { view.cur = 0 });
 onPage('review', () => { view.cur = 0; clearReviewNote(); render() });
 onPage('plan', () => { view.cur = 0; render() });
+onPage('adhkar', arg => { view.cur = 0; renderAdhkar(arg) });
 onPage('games', () => { view.cur = 0; resetGame(); render(); renderGames() });
 onPage('achievements', () => { view.cur = 0; render() });
 onPage('certificate', arg => {

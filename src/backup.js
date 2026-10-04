@@ -1,7 +1,7 @@
 // Backup file: export every child's progress as JSON, and import one back after strict validation.
 import { day } from './util.js';
 import { Q } from './data.js';
-import { ICONS, FRIENDS, snapshot } from './state.js';
+import { ICONS, FRIENDS, AZ_KEY, snapshot } from './state.js';
 import { PRESETS } from './plan.js';
 
 const APP = 'rafiq-alhifz', VERSION = 1, MAX_BYTES = 2e6, MAX_KIDS = 30;
@@ -62,6 +62,23 @@ function cleanLog(log) {
   return Object.keys(out).length ? out : null;
 }
 
+/** Adhkar progress: ISO-date keys, known list keys, small whole-number counts (at most 300 dhikr per list), done as 0 or 1. */
+function cleanAz(az) {
+  if (!az || typeof az !== 'object') return null;
+  const out = {};
+  for (const [d, e] of Object.entries(az).slice(0, 400)) {
+    if (!DATE.test(d) || !e || typeof e !== 'object') continue;
+    const day = {};
+    for (const [key, v] of Object.entries(e).slice(0, 200)) {
+      if (!AZ_KEY.test(key) || !v || !Array.isArray(v.c) || v.c.length < 1 || v.c.length > 300) continue;
+      const c = v.c.map(n => int(n, 0, 1000, 0));
+      if (c.some(n => n > 0)) day[key] = { c, d: v.d === 1 ? 1 : 0 };
+    }
+    if (Object.keys(day).length) out[d] = day;
+  }
+  return Object.keys(out).length ? out : null;
+}
+
 function cleanKid(k, idx, skip) {
   if (!k || typeof k !== 'object' || !k.S || typeof k.S !== 'object') { skip.kids++; return null }
   const kid = {
@@ -76,6 +93,8 @@ function cleanKid(k, idx, skip) {
   if (FRIENDS.some(f => f.id === k.friend)) kid.friend = k.friend;
   const log = cleanLog(k.log);
   if (log) kid.log = log;
+  const az = cleanAz(k.az);
+  if (az) kid.az = az;
   if (k.game && Number.isInteger(k.game.stars) && k.game.stars >= 0 && k.game.stars <= 1e6) kid.game = { stars: k.game.stars };
   return kid;
 }

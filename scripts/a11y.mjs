@@ -39,6 +39,10 @@ const STATES = [
   ['home', '#/'], ['dashboard', '#/dashboard'], ['mushaf', '#/mushaf'], ['search results', '#/search/' + encodeURIComponent('الرحمن')], ['search empty', '#/search'],
   ['review', '#/review'], ['plan view', '#/plan'], ['plan form', '#/plan', click('تغيير الخطة')],
   ['games menu', '#/games'], ['game: complete', '#/games', click('أكمل', '.gamecard')], ['game: order', '#/games', click('رتّب', '.gamecard')],
+  ['adhkar: morning', '#/adhkar/sabah', p => p.waitForSelector('.azcard', { timeout: 20000 })],
+  ['adhkar: a counted dhikr', '#/adhkar/sabah', async p => { await p.waitForSelector('.azcard', { timeout: 20000 }); await p.evaluate(() => { document.querySelectorAll('.azbtn')[0].click(); document.querySelectorAll('.azbtn')[1].click() }); await wait(300) }],
+  ['adhkar: all categories', '#/adhkar/all', p => p.waitForSelector('.azcat', { timeout: 20000 })],
+  ['adhkar: one category', '#/adhkar/c7', p => p.waitForSelector('.azcard', { timeout: 20000 })],
   ['achievements', '#/achievements'], ['certificate', '#/certificate/114'], ['report', '#/report'], ['about', '#/about'],
   ['surah (reader)', '#/surah/112'], ['surah (veil)', '#/surah/114', p => p.evaluate(() => document.getElementById('veilBtn').click())],
   ['surah (young child)', '#/surah/114', null, 'k2'], ['surah + tafsir', '#/surah/112', async p => { await p.waitForSelector('.ay .tf', { timeout: 20000 }); await p.evaluate(() => document.querySelector('.ay .tf').click()); await wait(800) }],
@@ -86,12 +90,12 @@ const jobs = ['dark', 'light'].flatMap(scheme => STATES.map(s => [scheme, s]));
 for (let i = 0; i < jobs.length; i += 6) await Promise.all(jobs.slice(i, i + 6).map(([scheme, s]) => audit(scheme, s)));
 
 // the wide layout (top navigation, columns) on a laptop and on a tablet
-const WIDE = ['#/', '#/dashboard', '#/mushaf', '#/games', '#/achievements', '#/surah/112'].map(h => [h, h]);
+const WIDE = ['#/', '#/dashboard', '#/mushaf', '#/games', '#/achievements', '#/surah/112', '#/adhkar/sabah', '#/adhkar/all'].map(h => [h, h]);
 const wideJobs = [1280, 820].flatMap(width => WIDE.map(([label, hash]) => [width, [label, hash]]));
 for (let i = 0; i < wideJobs.length; i += 6) await Promise.all(wideJobs.slice(i, i + 6).map(([width, s]) => audit('light', s, 1, width)));
 
 // WCAG 1.4.10 reflow: nothing may force sideways scrolling at 320 CSS px
-const REFLOW = ['#/', '#/dashboard', '#/mushaf', '#/search/' + encodeURIComponent('الرحمن'), '#/review', '#/plan', '#/games', '#/achievements', '#/certificate/114', '#/report', '#/about', '#/surah/112'];
+const REFLOW = ['#/', '#/dashboard', '#/mushaf', '#/search/' + encodeURIComponent('الرحمن'), '#/review', '#/plan', '#/games', '#/achievements', '#/certificate/114', '#/report', '#/about', '#/surah/112', '#/adhkar/sabah', '#/adhkar/all'];
 for (const hash of REFLOW) for (const width of [320, 768, 1180, 1280]) {
   const { ctx, page } = await open('dark', hash, width, 640);
   const o = await page.evaluate(() => ({ sw: document.documentElement.scrollWidth, iw: document.documentElement.clientWidth }));

@@ -2,7 +2,7 @@
 import { $, AR, day, charImg } from './util.js';
 import { Q } from './data.js';
 import { announce } from './motion.js';
-import { S, mem, gameStars, FRIENDS, kids, activeKid, switchKid, addKid, updateKid, removeKid, save, applyImport, ICONS, MODES } from './state.js';
+import { S, mem, gameStars, azStats, FRIENDS, kids, activeKid, switchKid, addKid, updateKid, removeKid, save, applyImport, ICONS, MODES } from './state.js';
 import { downloadBackup, lastExport, parseBackup } from './backup.js';
 import { go } from './router.js';
 
@@ -30,7 +30,7 @@ function totals() {
   let ay = 0, done = 0;
   Q.forEach((c, k) => { const m = mem(k + 1); ay += m; if (m === c.v.length) done++ });
   const streak = (S.last === day() || S.last === day(-1)) ? S.streak : 0;
-  return { ay, done, streak, games: gameStars() };
+  return { ay, done, streak, games: gameStars(), az: azStats() };
 }
 const BADGES = [
   { icon: '🌱', name: 'البداية', ok: t => t.ay >= 1 },
@@ -41,6 +41,10 @@ const BADGES = [
   { icon: '👑', name: 'مئة آية', ok: t => t.ay >= 100 },
   { icon: '🎮', name: 'لاعب نشيط', ok: t => t.games >= 10 },
   { icon: '🎯', name: 'بطل الألعاب', ok: t => t.games >= 50 },
+  { icon: '🌅', name: 'أذكار الصباح', ok: t => t.az.sabah },
+  { icon: '🌙', name: 'أذكار المساء', ok: t => t.az.masaa },
+  { icon: '😴', name: 'أذكار النوم', ok: t => t.az.nawm },
+  { icon: '📿', name: 'ملتزم بالأذكار', ok: t => t.az.days >= 7 },
 ];
 
 export function renderRewards(id = 'rewards') {

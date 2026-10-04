@@ -9,3 +9,7 @@ export const loadQuran = () => getJSON('quran.json').then(d => { Q.push(...d); r
 let TP = null;
 /** Tafsir is large, so it is fetched once on first use. */
 export const loadTafsir = () => TP || (TP = getJSON('tafsir.json').catch(e => { TP = null; throw e }));
+
+let AZ = null;
+/** The adhkar (Hisn al-Muslim, public/adhkar.json) are fetched once on first use and shown exactly as they are in the file. */
+export const loadAdhkar = () => AZ || (AZ = getJSON('adhkar.json').catch(e => { AZ = null; throw e }));

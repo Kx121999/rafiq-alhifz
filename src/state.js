@@ -82,6 +82,28 @@ function addLog(field, n) {
   for (const key of Object.keys(log)) if (key < cutoff) delete log[key];
 }
 export const activityLog = () => (activeKid() || {}).log || {};
+/* Adhkar progress: per day and per list (sabah, masaa, nawm, istiqaz, salah, or c<id> for any other category)
+   {c: [count per dhikr], d: 1 once the whole list is finished}. Kept AZ_DAYS days, as an optional field az on the child. */
+const AZ_DAYS = 60;
+export const AZ_KEY = /^(sabah|masaa|nawm|istiqaz|salah|c\d{1,3})$/;
+export const azToday = key => { const e = (((activeKid() || {}).az || {})[day()] || {})[key]; return e ? { c: e.c.slice(), d: e.d } : { c: [], d: 0 } };
+export function azSave(key, counts, done) {
+  const k = activeKid(); if (!k || !AZ_KEY.test(key)) return;
+  const az = k.az || (k.az = {}), d = day(), e = az[d] || (az[d] = {});
+  if (counts.some(n => n > 0)) e[key] = { c: counts.map(n => Math.max(0, Math.min(1000, Math.floor(n) || 0))), d: done ? 1 : 0 };
+  else delete e[key];
+  if (!Object.keys(e).length) delete az[d];
+  const cutoff = day(-AZ_DAYS);
+  for (const x of Object.keys(az)) if (x < cutoff) delete az[x];
+  if (!Object.keys(az).length) delete k.az;
+  persist();
+}
+/** For the medals: how many days had a finished list, and which of the three daily lists were ever finished. */
+export function azStats() {
+  const az = (activeKid() || {}).az || {}, seen = new Set(); let days = 0;
+  for (const e of Object.values(az)) { let any = false; for (const [key, v] of Object.entries(e)) if (v.d) { any = true; seen.add(key) } if (any) days++ }
+  return { days, sabah: seen.has('sabah'), masaa: seen.has('masaa'), nawm: seen.has('nawm') };
+}
 /** Marks a weak ayah as mastered (as opposed to un-flagging it by mistake) and counts it for the report. */
 export function masterWeak(id, i) { if (!setWeak(id, i, false)) return false; addLog('w', 1); return true }
 

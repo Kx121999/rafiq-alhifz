@@ -1,7 +1,7 @@
 // Hash router: #/ #/dashboard #/mushaf #/surah/<n> #/about. Works on static hosting with no server rules.
 import { $ } from './util.js';
 
-const TITLES = { home: '', dashboard: 'لوحتي', mushaf: 'المصحف', search: 'بحث', review: 'المراجعة', plan: 'الخطة', games: 'ألعاب', achievements: 'إنجازاتي', certificate: 'شهادة', report: 'التقرير الأسبوعي', surah: 'السورة', about: 'عن المنصة' };
+const TITLES = { home: '', dashboard: 'لوحتي', mushaf: 'المصحف', search: 'بحث', review: 'المراجعة', plan: 'الخطة', games: 'ألعاب', adhkar: 'الأذكار', achievements: 'إنجازاتي', certificate: 'شهادة', report: 'التقرير الأسبوعي', surah: 'السورة', about: 'عن المنصة' };
 /** Pages that are not a tab light up the tab they belong to. */
 const NAV_OF = { surah: 'mushaf', search: 'mushaf', certificate: 'achievements', plan: 'dashboard', report: 'dashboard' };
 const handlers = {};

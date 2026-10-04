@@ -33,6 +33,7 @@
     <a href="#/dashboard" data-nav="dashboard"><i aria-hidden="true">🏠</i><span>لوحتي</span></a>
     <a href="#/mushaf" data-nav="mushaf"><i aria-hidden="true">📖</i><span>المصحف</span></a>
     <a href="#/review" data-nav="review"><i aria-hidden="true">🔁</i><span>المراجعة</span><b class="count" id="dueCount" hidden></b></a>
+    <a href="#/adhkar" data-nav="adhkar"><i aria-hidden="true">📿</i><span>الأذكار</span></a>
     <a href="#/games" data-nav="games"><i aria-hidden="true">🎮</i><span>ألعاب</span></a>
     <a href="#/achievements" data-nav="achievements"><i aria-hidden="true">🏆</i><span>إنجازاتي</span></a>
   </nav>
@@ -62,6 +63,8 @@
       <li><i aria-hidden="true">🧒</i><b>ملف لكل طفل</b><span>وضع للصغار بخط كبير ونجوم، ووضع للقرّاء، وركن خاص بالأهل.</span></li>
       <li><i aria-hidden="true">💡</i><b>التفسير الميسّر</b><span>تفسير مختصر تحت كل آية لمن يقرأ.</span></li>
       <li><i aria-hidden="true">⭐</i><b>نجوم وأوسمة</b><span>نجمة لكل آية محفوظة، وأوسمة تُفتح مع التقدّم.</span></li>
+      <li><i aria-hidden="true">📿</i><b>الأذكار كلها</b><span>أذكار الصباح والمساء والنوم وغيرها من حصن المسلم، مع عدّاد لكل ذكر.</span></li>
+      <li><i aria-hidden="true">🎮</i><b>ألعاب تثبّت الحفظ</b><span>أكمل الآية ورتّب الآيات والكلمة الناقصة، بنجوم خاصة بالألعاب.</span></li>
     </ul>
   </main>
 
@@ -89,7 +92,9 @@
       <a class="tile" href="#/games"><i aria-hidden="true">🎮</i><b>ألعاب</b></a>
       <a class="tile" href="#/achievements"><i aria-hidden="true">🏆</i><b>إنجازاتي</b></a>
       <a class="tile" href="#/plan"><i aria-hidden="true">🎯</i><b>الخطة</b></a>
+      <a class="tile" href="#/adhkar"><i aria-hidden="true">📿</i><b>الأذكار</b></a>
       <a class="tile" href="#/search"><i aria-hidden="true">🔍</i><b>بحث</b></a>
+      <a class="tile" href="#/report"><i aria-hidden="true">📊</i><b>التقرير</b></a>
     </nav>
     <section class="rewards" id="rewards" aria-label="النجوم والأوسمة"></section>
   </main>
@@ -164,6 +169,14 @@
     <article class="cert" id="cert" aria-label="شهادة إتمام الحفظ"></article>
   </main>
 
+  <!-- الأذكار -->
+  <main class="page" id="page-adhkar" data-page="adhkar" tabindex="-1" hidden>
+    <header class="banner b-violet"><div><h1 class="ptitle">الأذكار</h1><p>صباحك ومساؤك ونومك بذكر الله</p></div><img class="char" src="/chars/ghayma.svg" alt="" width="84" height="84"></header>
+    <nav class="chips aztabs" id="azTabs" aria-label="أقسام الأذكار"></nav>
+    <div id="azBox" class="azbox" aria-busy="true"></div>
+    <p class="sr" id="azLive" role="status"></p>
+  </main>
+
   <!-- السورة -->
   <main class="page" id="page-surah" data-page="surah" tabindex="-1" hidden>
     <div class="shead">
@@ -197,6 +210,8 @@
       <h2>المصادر</h2>
       <p>التلاوات الصوتية من موقع everyayah.com، ملف لكل آية، وتُحمَّل منه مباشرة أثناء الاستماع. الموقع لا يستضيف أي ملف صوتي.</p>
       <p>نص المصحف بالرسم العثماني من موسوعة القرآن الكريم (quranenc.com) عبر حزمة quran-json. التفسير: «التفسير الميسّر» عبر مشروع tafsir_api المفتوح. لا تُعدَّل هذه النصوص ولا يُولَّد أي نص ديني جديد.</p>
+      <h2>الأذكار</h2>
+      <p>نصوص الأذكار من كتاب «حصن المسلم» لسعيد بن علي القحطاني، من ملف JSON مفتوح على GitHub (مشروع rn0x/Adhkar-json)، وتُعرض كما هي بلا أي تعديل. الآيات الواردة فيها يتحقق الموقع عند كل بناء أنها مطابقة لنص المصحف عندنا. عدّاد كل ذكر لكل طفل ولكل يوم، ويبقى على الجهاز فقط.</p>
       <h2>كيف تعمل المراجعة؟</h2>
       <p>عند حفظ أول آية من سورة تُجدول مراجعتها بعد يوم. كلما أتقنتَ المراجعة تضاعفت المدة (يومان، أربعة، ثمانية…) حتى ٣٠ يومًا، وإن احتجت إعادة عادت إلى يوم واحد.</p>
       <h2>تثبيت التطبيق والعمل بدون إنترنت</h2>
@@ -212,7 +227,7 @@
     <div class="sf-brand"><img src="/mascot.svg" alt="" width="44" height="44"><div><b>رفيق الحفظ</b><span>نحفظ القرآن معًا، بالمرح والاستمرار.</span></div></div>
     <div class="sf-main">
       <nav class="sf-links" aria-label="روابط سريعة">
-        <a href="#/dashboard">لوحتي</a><a href="#/mushaf">المصحف</a><a href="#/review">المراجعة</a><a href="#/games">ألعاب</a><a href="#/achievements">إنجازاتي</a><a href="#/plan">الخطة</a><a href="#/search">بحث</a><a href="#/about">عن المنصة</a>
+        <a href="#/dashboard">لوحتي</a><a href="#/mushaf">المصحف</a><a href="#/review">المراجعة</a><a href="#/adhkar">الأذكار</a><a href="#/games">ألعاب</a><a href="#/achievements">إنجازاتي</a><a href="#/plan">الخطة</a><a href="#/search">بحث</a><a href="#/about">عن المنصة</a>
       </nav>
       <p class="sf-src">نص المصحف بالرسم العثماني من موسوعة القرآن الكريم (quranenc.com). التفسير: «التفسير الميسّر» عبر مشروع tafsir_api المفتوح. التلاوات: everyayah.com. لا حسابات ولا خوادم، وتقدّمك محفوظ على جهازك.</p>
     </div>
