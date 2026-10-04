@@ -1,24 +1,81 @@
-// Progress lives in localStorage under the same key and shape as the original single-file site.
-import { $, day } from './util.js';
+// Progress is kept per child in localStorage under hifz-kids-v1.
+// Each child's S has exactly the shape of the original single-user progress (hifz-progress-v1),
+// which is migrated into the first child once and then left untouched as a backup.
+import { day } from './util.js';
 import { Q } from './data.js';
 
-const KEY = 'hifz-progress-v1';
+const KEY = 'hifz-kids-v1';
+const LEGACY_KEY = 'hifz-progress-v1';
 const fresh = () => ({ s: {}, goal: 5, day: day(), n: 0, streak: 0, last: '' });
+const clone = o => JSON.parse(JSON.stringify(o));
 
-/** S = {s: {<surah id>: {m: "0101…", d: "YYYY-MM-DD", i: days}}, goal, day, n, streak, last} */
+export const ICONS = ['⭐', '🌙', '☀️', '🌸', '🌳', '📖', '🌈', '💎'];
+export const MODES = { young: 'صغير (٤–٦ سنوات)', reader: 'قارئ (٧–١٢ سنة)' };
+
+/** The active child's progress: {s: {<surah id>: {m: "0101…", d: "YYYY-MM-DD", i: days}}, goal, day, n, streak, last} */
 export const S = fresh();
 
+/** All children: {active: id, kids: [{id, name, icon, mode: 'young'|'reader', S}]} */
+const store = { active: '', kids: [] };
+
 function adopt(o) {
-  if (o && typeof o === 'object' && o.s) {
-    for (const k of Object.keys(S)) delete S[k];
-    Object.assign(S, fresh(), JSON.parse(JSON.stringify(o)));
-  }
+  for (const k of Object.keys(S)) delete S[k];
+  Object.assign(S, fresh(), o && typeof o === 'object' && o.s ? clone(o) : {});
   if (S.day !== day()) { S.day = day(); S.n = 0 }
 }
-try { adopt(JSON.parse(localStorage.getItem(KEY))) } catch (e) {}
 
-export function save() { try { localStorage.setItem(KEY, JSON.stringify(S)) } catch (e) {} }
-export function showSync() { $('sync').textContent = 'تقدّمك محفوظ على هذا المتصفح فقط' }
+function persist() { try { localStorage.setItem(KEY, JSON.stringify(store)) } catch (e) {} }
+
+function load() {
+  let saved = null;
+  try { saved = JSON.parse(localStorage.getItem(KEY)) } catch (e) {}
+  if (saved && Array.isArray(saved.kids)) {
+    store.kids = saved.kids.filter(k => k && k.id && k.S && k.S.s);
+    store.active = store.kids.some(k => k.id === saved.active) ? saved.active : (store.kids[0] || {}).id || '';
+  } else {
+    let legacy = null;
+    try { legacy = JSON.parse(localStorage.getItem(LEGACY_KEY)) } catch (e) {}
+    // The first child takes over any progress saved by the single-user version; a new visitor gets an empty profile.
+    const first = legacy && typeof legacy === 'object' && legacy.s ? clone(legacy) : fresh();
+    store.kids = [{ id: newId(), name: 'طفلي', icon: ICONS[0], mode: 'reader', S: first }];
+    store.active = store.kids[0].id;
+    persist();
+  }
+  adopt(activeKid() && activeKid().S);
+}
+
+const newId = () => 'k' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+
+export const kids = () => store.kids;
+export const activeKid = () => store.kids.find(k => k.id === store.active) || null;
+
+export function save() { const k = activeKid(); if (!k) return; k.S = clone(S); persist() }
+
+export function switchKid(id) {
+  if (!store.kids.some(k => k.id === id)) return;
+  save(); store.active = id; adopt(activeKid().S); persist();
+}
+
+export function addKid({ name, icon, mode }) {
+  save();
+  const k = { id: newId(), name, icon, mode, S: fresh() };
+  store.kids.push(k); store.active = k.id; adopt(k.S); persist();
+  return k;
+}
+
+export function updateKid(id, { name, icon, mode }) {
+  const k = store.kids.find(x => x.id === id); if (!k) return;
+  Object.assign(k, { name, icon, mode }); persist();
+}
+
+export function removeKid(id) {
+  save();
+  store.kids = store.kids.filter(k => k.id !== id);
+  if (store.active === id) store.active = (store.kids[0] || {}).id || '';
+  adopt(activeKid() && activeKid().S); persist();
+}
+
+load();
 
 export const rec = id => S.s[id];
 export const mem = id => { const r = rec(id); if (!r) return 0; let c = 0; for (const ch of r.m) if (ch === '1') c++; return c };

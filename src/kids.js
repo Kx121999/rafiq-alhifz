@@ -1,0 +1,113 @@
+// Child profiles: the switcher bar, rewards (stars and badges), and the parent corner behind a math gate.
+import { $, AR, day } from './util.js';
+import { Q } from './data.js';
+import { S, mem, kids, activeKid, switchKid, addKid, updateKid, removeKid, save, ICONS, MODES } from './state.js';
+
+let onChange = () => {};
+export const onKidsChange = fn => { onChange = fn };
+
+const el = (tag, cls, text) => { const e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e };
+
+/** Young children get bigger text, star buttons and no tafsir; readers get the full page. */
+export function applyMode() { const k = activeKid(); document.body.dataset.mode = k ? k.mode : 'reader' }
+
+export function renderKidBar() {
+  const box = $('kids'); box.textContent = '';
+  const act = activeKid();
+  kids().forEach(k => {
+    const b = el('button', 'kid'); b.type = 'button'; b.dataset.id = k.id;
+    b.setAttribute('aria-pressed', act && k.id === act.id);
+    b.append(el('span', 'kicon', k.icon), el('span', 'kname', k.name));
+    box.appendChild(b);
+  });
+}
+
+/* ---------- rewards: derived from progress, so nothing extra is stored ---------- */
+function totals() {
+  let ay = 0, done = 0;
+  Q.forEach((c, k) => { const m = mem(k + 1); ay += m; if (m === c.v.length) done++ });
+  const streak = (S.last === day() || S.last === day(-1)) ? S.streak : 0;
+  return { ay, done, streak };
+}
+const BADGES = [
+  { icon: '🌱', name: 'البداية', ok: t => t.ay >= 1 },
+  { icon: '🌟', name: 'عشر آيات', ok: t => t.ay >= 10 },
+  { icon: '🏅', name: 'سورة كاملة', ok: t => t.done >= 1 },
+  { icon: '🏆', name: 'خمس سور', ok: t => t.done >= 5 },
+  { icon: '🔥', name: 'أسبوع متواصل', ok: t => t.streak >= 7 },
+  { icon: '👑', name: 'مئة آية', ok: t => t.ay >= 100 },
+];
+
+export function renderRewards() {
+  const box = $('rewards'); box.textContent = '';
+  const t = totals();
+  const stars = el('p', 'stars'); stars.append(el('span', 'big-star', '⭐'), el('b', '', AR(t.ay)), ' نجمة');
+  const row = el('ul', 'badges');
+  BADGES.forEach(b => {
+    const on = b.ok(t), li = el('li', 'badge' + (on ? ' on' : ''));
+    li.append(el('span', 'bicon', b.icon), el('span', 'bname', b.name));
+    li.title = on ? 'حصلتَ على وسام ' + b.name : 'وسام ' + b.name + ' لم يُفتح بعد';
+    row.appendChild(li);
+  });
+  box.append(stars, row);
+}
+
+/* ---------- parent corner ---------- */
+let answer = 0;
+function openGate() {
+  const a = 3 + Math.floor(Math.random() * 7), b = 3 + Math.floor(Math.random() * 7);
+  answer = a * b; $('gateQ').textContent = AR(a) + ' × ' + AR(b) + ' = ؟';
+  $('gateA').value = ''; $('gateErr').hidden = true; $('gate').showModal(); $('gateA').focus();
+}
+
+function renderParent() {
+  const box = $('parentBody'); box.textContent = '';
+  const act = activeKid();
+  kids().forEach(k => {
+    const card = el('section', 'kcard'); card.dataset.id = k.id;
+    const name = el('input', 'search'); name.value = k.name; name.maxLength = 20; name.setAttribute('aria-label', 'اسم الطفل');
+    name.addEventListener('change', () => { updateKid(k.id, { ...k, name: name.value.trim() || k.name }); name.value = k.name; refresh(false) });
+    const icons = el('div', 'icons');
+    ICONS.forEach(ic => {
+      const b = el('button', 'chip', ic); b.type = 'button'; b.setAttribute('aria-pressed', ic === k.icon); b.setAttribute('aria-label', 'الرمز ' + ic);
+      b.addEventListener('click', () => { updateKid(k.id, { ...k, icon: ic }); refresh(true) });
+      icons.appendChild(b);
+    });
+    const modes = el('div', 'icons');
+    Object.entries(MODES).forEach(([m, label]) => {
+      const b = el('button', 'chip', label); b.type = 'button'; b.setAttribute('aria-pressed', m === k.mode);
+      b.addEventListener('click', () => { updateKid(k.id, { ...k, mode: m }); refresh(true) });
+      modes.appendChild(b);
+    });
+    const foot = el('div', 'acts');
+    if (!act || k.id !== act.id) { const sw = el('button', 'btn', 'تحويل إلى ' + k.name); sw.type = 'button'; sw.addEventListener('click', () => { switchKid(k.id); refresh(true) }); foot.appendChild(sw) }
+    if (kids().length > 1) {
+      const del = el('button', 'btn danger', 'حذف'); del.type = 'button';
+      del.addEventListener('click', () => {
+        if (confirm('حذف ملف «' + k.name + '» وكل تقدّمه نهائيًا؟ لا يمكن التراجع.')) { removeKid(k.id); refresh(true) }
+      });
+      foot.appendChild(del);
+    }
+    card.append(el('h3', '', k.icon + ' ' + k.name), name, icons, modes, foot);
+    box.appendChild(card);
+  });
+}
+
+function refresh(rerenderParent) { applyMode(); renderKidBar(); if (rerenderParent) renderParent(); onChange() }
+
+export function initKids() {
+  $('kids').addEventListener('click', e => { const b = e.target.closest('.kid'); if (!b) return; switchKid(b.dataset.id); refresh(false) });
+  $('parentBtn').addEventListener('click', openGate);
+  $('gateForm').addEventListener('submit', e => {
+    e.preventDefault();
+    if (Number($('gateA').value) === answer) { $('gate').close(); renderParent(); $('parent').showModal() }
+    else { $('gateErr').hidden = false; $('gateA').select() }
+  });
+  $('addKid').addEventListener('click', () => {
+    const n = kids().length + 1;
+    addKid({ name: 'طفل ' + AR(n), icon: ICONS[n % ICONS.length], mode: 'reader' }); refresh(true);
+  });
+  document.querySelectorAll('dialog [data-close]').forEach(b => b.addEventListener('click', () => b.closest('dialog').close()));
+  document.querySelectorAll('dialog').forEach(d => d.addEventListener('close', () => { save(); renderKidBar(); onChange() }));
+  refresh(false);
+}

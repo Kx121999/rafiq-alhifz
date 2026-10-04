@@ -17,6 +17,10 @@
   </header>
 
   <main id="home" style="display:contents">
+    <nav class="kidbar" aria-label="الأطفال">
+      <div class="kids" id="kids"></div>
+      <button type="button" class="btn" id="parentBtn">ركن الأهل ⚙</button>
+    </nav>
     <section class="summary" aria-label="ملخص الحفظ">
       <div class="big"><b id="sAyat">٠</b><span>آية محفوظة من ٦٬٢٣٦</span></div>
       <div class="bar"><i id="sBar" style="width:0%"></i></div>
@@ -29,6 +33,8 @@
         <div class="fact"><small>أيام متتالية</small><strong id="sStreak">٠</strong></div>
       </div>
     </section>
+
+    <section class="rewards" id="rewards" aria-label="النجوم والأوسمة"></section>
 
     <div class="tools">
       <input class="search" id="q" type="search" placeholder="ابحث باسم السورة أو رقمها" aria-label="بحث في السور">
@@ -64,6 +70,30 @@
     </section>
   </main>
 </div>
+<dialog id="gate" class="dlg" aria-labelledby="gateT">
+  <form method="dialog" id="gateForm">
+    <h2 id="gateT">ركن الأهل</h2>
+    <p class="note">للكبار فقط. أجب عن هذا السؤال للدخول:</p>
+    <p class="q" id="gateQ"></p>
+    <input class="search" id="gateA" type="number" inputmode="numeric" autocomplete="off" aria-label="الإجابة">
+    <p class="err" id="gateErr" role="alert" hidden>إجابة غير صحيحة، حاول مرة أخرى.</p>
+    <div class="acts">
+      <button type="submit" class="btn primary" id="gateOk">دخول</button>
+      <button type="button" class="btn" data-close>إلغاء</button>
+    </div>
+  </form>
+</dialog>
+
+<dialog id="parent" class="dlg wide" aria-labelledby="parentT">
+  <h2 id="parentT">ركن الأهل</h2>
+  <div id="parentBody"></div>
+  <div class="acts">
+    <button type="button" class="btn" id="addKid">+ إضافة طفل</button>
+    <button type="button" class="btn primary" data-close>تم</button>
+  </div>
+  <p class="note">التقدّم محفوظ على هذا الجهاز وهذا المتصفح فقط، ولا يُرسل إلى أي مكان.</p>
+</dialog>
+
 <script type="module" src="/src/main.js"></script>
 </body>
 </html>
