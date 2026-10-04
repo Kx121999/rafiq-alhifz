@@ -8,6 +8,13 @@ export const days = n => n === 1 ? 'يوم واحد' : n === 2 ? 'يومين' : 
 export const norm = s => s
   .replace(/[ؐ-ًؚ-ٰٟۖ-ۭـ]/g, '')
   .replace(/[ٱأإآ]/g, 'ا').replace(/ة/g, 'ه').replace(/[ىی]/g, 'ي').replace(/ؤ/g, 'و').replace(/ئ/g, 'ي').trim();
+/** One of the cartoon friends as an <img>. 'rafiq' is the book; the rest live in public/chars/. Tapping one makes it jump (see motion.js). */
+export const charImg = (name, cls = '') => {
+  const i = document.createElement('img');
+  i.className = ('char ' + cls).trim(); i.alt = ''; i.draggable = false; i.width = i.height = 96;
+  i.src = import.meta.env.BASE_URL + (name === 'rafiq' ? 'mascot.svg' : 'chars/' + name + '.svg');
+  return i;
+};
 export const el = (tag, cls, text) => { const e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e };
 export const ayahs = n => n === 1 ? 'آية واحدة' : n === 2 ? 'آيتان' : n <= 10 ? AR(n) + ' آيات' : AR(n) + ' آية';
 export const nujum = n => n === 1 ? 'نجمة واحدة' : n === 2 ? 'نجمتان' : n <= 10 ? AR(n) + ' نجوم' : AR(n) + ' نجمة';

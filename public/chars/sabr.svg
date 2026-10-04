@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="200" height="200" fill="none">
+  <style>
+    .blink{transform-box:fill-box;transform-origin:center;animation:blink 4.2s infinite}
+    @keyframes blink{0%,92%,100%{transform:scaleY(1)}95%{transform:scaleY(.08)}}
+    .sway{transform-box:view-box;transform-origin:100px 176px;animation:sway 3.4s ease-in-out infinite}
+    @keyframes sway{0%,100%{transform:rotate(-2.5deg)}50%{transform:rotate(2.5deg)}}
+    .nod{transform-box:view-box;transform-origin:150px 140px;animation:nod 2.8s ease-in-out infinite}
+    @keyframes nod{0%,100%{transform:rotate(-5deg)}50%{transform:rotate(6deg)}}
+    @media (prefers-reduced-motion:reduce){*{animation:none!important}}
+  </style>
+  <!-- Sabr the turtle: slow and steady, like memorising -->
+  <ellipse cx="100" cy="182" rx="62" ry="8" fill="#000" opacity=".12"/>
+  <g class="sway">
+    <rect x="34" y="136" width="28" height="30" rx="13" fill="#8fe0b0" stroke="#58b985" stroke-width="4"/>
+    <rect x="112" y="136" width="28" height="30" rx="13" fill="#8fe0b0" stroke="#58b985" stroke-width="4"/>
+    <path d="M24 146c0-52 34-76 70-76s70 24 70 76z" fill="#3fae7a" stroke="#2b8a5d" stroke-width="5" stroke-linejoin="round"/>
+    <path d="M94 70v76M58 94c10 12 12 30 8 52M130 94c-10 12-12 30-8 52" stroke="#2b8a5d" stroke-width="4" stroke-linecap="round" opacity=".55"/>
+    <circle cx="76" cy="110" r="7" fill="#7fd9a8" opacity=".85"/><circle cx="112" cy="106" r="6" fill="#7fd9a8" opacity=".85"/>
+    <g class="nod">
+      <circle cx="162" cy="116" r="27" fill="#8fe0b0" stroke="#58b985" stroke-width="4"/>
+      <g class="blink"><ellipse cx="156" cy="108" rx="4.8" ry="6.4" fill="#1b2e44"/><ellipse cx="174" cy="108" rx="4.8" ry="6.4" fill="#1b2e44"/>
+        <circle cx="158" cy="105" r="1.9" fill="#fff"/><circle cx="176" cy="105" r="1.9" fill="#fff"/></g>
+      <circle cx="148" cy="126" r="5.5" fill="#ff8f70" opacity=".55"/><circle cx="180" cy="126" r="5.5" fill="#ff8f70" opacity=".55"/>
+      <path d="M156 126c3 7 15 7 18 0" stroke="#1b2e44" stroke-width="3.5" stroke-linecap="round"/>
+    </g>
+  </g>
+</svg>

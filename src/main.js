@@ -5,7 +5,7 @@ import { S, save, rec, mem, isDue, bump, setAyah, grade, setLast, activeKid, isW
 import { renderSummary, renderList, setFilter } from './home.js';
 import { view, renderSurah, toggleTafsir } from './surah.js';
 import { go, onPage, onShown, startRouter, route } from './router.js';
-import { pageIn, revealAyah, celebrate, markPop, markWave, motionReady } from './motion.js';
+import { pageIn, revealAyah, celebrate, markPop, markWave, motionReady, initCharacters } from './motion.js';
 import { initPlayer, loadSurah, playFrom, stopPlayer } from './player.js';
 import { initPwa } from './pwa.js';
 import { initSearch, openSearch } from './search.js';
@@ -118,7 +118,7 @@ $('revGood').addEventListener('click', () => onGrade(true));
 $('revBad').addEventListener('click', () => onGrade(false));
 
 /* ---------- boot ---------- */
-initKids(); onKidsChange(render); initPlayer(); initPwa(); initSearch();
+initCharacters(); initKids(); onKidsChange(render); initPlayer(); initPwa(); initSearch();
 startRouter();
 loadQuran().then(() => { render(); announceBadges(); motionReady(); route() })
   .catch(() => { $('list').innerHTML = '<li class="empty">تعذّر تحميل نص المصحف. أعد فتح الصفحة للمحاولة مرة أخرى.</li>' });

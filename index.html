@@ -5,8 +5,8 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>رفيق الحفظ</title>
 <meta name="description" content="رفيق الحفظ: منصة لحفظ القرآن الكريم ومراجعته، للصغار والكبار">
-<meta name="theme-color" content="#fff6e5" media="(prefers-color-scheme: light)">
-<meta name="theme-color" content="#101c2c" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#d6ecff">
+<meta name="color-scheme" content="light">
 <meta property="og:type" content="website">
 <meta property="og:locale" content="ar_AR">
 <meta property="og:title" content="رفيق الحفظ">
@@ -19,6 +19,7 @@
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Amiri+Quran&family=IBM+Plex+Sans+Arabic:wght@400;500;600&family=Reem+Kufi:wght@500;700&family=Baloo+Bhaijaan+2:wght@500;600;700;800&display=swap">
 </head>
 <body>
+<div class="sky" aria-hidden="true"><i class="cloud c1"></i><i class="cloud c2"></i><i class="cloud c3"></i><i class="twinkle t1">✦</i><i class="twinkle t2">✦</i><i class="twinkle t3">✦</i><i class="twinkle t4">✦</i></div>
 <div class="wrap" dir="rtl" lang="ar">
   <header class="top">
     <a class="brand" href="#/"><img class="logo" src="/mascot.svg" alt="" width="46" height="46"><span>رفيق الحفظ</span></a>
@@ -45,7 +46,7 @@
   <!-- الرئيسية -->
   <main class="page" id="page-home" data-page="home" tabindex="-1" hidden>
     <section class="hero">
-      <img class="mascot" src="/mascot.svg" alt="" width="150" height="150">
+      <div class="cast"><img class="char" src="/chars/nujum.svg" alt="" width="84" height="84"><img class="char lead" src="/mascot.svg" alt="" width="150" height="150"><img class="char" src="/chars/shams.svg" alt="" width="84" height="84"></div>
       <h1>احفظ القرآن خطوة بخطوة</h1>
       <p>منصة عربية لحفظ القرآن الكريم ومراجعته، لكل طفل فيها ملفه الخاص ونجومه وأوسمته.</p>
       <div class="acts">
@@ -68,6 +69,7 @@
   <main class="page" id="page-dashboard" data-page="dashboard" tabindex="-1" hidden>
     <section class="summary" aria-label="ملخص الحفظ">
       <h1 class="greet" id="greet">أهلًا بك!</h1>
+      <div class="mood"><img class="char" src="/mascot.svg" alt="" width="88" height="88"><p class="bubble" id="bubble" role="status">يلا نبدأ معًا! 🌱</p></div>
       <div class="big"><b id="sAyat">٠</b><span>آية محفوظة من ٦٬٢٣٦</span></div>
       <div class="bar"><i id="sBar" style="width:0%"></i></div>
       <div class="facts">
@@ -104,7 +106,7 @@
         <button type="button" class="chip" data-f="done" aria-pressed="false">مكتملة</button>
       </div>
     </div>
-    <ul class="list" id="list"><li class="empty">جارٍ تحميل المصحف…</li></ul>
+    <ul class="list" id="list"><li class="empty"><img class="char" src="/mascot.svg" alt="" width="72" height="72">جارٍ تحميل المصحف…</li></ul>
   </main>
 
   <!-- بحث -->
@@ -170,7 +172,7 @@
       <button type="button" class="btn" id="veilBtn" aria-pressed="false">وضع التسميع</button>
       <button type="button" class="btn" id="allBtn">حفظتُ السورة كاملة</button>
     </div>
-    <div class="stitle"><h1 id="stName"></h1><p id="stMeta"></p></div>
+    <div class="stitle"><img class="char stchar" src="/mascot.svg" alt="" width="68" height="68"><h1 id="stName"></h1><p id="stMeta"></p></div>
     <p class="note" id="veilNote" hidden>الآيات مخفية إلا كلمتها الأولى. اقرأ من حفظك ثم اضغط الآية لتتحقق.</p>
     <div class="basmala" id="basmala" hidden></div>
     <ol class="ayat" id="ayat"></ol>

@@ -2,6 +2,7 @@
 // in the way, and every function does nothing when the device asks for reduced motion. The one thing that
 // still happens then is the text of a celebration or a new medal, which appears and is announced without movement.
 import gsap from 'gsap';
+import { charImg } from './util.js';
 
 const mq = matchMedia('(prefers-reduced-motion: reduce)');
 const calm = () => mq.matches;
@@ -42,6 +43,8 @@ export function pageIn(name) {
   // unlocked medals pop in one after another; today's goal stars pop in too
   const medals = [...page.querySelectorAll('.badge.on .bicon')];
   if (medals.length) gsap.from(medals, { scale: 0.2, rotation: -25, opacity: 0, duration: 0.6, stagger: 0.08, delay: 0.3, ease: 'back.out(2)', clearProps: 'transform,opacity' });
+  const friends = [...page.querySelectorAll('.char')];
+  if (friends.length) gsap.from(friends, { scale: 0, y: 30, rotation: -14, opacity: 0, duration: 0.7, stagger: 0.12, delay: 0.2, ease: 'back.out(2)', clearProps: 'transform,opacity' });
   const goal = [...page.querySelectorAll('.goalstars span')];
   if (goal.length) gsap.from(goal, { scale: 0, duration: 0.4, stagger: 0.06, delay: 0.35, ease: 'back.out(3)', clearProps: 'transform' });
 }
@@ -65,6 +68,19 @@ function burst(el, n = 6, glyph = '⭐') {
       { x: Math.cos(a) * d, y: Math.sin(a) * d - 14, scale: 1, rotation: (Math.random() - 0.5) * 120, duration: 0.7, ease: 'power2.out' });
     gsap.to(s, { opacity: 0, duration: 0.35, delay: 0.45, onComplete: () => s.remove() });
   }
+}
+
+/** Tap or click any cartoon friend and it hops with a wiggle and a few sparkles. */
+export function initCharacters() {
+  document.addEventListener('click', e => {
+    const c = e.target.closest && e.target.closest('.char');
+    if (!c || calm() || gsap.isTweening(c)) return;
+    gsap.timeline({ defaults: { overwrite: 'auto' } })
+      .to(c, { y: -26, rotation: -10, duration: 0.18, ease: 'power2.out' })
+      .to(c, { y: 0, rotation: 8, duration: 0.2, ease: 'power2.in' })
+      .to(c, { rotation: 0, duration: 0.35, ease: 'elastic.out(1.2,.35)', clearProps: 'transform' });
+    burst(c, 5, '✨');
+  });
 }
 
 /** The memorise button jumps and throws a few stars when an ayah is marked as memorised. */
@@ -98,12 +114,14 @@ const MAX_QUEUE = 4;
 function enqueue(item) { if (queue.length >= MAX_QUEUE) queue.shift(); queue.push(item); if (!busy) next() }
 function next() { const it = queue.shift(); if (!it) { busy = false; return } busy = true; show(it) }
 
-function show({ text, withStars }) {
+function show({ text, withStars, friend }) {
   const box = document.getElementById('celebrate'); if (!box) { busy = false; return }
   current && current.kill(); clearTimeout(hideTimer);
   box.removeAttribute('style');   // drop the end state of any earlier animation so the message is always visible
   document.querySelectorAll('.fx-star').forEach(s => s.remove());
-  box.hidden = false; box.textContent = ''; box.appendChild(Object.assign(document.createElement('p'), { textContent: text }));
+  box.hidden = false; box.textContent = '';
+  if (friend) box.appendChild(charImg(friend));
+  box.appendChild(Object.assign(document.createElement('p'), { textContent: text }));
   const done = () => { box.hidden = true; next() };
   if (calm()) { hideTimer = setTimeout(done, 4000); return }
   current = gsap.timeline({ onComplete: done })
@@ -123,6 +141,6 @@ function show({ text, withStars }) {
 }
 
 /** A completed surah: a message with a gold ring, and falling-up stars for young children. */
-export const celebrate = (text, withStars) => enqueue({ text, withStars });
+export const celebrate = (text, withStars) => enqueue({ text, withStars, friend: 'nujum' });
 /** A plain notice (for example a newly unlocked medal). */
-export const announce = text => enqueue({ text, withStars: false });
+export const announce = text => enqueue({ text, withStars: false, friend: 'shams' });

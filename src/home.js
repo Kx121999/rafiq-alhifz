@@ -1,9 +1,18 @@
 import { $, AR, day, norm } from './util.js';
 import { Q } from './data.js';
-import { S, activeKid, mem, isDue } from './state.js';
+import { S, activeKid, mem, isDue, weakList } from './state.js';
 
 let filter = 'all';
 export const setFilter = f => { filter = f };
+
+/** What Rafiq says to the child, depending on how the day is going. */
+export function moodText(ayat, goal, doneToday, dueCount, weakCount) {
+  if (doneToday >= goal) return 'ما شاء الله! خلّصتَ وردك اليوم 🎉';
+  if (dueCount) return 'عندك ' + (dueCount === 1 ? 'سورة' : AR(dueCount) + ' سور') + ' تنتظر المراجعة 🔁';
+  if (weakCount) return 'تعال نثبّت الآيات اللي تحتاج تثبيتًا 💪';
+  if (doneToday > 0) return 'أحسنت! باقي ' + AR(goal - doneToday) + ' للورد 🌟';
+  return ayat ? 'جاهز لورد اليوم؟ يلا! 😄' : 'يلا نبدأ أول آية معًا! 🌱';
+}
 
 export function renderSummary() {
   let ay = 0, done = 0;
@@ -14,6 +23,8 @@ export function renderSummary() {
   $('sSurahs').textContent = AR(done) + ' من ١١٤';
   $('sToday').textContent = AR(S.n) + ' / ' + AR(S.goal);
   $('sStreak').textContent = AR((S.last === day() || S.last === day(-1)) ? S.streak : 0);
+  const dueCount = Q.filter((_, i) => isDue(i + 1)).length;
+  $('bubble').textContent = moodText(ay, S.goal, S.n, dueCount, weakList().length);
   const k = activeKid();
   $('greet').textContent = k ? 'أهلًا يا ' + k.name + ' ' + k.icon : 'أهلًا بك!';
   // today's goal as star slots (at most 10 shown); the exact numbers are in the text next to them

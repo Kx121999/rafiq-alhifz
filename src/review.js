@@ -1,4 +1,4 @@
-import { $, AR, day, days, el } from './util.js';
+import { $, AR, day, days, el, charImg } from './util.js';
 import { Q } from './data.js';
 import { S, mem, isDue, grade, weakList, masterWeak, save } from './state.js';
 import { revealAyah } from './motion.js';
@@ -17,7 +17,7 @@ export function renderReview() {
   const due = dueList();
   if (note) box.appendChild(el('p', 'good', note));
   if (!due.length) {
-    box.appendChild(el('p', 'note', 'لا توجد مراجعات مستحقة الآن. أحسنت!'));
+    const rest = el('div', 'hint'); rest.append(charImg('ghayma'), el('p', 'note', 'لا توجد مراجعات مستحقة الآن. أحسنت!')); box.appendChild(rest);
     const next = Object.entries(S.s).filter(([id]) => mem(+id) > 0).map(([id, r]) => r.d).sort()[0];
     if (next) box.appendChild(el('p', 'note', 'أقرب مراجعة قادمة: ' + new Date(next + 'T12:00').toLocaleDateString('ar-EG', { weekday: 'long', day: 'numeric', month: 'long' }) + '.'));
     const a = el('a', 'btn primary', 'اذهب إلى المصحف'); a.href = '#/mushaf'; box.appendChild(a);
@@ -52,7 +52,7 @@ export function renderWeak() {
   if (weakNote) box.appendChild(el('p', 'good', weakNote));
   const list = weakList();
   if (!list.length) {
-    box.appendChild(el('p', 'note', 'لا توجد آيات ضعيفة. من صفحة أي سورة اضغط «علّمها ضعيفة» تحت الآية التي تتعثّر فيها لتظهر هنا.'));
+    const none = el('div', 'hint'); none.append(charImg('nujum'), el('p', 'note', 'لا توجد آيات ضعيفة. من صفحة أي سورة اضغط «علّمها ضعيفة» تحت الآية التي تتعثّر فيها لتظهر هنا.')); box.appendChild(none);
     return;
   }
   const a = list[weakIdx % list.length], c = Q[a.id - 1], text = c.v[a.i];

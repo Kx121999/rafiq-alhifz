@@ -1,5 +1,5 @@
 // Memorisation plan: pick a goal and a number of weeks; the page works out a daily target and the next surah.
-import { $, AR, ayahs, day, el } from './util.js';
+import { $, AR, ayahs, day, el, charImg } from './util.js';
 import { Q } from './data.js';
 import { S, mem, save, kidPlan, setPlan } from './state.js';
 
@@ -38,7 +38,7 @@ export function renderPlan() {
 
 function planForm() {
   const f = el('div', 'planform');
-  f.appendChild(el('p', 'note', 'اختر هدفك ومدة الحفظ، وسنحسب لك الورد اليومي.'));
+  const intro = el('div', 'hint'); intro.append(charImg('sabr'), el('p', 'note', 'اختر هدفك ومدة الحفظ، وسنحسب لك الورد اليومي. خطوة بخطوة تصل!')); f.appendChild(intro);
   const goals = el('div', 'icons');
   Object.entries(PRESETS).forEach(([id, pr]) => {
     const b = el('button', 'chip', pr.name); b.type = 'button'; b.setAttribute('aria-pressed', id === draft.id);
@@ -60,6 +60,7 @@ function planForm() {
 
 function planView(p, st) {
   const v = el('div', 'planview');
+  const cheer = el('div', 'hint'); cheer.append(charImg('sabr'), el('p', 'note', st.left === 0 ? 'ما شاء الله، أتممتَ هذه الخطة!' : 'خطوة بخطوة كالسلحفاة، وتصل بإذن الله!')); v.appendChild(cheer);
   const head = el('div', 'big'); head.append(el('b', '', AR(st.done)), el('span', '', 'من ' + AR(st.total) + ' آية في ' + st.pr.name));
   const bar = el('div', 'bar'), fill = el('i'); fill.style.width = (st.done / st.total * 100).toFixed(1) + '%'; bar.appendChild(fill);
   const facts = el('div', 'facts');

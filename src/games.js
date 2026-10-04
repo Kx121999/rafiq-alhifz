@@ -1,6 +1,6 @@
 // Three memorisation games. Every question is built from ayat the child marked as memorised;
 // wrong options are real words or endings taken from other ayat in quran.json. Nothing is generated.
-import { $, AR, el, norm, nujum } from './util.js';
+import { $, AR, el, norm, nujum, charImg } from './util.js';
 import { Q } from './data.js';
 import { S, activeKid, addGameStars } from './state.js';
 import { correct, wrong } from './motion.js';
@@ -86,7 +86,7 @@ export function renderGames() {
   const box = $('gameBox'); box.textContent = '';
   if (!Q.length) return;
   if (G) return G.type === 'order' ? orderRound() : choiceRound();
-  box.appendChild(el('p', 'note', 'العب بالآيات التي علّمتَها كمحفوظة. نجوم الألعاب منفصلة عن نجوم الحفظ.'));
+  const intro = el('div', 'hint'); intro.append(charImg('nujum'), el('p', 'note', 'العب بالآيات التي علّمتَها كمحفوظة. نجوم الألعاب منفصلة عن نجوم الحفظ.')); box.appendChild(intro);
   const list = el('div', 'gamelist');
   Object.entries(GAMES).forEach(([type, g]) => {
     const ok = g.ok(), b = el('button', 'gamecard'); b.type = 'button'; b.disabled = !ok;

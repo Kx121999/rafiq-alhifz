@@ -1,4 +1,4 @@
-import { $, ayahs, el } from './util.js';
+import { $, ayahs, el, charImg } from './util.js';
 import { Q } from './data.js';
 import { mem, activeKid } from './state.js';
 import { renderRewards } from './kids.js';
@@ -12,7 +12,7 @@ export function renderAchievements() {
   if (!Q.length) return;
   box.appendChild(el('h2', '', 'السور التي أتممتَ حفظها'));
   const done = completed();
-  if (!done.length) { box.appendChild(el('p', 'note', 'لم تُتمّ أي سورة بعد. عند إتمام سورة كاملة تظهر هنا مع شهادة يمكنك طباعتها.')); return }
+  if (!done.length) { const none = el('div', 'hint'); none.append(charImg('sabr'), el('p', 'note', 'لم تُتمّ أي سورة بعد. خطوة بخطوة كالسلحفاة! عند إتمام سورة كاملة تظهر هنا مع شهادة يمكنك طباعتها.')); box.appendChild(none); return }
   const ul = el('ul', 'links');
   done.forEach(id => {
     const li = el('li', 'certrow'), a = el('a', 'btn', 'شهادة'); a.href = '#/certificate/' + id;

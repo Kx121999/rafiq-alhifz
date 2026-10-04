@@ -1,18 +1,32 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="200" height="200" fill="none">
+  <style>
+    .blink{transform-box:fill-box;transform-origin:center;animation:blink 4.2s infinite}
+    @keyframes blink{0%,92%,100%{transform:scaleY(1)}95%{transform:scaleY(.08)}}
+    .sway{transform-box:view-box;transform-origin:100px 176px;animation:sway 3.4s ease-in-out infinite}
+    @keyframes sway{0%,100%{transform:rotate(-2.5deg)}50%{transform:rotate(2.5deg)}}
+    .bobu{animation:bobu 2.6s ease-in-out infinite}
+    @keyframes bobu{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
+    .spin{transform-box:view-box;transform-origin:100px 100px;animation:spin 20s linear infinite}
+    @keyframes spin{to{transform:rotate(360deg)}}
+    .nod{transform-box:view-box;transform-origin:150px 126px;animation:nod 2.8s ease-in-out infinite}
+    @keyframes nod{0%,100%{transform:rotate(-4deg)}50%{transform:rotate(5deg)}}
+    @media (prefers-reduced-motion:reduce){*{animation:none!important}}
+  </style>
   <!-- Rafiq: a smiling open book with a star. Fixed colours, so it looks the same on light and dark pages. -->
   <ellipse cx="100" cy="176" rx="62" ry="9" fill="#000" opacity=".13"/>
   <!-- star -->
-  <path d="M100 14l7.6 15.4 17 2.5-12.3 12 2.9 16.9L100 52.8l-15.2 8 2.9-16.9-12.3-12 17-2.5z" fill="#ffc233" stroke="#e59a00" stroke-width="3" stroke-linejoin="round"/>
+  <g class="bobu"><path d="M100 14l7.6 15.4 17 2.5-12.3 12 2.9 16.9L100 52.8l-15.2 8 2.9-16.9-12.3-12 17-2.5z" fill="#ffc233" stroke="#e59a00" stroke-width="3" stroke-linejoin="round"/></g>
   <circle cx="148" cy="38" r="4" fill="#ffc233"/><circle cx="52" cy="46" r="3" fill="#ff8f70"/><circle cx="160" cy="62" r="2.5" fill="#6fb8ff"/>
-  <!-- cover -->
+  <g class="sway"><!-- cover -->
   <path d="M26 92c0-6 5-10 11-8 22 7 46 8 63 22 17-14 41-15 63-22 6-2 11 2 11 8v70c0 5-5 9-10 7-22-7-46-6-64 8-18-14-42-15-64-8-5 2-10-2-10-7z" fill="#087456"/>
   <!-- pages -->
   <path d="M36 96c20 6 44 8 64 22v46c-19-12-42-13-64-6z" fill="#fff8e8"/>
   <path d="M164 96c-20 6-44 8-64 22v46c19-12 42-13 64-6z" fill="#fff1d2"/>
   <path d="M100 118v46" stroke="#e6cf9c" stroke-width="3" stroke-linecap="round"/>
   <!-- face -->
-  <ellipse cx="74" cy="128" rx="6.5" ry="8" fill="#1b2e44"/><ellipse cx="126" cy="128" rx="6.5" ry="8" fill="#1b2e44"/>
-  <circle cx="76" cy="125" r="2.4" fill="#fff"/><circle cx="128" cy="125" r="2.4" fill="#fff"/>
+  <g class="blink"><ellipse cx="74" cy="128" rx="6.5" ry="8" fill="#1b2e44"/><ellipse cx="126" cy="128" rx="6.5" ry="8" fill="#1b2e44"/>
+  <circle cx="76" cy="125" r="2.4" fill="#fff"/><circle cx="128" cy="125" r="2.4" fill="#fff"/></g>
   <circle cx="60" cy="141" r="7" fill="#ff8f70" opacity=".55"/><circle cx="140" cy="141" r="7" fill="#ff8f70" opacity=".55"/>
   <path d="M88 140c4 9 20 9 24 0" stroke="#1b2e44" stroke-width="4" stroke-linecap="round"/>
+</g>
 </svg>
