@@ -25,6 +25,7 @@
     <nav class="nav" id="nav" aria-label="التنقل الرئيسي">
       <a href="#/dashboard" data-nav="dashboard">لوحتي</a>
       <a href="#/mushaf" data-nav="mushaf">المصحف</a>
+      <a href="#/search" data-nav="search">بحث</a>
       <a href="#/review" data-nav="review">المراجعة<span class="count" id="dueCount" hidden></span></a>
       <a href="#/plan" data-nav="plan">الخطة</a>
       <a href="#/games" data-nav="games">ألعاب</a>
@@ -92,6 +93,16 @@
       </div>
     </div>
     <ul class="list" id="list"><li class="empty">جارٍ تحميل المصحف…</li></ul>
+  </main>
+
+  <!-- بحث -->
+  <main class="page" id="page-search" data-page="search" tabindex="-1" hidden>
+    <h2 class="ptitle">بحث في المصحف</h2>
+    <input class="search" id="sq" type="search" placeholder="اكتب كلمة أو جزءًا من آية" aria-label="بحث في آيات المصحف" autocomplete="off" enterkeyhint="search">
+    <p class="note" id="sInfo" role="status"></p>
+    <div class="chips" id="sHints" aria-label="اقتراحات"></div>
+    <ol class="results" id="sList"></ol>
+    <button type="button" class="btn" id="sMore" hidden>عرض المزيد</button>
   </main>
 
   <!-- المراجعة -->

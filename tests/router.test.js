@@ -43,7 +43,13 @@ describe('router', () => {
   it('passes the path argument to the page handler', async () => {
     const seen = vi.fn(); r.onPage('surah', seen); r.startRouter();
     location.hash = '#/surah/114'; await tick();
-    expect(seen).toHaveBeenCalledWith('114');
+    expect(seen).toHaveBeenCalledWith('114', undefined);
+  });
+
+  it('passes a second path segment too (a surah and an ayah)', async () => {
+    const seen = vi.fn(); r.onPage('surah', seen); r.startRouter();
+    location.hash = '#/surah/112/3'; await tick();
+    expect(seen).toHaveBeenCalledWith('112', '3');
   });
 
   it('sends the visitor to the mushaf when a handler says no', async () => {

@@ -246,3 +246,13 @@ footer.foot{margin-top:8px}
 .weakq .rest{filter:blur(9px);opacity:.4;user-select:none}
 .weakq.shown .rest{filter:none;opacity:1;user-select:auto}
 .ay:has(.wk[aria-pressed="true"]) .tx{border-inline-end:3px solid var(--gold);padding-inline-end:8px}
+
+/* ---- search ---- */
+.results{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:10px}
+.hit{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:12px 14px;display:flex;flex-direction:column;gap:6px}
+.hithead{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.hitref{color:var(--accent);font-weight:600;text-decoration:none}
+.hitref:hover{text-decoration:underline}
+.hittx{font-family:var(--quran);font-size:1.5rem;line-height:2.2;margin:0}
+.hittx mark{background:var(--gold-soft);color:var(--gold);border-radius:6px;padding:0 .15em}
+.ay.found{background:var(--gold-soft);border-radius:10px;transition:background .6s}

@@ -8,6 +8,7 @@ import { go, onPage, onShown, startRouter, route } from './router.js';
 import { pageIn, revealAyah, celebrate, motionReady } from './motion.js';
 import { initPlayer, loadSurah, playFrom, stopPlayer } from './player.js';
 import { initPwa } from './pwa.js';
+import { initSearch, openSearch } from './search.js';
 import { renderToday } from './dashboard.js';
 import { renderReview, renderWeak, onReviewGraded, clearReviewNote, dueList } from './review.js';
 import { renderPlan, onPlanChanged } from './plan.js';
@@ -35,11 +36,25 @@ function checkCompleted(id, wasComplete) {
 }
 
 /* ---------- routes ---------- */
-onShown(page => { pageIn(page); if (page !== 'surah') stopPlayer() });
-onPage('surah', arg => {
+/** Opening #/surah/<n>/<ayah> (from a search result) scrolls to that ayah and highlights it for a moment. */
+let pendingAyah = 0;
+function jumpToAyah() {
+  const n = pendingAyah; pendingAyah = 0; if (!n) return;
+  const li = document.querySelector('#ayat .ay[data-i="' + (n - 1) + '"]'); if (!li) return;
+  li.scrollIntoView({ block: 'center' }); li.classList.add('found');
+  setTimeout(() => li.classList.remove('found'), 3500);
+}
+onShown(page => {
+  pageIn(page);
+  if (page !== 'surah') stopPlayer(); else setTimeout(jumpToAyah, 450);
+  if (page === 'search' && !$('sq').value) $('sq').focus();
+});
+onPage('search', arg => { view.cur = 0; openSearch(arg) });
+onPage('surah', (arg, ayah) => {
   const id = +arg; if (!(id >= 1 && id <= 114)) return false;
   if (!Q.length) { view.cur = 0; return }   // quran.json still loading: boot re-routes once it arrives
   view.cur = id; view.veil = isDue(id); setLast(id); renderSurah(true); loadSurah(id);
+  pendingAyah = +ayah >= 1 && +ayah <= Q[id - 1].v.length ? +ayah : 0;
   document.title = 'سورة ' + Q[id - 1].n + ' · رفيق الحفظ';
 });
 for (const p of ['home', 'about']) onPage(p, () => { view.cur = 0 });
@@ -98,7 +113,7 @@ $('revGood').addEventListener('click', () => onGrade(true));
 $('revBad').addEventListener('click', () => onGrade(false));
 
 /* ---------- boot ---------- */
-initKids(); onKidsChange(render); initPlayer(); initPwa();
+initKids(); onKidsChange(render); initPlayer(); initPwa(); initSearch();
 startRouter();
 loadQuran().then(() => { render(); motionReady(); route() })
   .catch(() => { $('list').innerHTML = '<li class="empty">تعذّر تحميل نص المصحف. أعد فتح الصفحة للمحاولة مرة أخرى.</li>' });

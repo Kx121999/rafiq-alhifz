@@ -42,4 +42,12 @@ describe('norm()', () => {
     expect(norm('الفاتحة')).toBe(norm('الفاتحه'));
     expect(norm('موسى')).toBe(norm('موسي'));
   });
+  it('removes Quranic marks and the alef wasla so mushaf text can be searched', () => {
+    expect(norm('ٱلرَّحۡمَٰنِ ٱلرَّحِيمِ')).toBe('الرحمن الرحيم');
+    expect(norm('مُؤۡمِنِينَ')).toBe(norm('مومنين'));
+  });
+  it('leaves digits alone, so a surah number typed in Arabic digits still matches', () => {
+    expect(norm('١١٢')).toBe('١١٢');
+    expect(norm('112')).toBe('112');
+  });
 });
