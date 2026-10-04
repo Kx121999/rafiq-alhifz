@@ -1,2 +1,5 @@
 node_modules/
 dist/
+promo/video/renders/
+promo/video/node_modules/
+promo/video/.hyperframes/

@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="ar" data-resolution="portrait">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=1080, height=1920">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Amiri+Quran&family=IBM+Plex+Sans+Arabic:wght@400;500;600&family=Reem+Kufi:wght@500;700&display=swap">
+    <script src="./assets/gsap.min.js"></script>
+    <style>
+      /* Palette and fonts are the site's own (dark theme): see BRIEF.md */
+      :root {
+        --bg: #0c1613;
+        --surface: #13211c;
+        --fg: #e3ede7;
+        --muted: #b3c6be;
+        --line: #2a4037;
+        --accent: #4fc39a;
+        --gold: #dab35f;
+        --display: "Reem Kufi", "IBM Plex Sans Arabic", sans-serif;
+        --ui: "IBM Plex Sans Arabic", sans-serif;
+      }
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+      html, body { width: 1080px; height: 1920px; overflow: hidden; background: var(--bg); }
+      #root { direction: rtl; position: relative; width: 1080px; height: 1920px; overflow: hidden; font-family: var(--ui); color: var(--fg); }
+
+      .bg { position: absolute; inset: 0; background: linear-gradient(180deg, #0c1613 0%, #09110e 100%); }
+      .glow { position: absolute; border-radius: 50%; filter: blur(110px); }
+      #g1 { width: 900px; height: 900px; left: -250px; top: 200px; background: rgba(79, 195, 154, 0.16); }
+      #g2 { width: 800px; height: 800px; right: -300px; top: 1000px; background: rgba(218, 179, 95, 0.10); }
+
+      .scene { position: absolute; inset: 0; }
+      .head { position: absolute; left: 60px; right: 60px; top: 120px; text-align: center; display: flex; flex-direction: column; align-items: center; gap: 22px; }
+      .ttl { word-spacing: 0.14em; font-family: var(--display); font-weight: 700; font-size: 104px; line-height: 1.35; color: var(--fg); text-wrap: balance; }
+      .ttl .w { display: inline-block; }
+      .ttl .a { color: var(--accent); }
+      .sub { font-size: 44px; font-weight: 500; color: var(--muted); line-height: 1.5; }
+      .rule { width: 180px; height: 5px; border-radius: 99px; background: var(--gold); transform-origin: center; }
+
+      .phone { position: absolute; background: var(--surface); border: 10px solid var(--line); overflow: hidden;
+        box-shadow: 0 60px 120px rgba(0, 0, 0, 0.55), 0 0 160px rgba(79, 195, 154, 0.13); }
+      .phone img { display: block; width: 100%; height: 100%; object-fit: cover; object-position: top center; transform-origin: 50% 0%; }
+      .phone.big { left: 190px; top: 520px; width: 700px; height: 1380px; border-radius: 70px; }
+      .phone.sm { width: 500px; height: 1000px; border-radius: 56px; }
+      #s7 .l { left: 30px; top: 700px; }
+      #s7 .r { left: 550px; top: 470px; }
+
+      /* scene 1: wordmark */
+      #s1 .head { top: 150px; gap: 30px; }
+      #s1 .ttl { font-size: 190px; line-height: 1.2; }
+      #s1 .phone.big { top: 700px; }
+      /* scene 8: call to action */
+      #s8 .head { top: 0; bottom: 0; justify-content: center; gap: 44px; }
+      #s8 .ttl { font-size: 150px; }
+      .orn { width: 64px; height: 64px; border: 4px solid var(--gold); border-radius: 10px; }
+      .pill { font-family: var(--ui); font-weight: 600; font-size: 48px; color: var(--bg); background: var(--accent); border-radius: 99px; padding: 26px 56px; direction: ltr; }
+      .note { font-size: 38px; color: var(--muted); font-weight: 500; }
+    </style>
+  </head>
+  <body>
+    <div data-hf-id="hf-dluy" id="root" data-composition-id="main" data-start="0" data-duration="28" data-width="1080" data-height="1920">
+
+      <div data-hf-id="hf-rzlf" class="clip bg" id="ambient" data-start="0" data-duration="28" data-track-index="0">
+        <div data-hf-id="hf-2uwp" class="glow" id="g1"></div>
+        <div data-hf-id="hf-6t0q" class="glow" id="g2"></div>
+      </div>
+
+      <!-- 1 · الشعار -->
+      <section data-hf-id="hf-tu0k" class="clip scene" id="s1" data-start="0" data-duration="3.95" data-track-index="1">
+        <div data-hf-id="hf-z992" class="head">
+          <h1 data-hf-id="hf-otdw" class="ttl a-all">رفيق الحفظ</h1>
+          <div data-hf-id="hf-a46i" class="rule"></div>
+          <p data-hf-id="hf-19ag" class="sub">احفظ القرآن خطوة بخطوة</p>
+        </div>
+        <div data-hf-id="hf-xvxq" class="phone big"><img data-hf-id="hf-lbg4" src="assets/shots/home.png" alt=""></div>
+      </section>
+
+      <!-- 2 · ملف لكل طفل -->
+      <section data-hf-id="hf-izmr" class="clip scene" id="s2" data-start="3.5" data-duration="3.95" data-track-index="1">
+        <div data-hf-id="hf-gwvu" class="head">
+          <h2 data-hf-id="hf-c28l" class="ttl">لكل طفل ملفه <span data-hf-id="hf-dot4" class="a">ونجومه</span></h2>
+          <div data-hf-id="hf-ya9a" class="rule"></div>
+        </div>
+        <div data-hf-id="hf-s7aq" class="phone big"><img data-hf-id="hf-z3fp" src="assets/shots/dashboard.png" alt=""></div>
+      </section>
+
+      <!-- 3 · علّم ما حفظت -->
+      <section data-hf-id="hf-6st3" class="clip scene" id="s3" data-start="7" data-duration="3.95" data-track-index="1">
+        <div data-hf-id="hf-hb6v" class="head">
+          <h2 data-hf-id="hf-pd4s" class="ttl">علّم ما حفظتَ <span data-hf-id="hf-a7cw" class="a">آية بآية</span></h2>
+          <div data-hf-id="hf-yokb" class="rule"></div>
+        </div>
+        <div data-hf-id="hf-sllr" class="phone big"><img data-hf-id="hf-orr4" src="assets/shots/surah.png" alt=""></div>
+      </section>
+
+      <!-- 4 · وضع التسميع -->
+      <section data-hf-id="hf-68lj" class="clip scene" id="s4" data-start="10.5" data-duration="3.95" data-track-index="1">
+        <div data-hf-id="hf-hphw" class="head">
+          <h2 data-hf-id="hf-cg5u" class="ttl">وضع <span data-hf-id="hf-ssc4" class="a">التسميع</span></h2>
+          <div data-hf-id="hf-z2vc" class="rule"></div>
+          <p data-hf-id="hf-0qzy" class="sub">اقرأ من حفظك ثم تحقّق</p>
+        </div>
+        <div data-hf-id="hf-szws" class="phone big"><img data-hf-id="hf-eh3t" src="assets/shots/veil.png" alt=""></div>
+      </section>
+
+      <!-- 5 · مراجعة متباعدة -->
+      <section data-hf-id="hf-ve9z" class="clip scene" id="s5" data-start="14" data-duration="3.95" data-track-index="1">
+        <div data-hf-id="hf-i3sx" class="head">
+          <h2 data-hf-id="hf-hj5n" class="ttl">مراجعة متباعدة <span data-hf-id="hf-2faw" class="a">في موعدها</span></h2>
+          <div data-hf-id="hf-waq5" class="rule"></div>
+        </div>
+        <div data-hf-id="hf-xg6x" class="phone big"><img data-hf-id="hf-cjgt" src="assets/shots/review.png" alt=""></div>
+      </section>
+
+      <!-- 6 · الصوت -->
+      <section data-hf-id="hf-2g24" class="clip scene" id="s6" data-start="17.5" data-duration="3.95" data-track-index="1">
+        <div data-hf-id="hf-ii3y" class="head">
+          <h2 data-hf-id="hf-u33m" class="ttl">استمع بصوت <span data-hf-id="hf-9ktf" class="a">قارئك</span></h2>
+          <div data-hf-id="hf-wp16" class="rule"></div>
+          <p data-hf-id="hf-0mn6" class="sub">وكرّر الآية كما تشاء</p>
+        </div>
+        <div data-hf-id="hf-xuhy" class="phone big"><img data-hf-id="hf-wiga" src="assets/shots/player.png" alt=""></div>
+      </section>
+
+      <!-- 7 · ألعاب وأوسمة وشهادات -->
+      <section data-hf-id="hf-j3nl" class="clip scene" id="s7" data-start="21" data-duration="3.95" data-track-index="1">
+        <div data-hf-id="hf-iwez" class="head">
+          <h2 data-hf-id="hf-syog" class="ttl">ألعاب وأوسمة <span data-hf-id="hf-w10s" class="a">وشهادات</span></h2>
+          <div data-hf-id="hf-x3c7" class="rule"></div>
+        </div>
+        <div data-hf-id="hf-3mh0" class="phone sm l"><img data-hf-id="hf-8ea6" src="assets/shots/quiz.png" alt=""></div>
+        <div data-hf-id="hf-tin6" class="phone sm r"><img data-hf-id="hf-r0jb" src="assets/shots/cert.png" alt=""></div>
+      </section>
+
+      <!-- 8 · الدعوة للبدء -->
+      <section data-hf-id="hf-vk4j" class="clip scene" id="s8" data-start="24.5" data-duration="3.5" data-track-index="1">
+        <div data-hf-id="hf-jaq0" class="head">
+          <div data-hf-id="hf-fspv" class="orn"></div>
+          <h2 data-hf-id="hf-79wz" class="ttl">ابدأ الحفظ <span data-hf-id="hf-c6fi" class="a">اليوم</span></h2>
+          <div data-hf-id="hf-ptj5" class="pill">kx121999.github.io/rafiq-alhifz</div>
+          <p data-hf-id="hf-pq9l" class="note">بدون حسابات · بياناتك على جهازك</p>
+        </div>
+      </section>
+    </div>
+
+    <script>
+      window.__timelines = window.__timelines || {};
+      const tl = gsap.timeline({ paused: true });
+
+      // split titles into words (deterministic) so they can enter one after another
+      document.querySelectorAll(".ttl").forEach((t) => {
+        const out = [];
+        t.childNodes.forEach((n) => {
+          if (n.nodeType === 3) n.textContent.split(/\s+/).filter(Boolean).forEach((w) => out.push('<span class="w">' + w + "</span>"));
+          else if (n.classList && n.classList.contains("a")) n.textContent.split(/\s+/).filter(Boolean).forEach((w) => out.push('<span class="w a">' + w + "</span>"));
+        });
+        t.innerHTML = out.join(" ");
+      });
+
+      // [id, start, visible length before the cross-fade]
+      const SCENES = [
+        ["s1", 0, 3.5], ["s2", 3.5, 3.5], ["s3", 7, 3.5], ["s4", 10.5, 3.5],
+        ["s5", 14, 3.5], ["s6", 17.5, 3.5], ["s7", 21, 3.5], ["s8", 24.5, 3.5],
+      ];
+      const FADE = 0.45;
+
+      SCENES.forEach(([id, S, D], i) => {
+        const q = (sel) => `#${id} ${sel}`;
+        const last = i === SCENES.length - 1;
+        // cross-fade (the last scene holds to the end)
+        tl.fromTo("#" + id, { opacity: 0 }, { opacity: 1, duration: FADE, ease: "power1.out" }, S);
+        if (!last) tl.to("#" + id, { opacity: 0, duration: FADE, ease: "power1.in" }, S + D);
+        // the title block leaves quickly, before the next scene's title arrives, so two big titles never overlap
+        if (!last) tl.to(q(".head"), { opacity: 0, y: -24, duration: 0.3, ease: "power1.in" }, S + D - 0.1);
+        tl.fromTo(q(".ttl .w"), { opacity: 0, y: 40 }, { opacity: 1, y: 0, duration: 0.7, stagger: 0.09, ease: "power3.out" }, S + 0.15);
+        tl.fromTo(q(".rule"), { scaleX: 0 }, { scaleX: 1, duration: 0.6, ease: "power2.out" }, S + 0.55);
+        if (document.querySelector(q(".sub"))) tl.fromTo(q(".sub"), { opacity: 0, y: 24 }, { opacity: 1, y: 0, duration: 0.6, ease: "power2.out" }, S + 0.7);
+        document.querySelectorAll(q(".phone")).forEach((p, k) => {
+          tl.fromTo(p, { y: 150, opacity: 0, scale: 0.97 }, { y: 0, opacity: 1, scale: 1, duration: 1.0, ease: "power3.out" }, S + 0.35 + k * 0.2);
+          tl.fromTo(p.querySelector("img"), { scale: 1 }, { scale: 1.035, duration: D + FADE, ease: "none" }, S);
+        });
+      });
+
+      // scene 8 extras
+      tl.fromTo("#s8 .orn", { scale: 0, rotation: 45 }, { scale: 1, rotation: 45, duration: 0.7, ease: "power2.out" }, 24.6);
+      tl.fromTo("#s8 .pill", { opacity: 0, y: 30 }, { opacity: 1, y: 0, duration: 0.7, ease: "power2.out" }, 25.4);
+      tl.fromTo("#s8 .note", { opacity: 0, y: 24 }, { opacity: 1, y: 0, duration: 0.6, ease: "power2.out" }, 25.9);
+
+      // slow ambient drift for the whole film
+      tl.to("#g1", { x: 160, y: 120, duration: 28, ease: "sine.inOut" }, 0);
+      tl.to("#g2", { x: -140, y: -160, duration: 28, ease: "sine.inOut" }, 0);
+
+      tl.to({}, { duration: 28 }, 0); // anchor: the timeline lasts exactly the composition
+      window.__timelines["main"] = tl;
+      tl.seek(0);
+    </script>
+  </body>
+</html>

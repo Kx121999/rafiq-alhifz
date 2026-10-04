@@ -229,3 +229,6 @@ footer.foot{margin-top:8px}
 .pl{border:0;background:transparent;color:var(--accent);font-size:.82rem;padding:2px 0;text-decoration:underline;text-underline-offset:3px}
 .ay.playing{background:var(--accent-soft);border-radius:10px}
 [data-mode="young"] .pl{font-size:1rem;min-height:44px}
+
+.foot a{color:var(--accent)}
+.foot a:visited{color:var(--accent)}
