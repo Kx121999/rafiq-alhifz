@@ -5,7 +5,7 @@ import { S, save, rec, mem, isDue, bump, setAyah, grade, setLast, activeKid, isW
 import { renderSummary, renderList, setFilter } from './home.js';
 import { view, renderSurah, toggleTafsir } from './surah.js';
 import { go, onPage, onShown, startRouter, route } from './router.js';
-import { pageIn, revealAyah, celebrate, motionReady } from './motion.js';
+import { pageIn, revealAyah, celebrate, markPop, markWave, motionReady } from './motion.js';
 import { initPlayer, loadSurah, playFrom, stopPlayer } from './player.js';
 import { initPwa } from './pwa.js';
 import { initSearch, openSearch } from './search.js';
@@ -15,7 +15,7 @@ import { renderReview, renderWeak, onReviewGraded, clearReviewNote, dueList } fr
 import { renderPlan, onPlanChanged } from './plan.js';
 import { renderGames, onGameStars, resetGame } from './games.js';
 import { renderAchievements, renderCertificate } from './achievements.js';
-import { initKids, onKidsChange, renderRewards, applyMode } from './kids.js';
+import { initKids, onKidsChange, renderRewards, applyMode, announceBadges } from './kids.js';
 
 function render() {
   if (!Q.length) return;
@@ -27,7 +27,7 @@ function updateDue() {
   const n = dueList().length + weakList().length, c = $('dueCount');
   c.textContent = AR(n); c.hidden = !n; c.setAttribute('aria-label', AR(n) + ' للمراجعة');
 }
-const refreshStats = () => { renderSummary(); renderToday(); renderRewards(); updateDue() };
+const refreshStats = () => { renderSummary(); renderToday(); renderRewards(); updateDue(); announceBadges() };
 
 /** Celebrates when a surah goes from incomplete to fully memorised. */
 function checkCompleted(id, wasComplete) {
@@ -69,7 +69,7 @@ onPage('certificate', arg => {
   if (!renderCertificate(+arg)) return '/achievements';
   document.title = 'شهادة سورة ' + Q[+arg - 1].n + ' · رفيق الحفظ';
 });
-onGameStars(() => { renderRewards(); renderAchievements() });
+onGameStars(() => { renderRewards(); renderAchievements(); announceBadges() });
 $('printCert').addEventListener('click', () => window.print());
 $('printReport').addEventListener('click', () => window.print());
 onReviewGraded(() => { renderSummary(); renderToday(); renderRewards(); updateDue() });
@@ -92,6 +92,7 @@ $('allBtn').addEventListener('click', () => {
   const tot = Q[view.cur - 1].v.length, was = mem(view.cur) === tot, on = !was; let d = 0;
   for (let i = 0; i < tot; i++) d += setAyah(view.cur, i, on);
   bump(d); save(); renderSurah(false); refreshStats(); checkCompleted(view.cur, was);
+  if (on) markWave(document.querySelectorAll('#ayat .ck'));
 });
 $('ayat').addEventListener('click', e => {
   const li = e.target.closest('.ay'); if (!li) return;
@@ -100,8 +101,9 @@ $('ayat').addEventListener('click', e => {
   if (e.target.closest('.tf')) { toggleTafsir(li); return }
   if (e.target.closest('.tfx')) return;
   if (e.target.closest('.ck')) {
-    const i = +li.dataset.i, r = rec(view.cur), was = mem(view.cur) === Q[view.cur - 1].v.length;
-    bump(setAyah(view.cur, i, !(r && r.m[i] === '1'))); save(); renderSurah(false); refreshStats(); checkCompleted(view.cur, was);
+    const i = +li.dataset.i, r = rec(view.cur), was = mem(view.cur) === Q[view.cur - 1].v.length, turnOn = !(r && r.m[i] === '1');
+    bump(setAyah(view.cur, i, turnOn)); save(); renderSurah(false); refreshStats(); checkCompleted(view.cur, was);
+    if (turnOn) markPop(li.querySelector('.ck'));
   } else if (view.veil && li.classList.toggle('shown')) revealAyah(li);
 });
 $('ayat').addEventListener('keydown', e => {
@@ -118,5 +120,5 @@ $('revBad').addEventListener('click', () => onGrade(false));
 /* ---------- boot ---------- */
 initKids(); onKidsChange(render); initPlayer(); initPwa(); initSearch();
 startRouter();
-loadQuran().then(() => { render(); motionReady(); route() })
+loadQuran().then(() => { render(); announceBadges(); motionReady(); route() })
   .catch(() => { $('list').innerHTML = '<li class="empty">تعذّر تحميل نص المصحف. أعد فتح الصفحة للمحاولة مرة أخرى.</li>' });

@@ -25,7 +25,11 @@ const salma = { id: 'k1', name: 'سلمى', icon: '🌸', mode: 'reader', plan: 
 const yousef = { id: 'k2', name: 'يوسف', icon: '🌙', mode: 'young', S: { s: { 114: { m: '111000', d: ymd(1), i: 1 } }, goal: 5, day: ymd(), n: 0, streak: 0, last: '' } };
 const wait = ms => new Promise(r => setTimeout(r, ms));
 
-const click = (text, sel = 'button, a') => p => p.evaluate((t, s) => [...document.querySelectorAll(s)].find(b => b.textContent.includes(t)).click(), text, sel);
+// wait for the element to exist first: on a slow machine the page can still be loading the Quran text
+const click = (text, sel = 'button, a') => async p => {
+  await p.waitForFunction((t, s) => [...document.querySelectorAll(s)].some(b => b.textContent.includes(t)), { timeout: 20000 }, text, sel);
+  await p.evaluate((t, s) => [...document.querySelectorAll(s)].find(b => b.textContent.includes(t)).click(), text, sel);
+};
 const openParent = async p => {
   await p.evaluate(() => document.getElementById('parentBtn').click()); await wait(200);
   const q = await p.$eval('#gateQ', e => e.textContent), n = q.match(/[٠-٩]+/g).map(s => +s.replace(/[٠-٩]/g, d => '٠١٢٣٤٥٦٧٨٩'.indexOf(d)));
@@ -37,7 +41,7 @@ const STATES = [
   ['games menu', '#/games'], ['game: complete', '#/games', click('أكمل', '.gamecard')], ['game: order', '#/games', click('رتّب', '.gamecard')],
   ['achievements', '#/achievements'], ['certificate', '#/certificate/114'], ['report', '#/report'], ['about', '#/about'],
   ['surah (reader)', '#/surah/112'], ['surah (veil)', '#/surah/114', p => p.evaluate(() => document.getElementById('veilBtn').click())],
-  ['surah (young child)', '#/surah/114', null, 'k2'], ['surah + tafsir', '#/surah/112', async p => { await p.evaluate(() => document.querySelector('.ay .tf').click()); await wait(800) }],
+  ['surah (young child)', '#/surah/114', null, 'k2'], ['surah + tafsir', '#/surah/112', async p => { await p.waitForSelector('.ay .tf', { timeout: 20000 }); await p.evaluate(() => document.querySelector('.ay .tf').click()); await wait(800) }],
   ['player settings', '#/surah/112', p => p.evaluate(() => { document.getElementById('plToggle').click(); document.querySelector('#player details').open = true })],
   ['parent gate', '#/dashboard', p => p.evaluate(() => document.getElementById('parentBtn').click())], ['parent corner', '#/dashboard', openParent],
 ];

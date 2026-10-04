@@ -1,6 +1,7 @@
 // Child profiles: the switcher bar, rewards (stars and badges), and the parent corner behind a math gate.
 import { $, AR, day } from './util.js';
 import { Q } from './data.js';
+import { announce } from './motion.js';
 import { S, mem, gameStars, kids, activeKid, switchKid, addKid, updateKid, removeKid, save, applyImport, ICONS, MODES } from './state.js';
 import { downloadBackup, lastExport, parseBackup } from './backup.js';
 import { go } from './router.js';
@@ -56,6 +57,16 @@ export function renderRewards(id = 'rewards') {
   });
   const games = el('p', 'stars game'); games.append(el('span', 'big-star', '🎮'), el('b', '', AR(t.games)), ' نجمة ألعاب (منفصلة عن نجوم الحفظ)');
   box.append(stars, games, row);
+}
+
+/** Tells the child when a medal is newly unlocked. The first call per child only records what is already unlocked. */
+const unlocked = new Map();
+export function announceBadges() {
+  const k = activeKid(); if (!k) return;
+  const t = totals(), now = new Set(BADGES.filter(b => b.ok(t)).map(b => b.name)), before = unlocked.get(k.id);
+  unlocked.set(k.id, now);
+  if (!before) return;
+  BADGES.filter(b => now.has(b.name) && !before.has(b.name)).forEach(b => announce('وسام جديد: ' + b.icon + ' ' + b.name + '!'));
 }
 
 /* ---------- parent corner ---------- */

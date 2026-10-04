@@ -1,9 +1,22 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
-  <defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#14876a"/><stop offset="1" stop-color="#0a3f31"/></linearGradient></defs>
+  <defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#d6f3e8"/><stop offset="1" stop-color="#cfe6ff"/></linearGradient></defs>
   <rect width="512" height="512" rx="112" fill="url(#g)"/>
-  <g transform="translate(256 256) scale(1) translate(-256 -256)">
-    <rect x="116" y="116" width="280" height="280" rx="34" transform="rotate(45 256 256)" fill="none" stroke="#dab35f" stroke-width="16"/>
-    <path d="M256 212c-30-18-66-20-96-10v128c30-10 66-8 96 10z" fill="#f3f7f4"/>
-    <path d="M256 212c30-18 66-20 96-10v128c-30-10-66-8-96 10z" fill="#d6e6de"/>
-    <path d="M256 212v128" stroke="#0a3f31" stroke-width="6" stroke-linecap="round"/>
-  </g></svg>
+  <g transform="translate(256 256) scale(2.2) translate(-100 -102)">
+  <!-- Rafiq: a smiling open book with a star. Fixed colours, so it looks the same on light and dark pages. -->
+  <ellipse cx="100" cy="176" rx="62" ry="9" fill="#000" opacity=".13"/>
+  <!-- star -->
+  <path d="M100 14l7.6 15.4 17 2.5-12.3 12 2.9 16.9L100 52.8l-15.2 8 2.9-16.9-12.3-12 17-2.5z" fill="#ffc233" stroke="#e59a00" stroke-width="3" stroke-linejoin="round"/>
+  <circle cx="148" cy="38" r="4" fill="#ffc233"/><circle cx="52" cy="46" r="3" fill="#ff8f70"/><circle cx="160" cy="62" r="2.5" fill="#6fb8ff"/>
+  <!-- cover -->
+  <path d="M26 92c0-6 5-10 11-8 22 7 46 8 63 22 17-14 41-15 63-22 6-2 11 2 11 8v70c0 5-5 9-10 7-22-7-46-6-64 8-18-14-42-15-64-8-5 2-10-2-10-7z" fill="#087456"/>
+  <!-- pages -->
+  <path d="M36 96c20 6 44 8 64 22v46c-19-12-42-13-64-6z" fill="#fff8e8"/>
+  <path d="M164 96c-20 6-44 8-64 22v46c19-12 42-13 64-6z" fill="#fff1d2"/>
+  <path d="M100 118v46" stroke="#e6cf9c" stroke-width="3" stroke-linecap="round"/>
+  <!-- face -->
+  <ellipse cx="74" cy="128" rx="6.5" ry="8" fill="#1b2e44"/><ellipse cx="126" cy="128" rx="6.5" ry="8" fill="#1b2e44"/>
+  <circle cx="76" cy="125" r="2.4" fill="#fff"/><circle cx="128" cy="125" r="2.4" fill="#fff"/>
+  <circle cx="60" cy="141" r="7" fill="#ff8f70" opacity=".55"/><circle cx="140" cy="141" r="7" fill="#ff8f70" opacity=".55"/>
+  <path d="M88 140c4 9 20 9 24 0" stroke="#1b2e44" stroke-width="4" stroke-linecap="round"/>
+</g>
+</svg>

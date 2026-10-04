@@ -347,3 +347,6 @@ footer.foot{margin-top:6px}
 
 /* very narrow phones (320px): tighter tab labels so the five tabs always fit */
 @media (max-width:360px){.nav a{font-size:.72rem;padding-inline:0}.nav a i{font-size:1.45rem}.brand{font-size:1.35rem}.logo{width:40px;height:40px}.iconbtn{padding-inline:10px}}
+
+/* little stars thrown by the memorise button and by right game answers */
+.fx-spark{position:fixed;font-size:1.05rem;line-height:1;pointer-events:none;z-index:70;margin:-.5em 0 0 -.5em}
