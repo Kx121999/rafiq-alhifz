@@ -409,3 +409,83 @@ footer.foot{margin-top:6px}
 .tour .acts,.tour .icons{justify-content:center}
 .tour label{display:block;margin:8px 0 4px;font-weight:600;text-align:start}
 .tour .icons{margin-top:8px}
+
+/* ======================= site footer ======================= */
+.sitefoot{display:grid;gap:14px;padding:20px;margin-top:10px;background:var(--surface);border:2px solid var(--line);border-radius:var(--r);box-shadow:0 4px 0 var(--line);text-align:start;color:var(--muted);font-size:.9rem}
+.sf-brand{display:flex;align-items:center;gap:12px}
+.sf-brand div{display:flex;flex-direction:column;line-height:1.35}
+.sf-brand b{font-family:var(--display);font-weight:800;font-size:1.3rem;color:var(--fg)}
+.sf-main{display:flex;flex-direction:column;gap:10px}
+.sf-links{display:flex;flex-wrap:wrap;gap:4px 18px}
+.sf-links a{display:inline-flex;align-items:center;min-height:36px;color:var(--accent);font-weight:600;text-decoration:none}
+.sf-links a:hover{text-decoration:underline;text-underline-offset:4px}
+.sf-src{margin:0;font-size:.82rem;line-height:1.8}
+
+/* ======================= gentle lift on hover (mouse only) ======================= */
+@media (hover:hover){
+  .row,.tile,.gamecard,.feats li,.kid,.iconbtn{transition:transform .15s ease,background .15s ease,box-shadow .15s ease}
+  .row:hover,.tile:hover,.gamecard:not(:disabled):hover,.feats li:hover{transform:translateY(-3px);box-shadow:0 7px 0 var(--line)}
+  .btn:hover:not(:active):not(:disabled),.kid:hover,.iconbtn:hover{transform:translateY(-2px)}
+}
+@media (hover:hover) and (prefers-reduced-motion:reduce){.row:hover,.tile:hover,.gamecard:hover,.feats li:hover,.btn:hover,.kid:hover,.iconbtn:hover{transform:none}}
+
+/* ======================= tablets and laptops: a wider, two-column platform ======================= */
+@media (min-width:1180px){
+  :root{--tab-h:0px}
+  .wrap{max-width:74rem;padding-inline:32px;padding-block:18px 40px;gap:22px}
+  /* the tab bar moves to the top, centred between the brand and the buttons */
+  .nav{top:14px;bottom:auto;width:max-content;max-width:none;display:flex;gap:4px;border:2px solid var(--line);border-radius:99px;padding:4px;box-shadow:0 4px 0 var(--line),0 12px 28px var(--shadow)}
+  .nav a{flex-direction:row;gap:8px;min-height:46px;padding:4px 20px;border-radius:99px;font-size:.98rem}
+  .nav a i{font-size:1.35rem}
+  .nav a[aria-current="page"] i{transform:none}
+  .nav .count{position:static;margin-inline-start:2px}
+  .top{min-height:58px}
+  .brand{font-size:1.75rem}
+  .logo{width:52px;height:52px}
+  .shead{top:82px}
+
+  /* single-topic pages keep a comfortable reading width in the middle */
+  #page-surah,#page-review,#page-plan,#page-about,#page-report,#page-certificate{width:100%;max-width:58rem;margin-inline:auto}
+
+  /* home */
+  .hero{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,1fr);column-gap:32px;row-gap:12px;align-content:center;justify-items:start;text-align:start;padding:48px 56px}
+  .hero>h1,.hero>p,.hero>.acts{grid-column:1}
+  .hero>.cast{grid-column:2;grid-row:1 / span 3;align-self:center;gap:6px}
+  .hero .cast .char{--cs:128px}
+  .hero .cast .char.lead{--cs:230px}
+  .hero h1{font-size:3.1rem}
+  .hero p{font-size:1.12rem;max-width:34rem}
+  .hero .acts{justify-content:flex-start}
+  .feats{grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}
+  .feats li{padding:20px 22px;gap:6px}
+  .feats i{font-size:2.4rem}
+
+  /* dashboard: the summary on one side, today and shortcuts on the other, medals underneath */
+  #page-dashboard{display:grid;grid-template-columns:minmax(0,1.3fr) minmax(0,1fr);grid-template-areas:"sum today" "sum tiles" "rew rew";gap:20px;align-items:start}
+  #page-dashboard .summary{grid-area:sum;align-self:stretch;padding:24px}
+  #page-dashboard .today{grid-area:today}
+  #page-dashboard .tiles{grid-area:tiles}
+  #page-dashboard .rewards{grid-area:rew}
+  .big b{font-size:3.6rem}
+  .greet{font-size:1.9rem}
+
+  /* the mushaf: surahs in columns */
+  .list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+  .list .empty{grid-column:1 / -1}
+
+  .sitefoot{grid-template-columns:auto minmax(0,1fr);align-items:center;gap:32px;padding:22px 28px}
+}
+@media (min-width:1280px){.list{grid-template-columns:repeat(3,minmax(0,1fr))}}
+
+/* between a big phone and a laptop: keep the bottom tab bar but let the content breathe */
+@media (min-width:700px) and (max-width:1179px){
+  .wrap{max-width:52rem}.nav{max-width:52rem}
+  .list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.list .empty{grid-column:1 / -1}
+  .feats{grid-template-columns:repeat(3,minmax(0,1fr))}
+}
+@media (min-width:1180px) and (max-width:1279px){.nav a{padding-inline:13px;font-size:.92rem;gap:6px}.nav{gap:0}.brand{font-size:1.55rem}}
+@media (min-width:700px){.list>li{display:flex}.list>li>.row{flex:1}}
+@media (min-width:1180px){
+  .results{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+  .results .empty{grid-column:1 / -1}
+}

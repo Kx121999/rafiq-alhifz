@@ -65,19 +65,19 @@ async function open(scheme, hash, width, height, active = 'k1') {
 }
 
 const failures = [];
-async function audit(scheme, state, attempt = 1) {
+async function audit(scheme, state, attempt = 1, width = 430) {
   const [label, hash, act, active] = state;
   let ctx, page;
-  try { ({ ctx, page } = await open(scheme, hash, 430, 860, active)) }
-  catch (e) { if (attempt < 2) return audit(scheme, state, attempt + 1); failures.push({ where: scheme + ' / ' + label, id: 'audit-error', impact: 'error', help: 'could not open the page: ' + String(e).slice(0, 120), nodes: [] }); return }
+  try { ({ ctx, page } = await open(scheme, hash, width, width > 700 ? 800 : 860, active)) }
+  catch (e) { if (attempt < 2) return audit(scheme, state, attempt + 1, width); failures.push({ where: scheme + ' / ' + label, id: 'audit-error', impact: 'error', help: 'could not open the page: ' + String(e).slice(0, 120), nodes: [] }); return }
   try {
     if (act) { await act(page); await wait(300) }
     await page.evaluate(AXE);
     const found = await page.evaluate(async () => (await axe.run(document, { runOnly: { type: 'tag', values: ['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22aa', 'best-practice'] } }))
       .violations.map(v => ({ id: v.id, impact: v.impact, help: v.help, nodes: v.nodes.slice(0, 4).map(n => n.target.join(' ') + '  ' + (n.any[0] || n.all[0] || n.none[0] || {}).message) })));
     // a real violation shows up every time; one that vanishes on a second look was a half-painted frame on a busy machine
-    if (found.length && attempt < 2) { await ctx.close(); return audit(scheme, state, attempt + 1) }
-    found.forEach(v => failures.push({ where: scheme + ' / ' + label, ...v }));
+    if (found.length && attempt < 2) { await ctx.close(); return audit(scheme, state, attempt + 1, width) }
+    found.forEach(v => failures.push({ where: scheme + ' / ' + label + (width > 700 ? ' @' + width : ''), ...v }));
   } catch (e) { failures.push({ where: scheme + ' / ' + label, id: 'audit-error', impact: 'error', help: String(e).slice(0, 160), nodes: [] }) }
   await ctx.close();
 }
@@ -85,19 +85,24 @@ async function audit(scheme, state, attempt = 1) {
 const jobs = ['dark', 'light'].flatMap(scheme => STATES.map(s => [scheme, s]));
 for (let i = 0; i < jobs.length; i += 6) await Promise.all(jobs.slice(i, i + 6).map(([scheme, s]) => audit(scheme, s)));
 
+// the wide layout (top navigation, columns) on a laptop and on a tablet
+const WIDE = ['#/', '#/dashboard', '#/mushaf', '#/games', '#/achievements', '#/surah/112'].map(h => [h, h]);
+const wideJobs = [1280, 820].flatMap(width => WIDE.map(([label, hash]) => [width, [label, hash]]));
+for (let i = 0; i < wideJobs.length; i += 6) await Promise.all(wideJobs.slice(i, i + 6).map(([width, s]) => audit('light', s, 1, width)));
+
 // WCAG 1.4.10 reflow: nothing may force sideways scrolling at 320 CSS px
 const REFLOW = ['#/', '#/dashboard', '#/mushaf', '#/search/' + encodeURIComponent('الرحمن'), '#/review', '#/plan', '#/games', '#/achievements', '#/certificate/114', '#/report', '#/about', '#/surah/112'];
-for (const hash of REFLOW) {
-  const { ctx, page } = await open('dark', hash, 320, 640);
+for (const hash of REFLOW) for (const width of [320, 768, 1180, 1280]) {
+  const { ctx, page } = await open('dark', hash, width, 640);
   const o = await page.evaluate(() => ({ sw: document.documentElement.scrollWidth, iw: document.documentElement.clientWidth }));
-  if (o.sw > o.iw + 1) failures.push({ where: '320px / ' + hash, id: 'reflow', impact: 'serious', help: 'Page scrolls sideways at 320 px', nodes: [o.sw + ' > ' + o.iw] });
+  if (o.sw > o.iw + 1) failures.push({ where: width + 'px / ' + hash, id: 'reflow', impact: 'serious', help: 'Page scrolls sideways at ' + width + ' px', nodes: [o.sw + ' > ' + o.iw] });
   await ctx.close();
 }
 
 await browser.close();
 server.httpServer.close();
-const checked = jobs.length + REFLOW.length;
-if (!failures.length) { console.log('Accessibility check passed: ' + jobs.length + ' page states (light and dark) and ' + REFLOW.length + ' reflow checks, no violations.'); process.exit(0) }
+const checked = jobs.length + wideJobs.length + REFLOW.length * 4;
+if (!failures.length) { console.log('Accessibility check passed: ' + jobs.length + ' phone states (light and dark), ' + wideJobs.length + ' wide-screen states and ' + REFLOW.length * 4 + ' reflow checks (320 to 1280 px), no violations.'); process.exit(0) }
 console.error('Accessibility check FAILED (' + failures.length + ' finding(s) in ' + checked + ' checks):\n');
 for (const f of failures) console.error('- [' + f.impact + '] ' + f.id + ' in ' + f.where + ': ' + f.help + '\n    ' + f.nodes.join('\n    '));
 process.exit(1);
