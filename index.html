@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>رفيق الحفظ</title>
+<meta name="description" content="رفيق الحفظ: موقع لحفظ القرآن الكريم ومراجعته">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Amiri+Quran&family=IBM+Plex+Sans+Arabic:wght@400;500;600&family=Reem+Kufi:wght@500;700&display=swap">
+</head>
+<body>
+<div class="wrap" dir="rtl" lang="ar">
+  <header class="top">
+    <h1 class="brand">رفيق الحفظ</h1>
+    <span class="sync" id="sync" role="status"></span>
+  </header>
+
+  <main id="home" style="display:contents">
+    <section class="summary" aria-label="ملخص الحفظ">
+      <div class="big"><b id="sAyat">٠</b><span>آية محفوظة من ٦٬٢٣٦</span></div>
+      <div class="bar"><i id="sBar" style="width:0%"></i></div>
+      <div class="facts">
+        <div class="fact"><small>سور مكتملة</small><strong id="sSurahs">٠ من ١١٤</strong></div>
+        <div class="fact"><small>وِرد اليوم</small>
+          <strong class="step"><span id="sToday">٠ / ٥</span>
+            <button type="button" id="gMinus" aria-label="تقليل الورد اليومي">−</button>
+            <button type="button" id="gPlus" aria-label="زيادة الورد اليومي">+</button></strong></div>
+        <div class="fact"><small>أيام متتالية</small><strong id="sStreak">٠</strong></div>
+      </div>
+    </section>
+
+    <div class="tools">
+      <input class="search" id="q" type="search" placeholder="ابحث باسم السورة أو رقمها" aria-label="بحث في السور">
+      <div class="chips" id="chips">
+        <button type="button" class="chip" data-f="all" aria-pressed="true">الكل</button>
+        <button type="button" class="chip" data-f="due" aria-pressed="false">مراجعة اليوم</button>
+        <button type="button" class="chip" data-f="doing" aria-pressed="false">قيد الحفظ</button>
+        <button type="button" class="chip" data-f="done" aria-pressed="false">مكتملة</button>
+      </div>
+    </div>
+    <ul class="list" id="list"><li class="empty">جارٍ تحميل المصحف…</li></ul>
+    <p class="foot">نص المصحف بالرسم العثماني من موسوعة القرآن الكريم (quranenc.com). التفسير: «التفسير الميسّر» عبر مشروع tafsir_api المفتوح.</p>
+  </main>
+
+  <main id="surah" hidden style="display:contents">
+    <div class="shead">
+      <button type="button" class="btn" id="back">→ السور</button>
+      <span class="grow"></span>
+      <a class="btn" id="listen" target="_blank" rel="noopener" href="https://quran.com">استماع للسورة ↗</a>
+      <button type="button" class="btn" id="veilBtn" aria-pressed="false">وضع التسميع</button>
+      <button type="button" class="btn" id="allBtn">حفظتُ السورة كاملة</button>
+    </div>
+    <div class="stitle"><h2 id="stName"></h2><p id="stMeta"></p></div>
+    <p class="note" id="veilNote" hidden>الآيات مخفية إلا كلمتها الأولى. اقرأ من حفظك ثم اضغط الآية لتتحقق.</p>
+    <div class="basmala" id="basmala" hidden></div>
+    <ol class="ayat" id="ayat"></ol>
+    <section class="review" id="review" hidden>
+      <p id="revText"></p>
+      <div class="acts">
+        <button type="button" class="btn primary" id="revGood">راجعتُها وأتقنتُها</button>
+        <button type="button" class="btn" id="revBad">تحتاج إعادة</button>
+      </div>
+    </section>
+  </main>
+</div>
+<script type="module" src="/src/main.js"></script>
+</body>
+</html>
