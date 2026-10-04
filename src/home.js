@@ -1,6 +1,6 @@
-import { $, AR, day, norm } from './util.js';
+import { $, AR, day, norm, charSrc } from './util.js';
 import { Q } from './data.js';
-import { S, activeKid, mem, isDue, weakList } from './state.js';
+import { S, activeKid, mem, isDue, weakList, friendOf } from './state.js';
 
 let filter = 'all';
 export const setFilter = f => { filter = f };
@@ -25,6 +25,7 @@ export function renderSummary() {
   $('sStreak').textContent = AR((S.last === day() || S.last === day(-1)) ? S.streak : 0);
   const dueCount = Q.filter((_, i) => isDue(i + 1)).length;
   $('bubble').textContent = moodText(ay, S.goal, S.n, dueCount, weakList().length);
+  $('moodChar').src = charSrc(friendOf());
   const k = activeKid();
   $('greet').textContent = k ? 'أهلًا يا ' + k.name + ' ' + k.icon : 'أهلًا بك!';
   // today's goal as star slots (at most 10 shown); the exact numbers are in the text next to them

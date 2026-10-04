@@ -69,7 +69,7 @@
   <main class="page" id="page-dashboard" data-page="dashboard" tabindex="-1" hidden>
     <section class="summary" aria-label="ملخص الحفظ">
       <h1 class="greet" id="greet">أهلًا بك!</h1>
-      <div class="mood"><img class="char" src="/mascot.svg" alt="" width="88" height="88"><p class="bubble" id="bubble" role="status">يلا نبدأ معًا! 🌱</p></div>
+      <div class="mood"><img class="char" id="moodChar" src="/mascot.svg" alt="" width="88" height="88"><p class="bubble" id="bubble" role="status">يلا نبدأ معًا! 🌱</p></div>
       <div class="big"><b id="sAyat">٠</b><span>آية محفوظة من ٦٬٢٣٦</span></div>
       <div class="bar"><i id="sBar" style="width:0%"></i></div>
       <div class="facts">
@@ -96,7 +96,7 @@
 
   <!-- المصحف -->
   <main class="page" id="page-mushaf" data-page="mushaf" tabindex="-1" hidden>
-    <h1 class="ptitle">المصحف</h1>
+    <header class="banner b-sun"><div><h1 class="ptitle">المصحف</h1><p>اختر سورة وابدأ الحفظ</p></div><img class="char" src="/mascot.svg" alt="" width="84" height="84"></header>
     <div class="tools">
       <input class="search" id="q" type="search" placeholder="ابحث باسم السورة أو رقمها" aria-label="بحث في السور">
       <div class="chips" id="chips">
@@ -111,7 +111,7 @@
 
   <!-- بحث -->
   <main class="page" id="page-search" data-page="search" tabindex="-1" hidden>
-    <h1 class="ptitle">بحث في المصحف</h1>
+    <header class="banner b-sky"><div><h1 class="ptitle">بحث في المصحف</h1><p>اكتب كلمة وسنجد لك الآيات</p></div><img class="char" src="/chars/ghayma.svg" alt="" width="84" height="84"></header>
     <input class="search" id="sq" type="search" placeholder="اكتب كلمة أو جزءًا من آية" aria-label="بحث في آيات المصحف" autocomplete="off" enterkeyhint="search">
     <p class="note" id="sInfo" role="status"></p>
     <div class="chips" id="sHints" aria-label="اقتراحات"></div>
@@ -121,26 +121,26 @@
 
   <!-- المراجعة -->
   <main class="page" id="page-review" data-page="review" tabindex="-1" hidden>
-    <h1 class="ptitle">مراجعة اليوم</h1>
+    <header class="banner b-coral"><div><h1 class="ptitle">مراجعة اليوم</h1><p>كل مراجعة تثبّت حفظك أكتر</p></div><img class="char" src="/chars/sabr.svg" alt="" width="84" height="84"></header>
     <section class="today" id="reviewBox" role="status" aria-live="polite"></section>
     <section class="today" id="weakBox" aria-live="polite"></section>
   </main>
 
   <!-- الخطة -->
   <main class="page" id="page-plan" data-page="plan" tabindex="-1" hidden>
-    <h1 class="ptitle">خطة الحفظ</h1>
+    <header class="banner b-violet"><div><h1 class="ptitle">خطة الحفظ</h1><p>خطوة بخطوة تصل</p></div><img class="char" src="/chars/shams.svg" alt="" width="84" height="84"></header>
     <section class="today" id="planBox"></section>
   </main>
 
   <!-- ألعاب -->
   <main class="page" id="page-games" data-page="games" tabindex="-1" hidden>
-    <h1 class="ptitle">ألعاب</h1>
+    <header class="banner b-rose"><div><h1 class="ptitle">ألعاب</h1><p>العب وثبّت حفظك</p></div><img class="char" src="/chars/nujum.svg" alt="" width="84" height="84"></header>
     <section class="today" id="gameBox"></section>
   </main>
 
   <!-- إنجازاتي -->
   <main class="page" id="page-achievements" data-page="achievements" tabindex="-1" hidden>
-    <h1 class="ptitle">إنجازاتي</h1>
+    <header class="banner b-mint"><div><h1 class="ptitle">إنجازاتي</h1><p>نجومك وأوسمتك وشهاداتك</p></div><img class="char" src="/chars/shams.svg" alt="" width="84" height="84"></header>
     <section class="rewards" id="achRewards" aria-label="النجوم والأوسمة"></section>
     <section class="today" id="achSurahs"></section>
   </main>
@@ -172,7 +172,10 @@
       <button type="button" class="btn" id="veilBtn" aria-pressed="false">وضع التسميع</button>
       <button type="button" class="btn" id="allBtn">حفظتُ السورة كاملة</button>
     </div>
-    <div class="stitle"><img class="char stchar" src="/mascot.svg" alt="" width="68" height="68"><h1 id="stName"></h1><p id="stMeta"></p></div>
+    <div class="stitle"><img class="char stchar" id="stchar" src="/mascot.svg" alt="" width="68" height="68"><h1 id="stName"></h1><p id="stMeta"></p></div>
+    <div class="journey"><span class="jflag" aria-hidden="true">🌱</span>
+      <div class="jtrack" id="jtrack" role="progressbar" aria-label="تقدّم حفظ السورة" aria-valuemin="0" aria-valuemax="1" aria-valuenow="0"><i class="jfill" id="jfill"></i><span class="walker" id="walker"></span></div>
+      <span class="jflag" aria-hidden="true">🏁</span></div>
     <p class="note" id="veilNote" hidden>الآيات مخفية إلا كلمتها الأولى. اقرأ من حفظك ثم اضغط الآية لتتحقق.</p>
     <div class="basmala" id="basmala" hidden></div>
     <ol class="ayat" id="ayat"></ol>
@@ -189,7 +192,7 @@
 
   <!-- عن المنصة -->
   <main class="page" id="page-about" data-page="about" tabindex="-1" hidden>
-    <h1 class="ptitle">عن المنصة</h1>
+    <header class="banner b-sun"><div><h1 class="ptitle">عن المنصة</h1><p>من نحن وكيف تعمل</p></div><img class="char" src="/mascot.svg" alt="" width="84" height="84"></header>
     <section class="prose">
       <h2>المصادر</h2>
       <p>التلاوات الصوتية من موقع everyayah.com، ملف لكل آية، وتُحمَّل منه مباشرة أثناء الاستماع. الموقع لا يستضيف أي ملف صوتي.</p>
@@ -198,6 +201,8 @@
       <p>عند حفظ أول آية من سورة تُجدول مراجعتها بعد يوم. كلما أتقنتَ المراجعة تضاعفت المدة (يومان، أربعة، ثمانية…) حتى ٣٠ يومًا، وإن احتجت إعادة عادت إلى يوم واحد.</p>
       <h2>تثبيت التطبيق والعمل بدون إنترنت</h2>
       <p>بعد فتح الموقع مرة واحدة يعمل المصحف والتفسير وتقدّمك بدون إنترنت. على أندرويد وكروم يظهر زر «ثبّت التطبيق» في الصفحة الرئيسية. على أيفون: زر المشاركة في سفاري ثم «إضافة إلى الشاشة الرئيسية». الصوت وحده يحتاج إنترنت.</p>
+      <h2>جولة تعريفية</h2>
+      <p><button type="button" class="btn" id="tourBtn">جولة تعريفية مع رفيق</button></p>
       <h2>خصوصيتك</h2>
       <p>لا حسابات ولا خوادم. تقدّم كل طفل محفوظ على هذا الجهاز وهذا المتصفح فقط ولا يُرسل إلى أي مكان.</p>
     </section>
@@ -209,6 +214,8 @@
 <div id="updateBar" class="updatebar" role="status" hidden><span>تم تحديث الموقع.</span> <button type="button" class="btn primary" id="updateReload">تحديث الآن</button></div>
 
 <div id="celebrate" class="celebrate" role="status" aria-live="polite" hidden></div>
+
+<dialog id="tour" class="dlg tour" aria-labelledby="tourT"><div id="tourBody"></div></dialog>
 
 <dialog id="gate" class="dlg" aria-labelledby="gateT">
   <form method="dialog" id="gateForm">

@@ -9,10 +9,11 @@ export const norm = s => s
   .replace(/[ؐ-ًؚ-ٰٟۖ-ۭـ]/g, '')
   .replace(/[ٱأإآ]/g, 'ا').replace(/ة/g, 'ه').replace(/[ىی]/g, 'ي').replace(/ؤ/g, 'و').replace(/ئ/g, 'ي').trim();
 /** One of the cartoon friends as an <img>. 'rafiq' is the book; the rest live in public/chars/. Tapping one makes it jump (see motion.js). */
+export const charSrc = name => import.meta.env.BASE_URL + (name === 'rafiq' ? 'mascot.svg' : 'chars/' + name + '.svg');
 export const charImg = (name, cls = '') => {
   const i = document.createElement('img');
   i.className = ('char ' + cls).trim(); i.alt = ''; i.draggable = false; i.width = i.height = 96;
-  i.src = import.meta.env.BASE_URL + (name === 'rafiq' ? 'mascot.svg' : 'chars/' + name + '.svg');
+  i.src = charSrc(name);
   return i;
 };
 export const el = (tag, cls, text) => { const e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e };

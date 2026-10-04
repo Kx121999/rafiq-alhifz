@@ -1,15 +1,22 @@
-import { $, AR, day } from './util.js';
+import { $, AR, day, charSrc, charImg } from './util.js';
 import { Q, loadTafsir } from './data.js';
-import { mem, rec, isWeak, weakList } from './state.js';
+import { mem, rec, isWeak, weakList, friendOf } from './state.js';
 
 /** The open surah (0 = index page) and whether recitation mode hides the ayat. */
 export const view = { cur: 0, veil: false };
 
 export function renderSurah(full) {
   const cur = view.cur, c = Q[cur - 1], tot = c.v.length, m = mem(cur), r = rec(cur);
+  $('stchar').src = charSrc(friendOf());
   $('stName').textContent = 'سورة ' + c.n; $('listen').href = 'https://quran.com/' + cur;
   const weak = weakList().filter(a => a.id === cur).length;
   $('stMeta').textContent = (c.t ? 'مدنية' : 'مكية') + ' · حفظتَ ' + AR(m) + ' من ' + AR(tot) + ' آية' + (weak ? ' · ' + AR(weak) + ' تحتاج تثبيتًا' : '');
+  // the journey: the child's friend walks along the road as more ayat are memorised
+  const pct = (tot ? m / tot * 100 : 0).toFixed(1) + '%', walker = $('walker'), road = $('jtrack'), friend = friendOf();
+  $('jfill').style.width = pct; walker.style.insetInlineStart = 'calc(' + pct + ' - 28px)';
+  if (walker.dataset.f !== friend) { walker.dataset.f = friend; walker.replaceChildren(charImg(friend)); walker.classList.toggle('flip', friend === 'sabr') }
+  road.setAttribute('aria-valuemax', tot); road.setAttribute('aria-valuenow', m); road.setAttribute('aria-valuetext', AR(m) + ' من ' + AR(tot) + ' آية');
+  road.classList.toggle('done', tot > 0 && m === tot);
   $('allBtn').textContent = m === tot ? 'إلغاء حفظ السورة' : 'حفظتُ السورة كاملة';
   $('veilBtn').setAttribute('aria-pressed', view.veil); $('veilNote').hidden = !view.veil;
   const b = $('basmala'); b.hidden = (cur === 1 || cur === 9); b.textContent = Q[0].v[0];

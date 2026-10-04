@@ -330,3 +330,36 @@ describe('activity log', () => {
     expect(again.state.activityLog()['2026-05-01'].a).toBe(2);
   });
 });
+
+describe('a friend for each child', () => {
+  it('is Rafiq by default and can be changed per child', async () => {
+    const { state } = await boot();
+    expect(state.friendOf()).toBe('rafiq');
+    const first = state.activeKid().id;
+    state.updateKid(first, { name: 'نور', icon: '🌟', mode: 'young', friend: 'sabr' });
+    expect(state.friendOf()).toBe('sabr');
+    const second = state.addKid({ name: 'يوسف', icon: '🌙', mode: 'reader', friend: 'shams' });
+    expect(state.friendOf()).toBe('shams');
+    state.switchKid(first);
+    expect(state.friendOf()).toBe('sabr');
+    expect(second.friend).toBe('shams');
+  });
+
+  it('ignores an unknown friend and keeps the current one when none is given', async () => {
+    const { state } = await boot();
+    const id = state.activeKid().id;
+    state.updateKid(id, { name: 'نور', icon: '🌟', mode: 'young', friend: 'nujum' });
+    state.updateKid(id, { name: 'نور', icon: '🌟', mode: 'young', friend: 'dragon' });
+    expect(state.friendOf()).toBe('nujum');
+    state.updateKid(id, { name: 'نور ٢', icon: '🌟', mode: 'young' });
+    expect(state.friendOf()).toBe('nujum');
+    expect(state.addKid({ name: 'س', icon: '⭐', mode: 'reader', friend: 'toString' })).not.toHaveProperty('friend');
+  });
+
+  it('survives a reload', async () => {
+    const { state } = await boot();
+    state.updateKid(state.activeKid().id, { name: 'نور', icon: '🌟', mode: 'young', friend: 'ghayma' });
+    const again = await boot({ 'hifz-kids-v1': localStorage.getItem('hifz-kids-v1') });
+    expect(again.state.friendOf()).toBe('ghayma');
+  });
+});

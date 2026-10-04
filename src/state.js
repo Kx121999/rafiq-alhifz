@@ -11,6 +11,11 @@ const clone = o => JSON.parse(JSON.stringify(o));
 
 export const ICONS = ['⭐', '🌙', '☀️', '🌸', '🌳', '📖', '🌈', '💎'];
 export const MODES = { young: 'صغير (٤–٦ سنوات)', reader: 'قارئ (٧–١٢ سنة)' };
+/** The cartoon friends a child can pick as their companion. 'rafiq' is the default and the book on the home page. */
+export const FRIENDS = [
+  { id: 'rafiq', name: 'رفيق' }, { id: 'nujum', name: 'نجوم' }, { id: 'shams', name: 'شمس' }, { id: 'ghayma', name: 'غيمة' }, { id: 'sabr', name: 'صبر' },
+];
+export const isFriend = id => FRIENDS.some(f => f.id === id);
 
 /** The active child's progress: {s: {<surah id>: {m: "0101…", d: "YYYY-MM-DD", i: days}}, goal, day, n, streak, last} */
 export const S = fresh();
@@ -98,17 +103,23 @@ export function switchKid(id) {
   save(); store.active = id; adopt(activeKid().S); persist();
 }
 
-export function addKid({ name, icon, mode }) {
+export function addKid({ name, icon, mode, friend }) {
   save();
   const k = { id: newId(), name, icon, mode, S: fresh() };
+  if (isFriend(friend)) k.friend = friend;
   store.kids.push(k); store.active = k.id; adopt(k.S); persist();
   return k;
 }
 
-export function updateKid(id, { name, icon, mode }) {
+export function updateKid(id, { name, icon, mode, friend }) {
   const k = store.kids.find(x => x.id === id); if (!k) return;
-  Object.assign(k, { name, icon, mode }); persist();
+  Object.assign(k, { name, icon, mode });
+  if (isFriend(friend)) k.friend = friend;
+  persist();
 }
+
+/** The active child's friend (Rafiq unless they picked another). */
+export const friendOf = () => { const f = (activeKid() || {}).friend; return isFriend(f) ? f : 'rafiq' };
 
 export function removeKid(id) {
   save();

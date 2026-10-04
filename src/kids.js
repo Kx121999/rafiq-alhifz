@@ -1,8 +1,8 @@
 // Child profiles: the switcher bar, rewards (stars and badges), and the parent corner behind a math gate.
-import { $, AR, day } from './util.js';
+import { $, AR, day, charImg } from './util.js';
 import { Q } from './data.js';
 import { announce } from './motion.js';
-import { S, mem, gameStars, kids, activeKid, switchKid, addKid, updateKid, removeKid, save, applyImport, ICONS, MODES } from './state.js';
+import { S, mem, gameStars, FRIENDS, kids, activeKid, switchKid, addKid, updateKid, removeKid, save, applyImport, ICONS, MODES } from './state.js';
 import { downloadBackup, lastExport, parseBackup } from './backup.js';
 import { go } from './router.js';
 
@@ -96,6 +96,14 @@ function renderParent() {
       b.addEventListener('click', () => { updateKid(k.id, { ...k, mode: m }); refresh(true) });
       modes.appendChild(b);
     });
+    const friends = el('div', 'icons friends'); friends.setAttribute('role', 'group'); friends.setAttribute('aria-label', 'صديق ' + k.name);
+    FRIENDS.forEach(f => {
+      const b = el('button', 'chip friendchip'); b.type = 'button';
+      b.setAttribute('aria-pressed', f.id === (k.friend || 'rafiq')); b.setAttribute('aria-label', 'الصديق ' + f.name);
+      b.append(charImg(f.id), el('span', '', f.name));
+      b.addEventListener('click', () => { updateKid(k.id, { ...k, friend: f.id }); refresh(true) });
+      friends.appendChild(b);
+    });
     const foot = el('div', 'acts');
     const rep = el('button', 'btn', 'تقرير الأسبوع'); rep.type = 'button';
     rep.addEventListener('click', () => { if (!act || k.id !== act.id) switchKid(k.id); $('parent').close(); go('/report') });
@@ -108,7 +116,7 @@ function renderParent() {
       });
       foot.appendChild(del);
     }
-    card.append(el('h3', '', k.icon + ' ' + k.name), name, icons, modes, foot);
+    card.append(el('h3', '', k.icon + ' ' + k.name), name, icons, modes, friends, foot);
     box.appendChild(card);
   });
   box.appendChild(backupSection());

@@ -10,12 +10,13 @@ import { initPlayer, loadSurah, playFrom, stopPlayer } from './player.js';
 import { initPwa } from './pwa.js';
 import { initSearch, openSearch } from './search.js';
 import { renderReport } from './report.js';
+import { initTour, needsTour, openTour } from './tour.js';
 import { renderToday } from './dashboard.js';
 import { renderReview, renderWeak, onReviewGraded, clearReviewNote, dueList } from './review.js';
 import { renderPlan, onPlanChanged } from './plan.js';
 import { renderGames, onGameStars, resetGame } from './games.js';
 import { renderAchievements, renderCertificate } from './achievements.js';
-import { initKids, onKidsChange, renderRewards, applyMode, announceBadges } from './kids.js';
+import { initKids, onKidsChange, renderRewards, renderKidBar, applyMode, announceBadges } from './kids.js';
 
 function render() {
   if (!Q.length) return;
@@ -118,7 +119,7 @@ $('revGood').addEventListener('click', () => onGrade(true));
 $('revBad').addEventListener('click', () => onGrade(false));
 
 /* ---------- boot ---------- */
-initCharacters(); initKids(); onKidsChange(render); initPlayer(); initPwa(); initSearch();
+initCharacters(); initKids(); onKidsChange(render); initTour({ onDone: () => { renderKidBar(); render() } }); initPlayer(); initPwa(); initSearch();
 startRouter();
-loadQuran().then(() => { render(); announceBadges(); motionReady(); route() })
+loadQuran().then(() => { render(); announceBadges(); motionReady(); route(); if (needsTour()) openTour() })
   .catch(() => { $('list').innerHTML = '<li class="empty">تعذّر تحميل نص المصحف. أعد فتح الصفحة للمحاولة مرة أخرى.</li>' });

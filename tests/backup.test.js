@@ -160,3 +160,11 @@ describe('activity log in backups', () => {
     expect(backup.parseBackup(file([kid({ log: {} })])).kids[0].log).toBeUndefined();
   });
 });
+
+describe('friend in backups', () => {
+  it('keeps a real friend and drops anything else', async () => {
+    const { backup } = await setup();
+    const r = backup.parseBackup(file([kid({ friend: 'sabr' }), kid({ friend: 'dragon' }), kid({ friend: '__proto__' }), kid({})])).kids;
+    expect(r.map(k => k.friend)).toEqual(['sabr', undefined, undefined, undefined]);
+  });
+});

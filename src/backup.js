@@ -1,7 +1,7 @@
 // Backup file: export every child's progress as JSON, and import one back after strict validation.
 import { day } from './util.js';
 import { Q } from './data.js';
-import { ICONS, snapshot } from './state.js';
+import { ICONS, FRIENDS, snapshot } from './state.js';
 import { PRESETS } from './plan.js';
 
 const APP = 'rafiq-alhifz', VERSION = 1, MAX_BYTES = 2e6, MAX_KIDS = 30;
@@ -73,6 +73,7 @@ function cleanKid(k, idx, skip) {
   const p = k.plan;
   if (p && Object.hasOwn(PRESETS, p.id) && DATE.test(p.start) && Number.isInteger(p.weeks) && p.weeks >= 1 && p.weeks <= 104) kid.plan = { id: p.id, weeks: p.weeks, start: p.start };
   if (Number.isInteger(k.last) && k.last >= 1 && k.last <= 114) kid.last = k.last;
+  if (FRIENDS.some(f => f.id === k.friend)) kid.friend = k.friend;
   const log = cleanLog(k.log);
   if (log) kid.log = log;
   if (k.game && Number.isInteger(k.game.stars) && k.game.stars >= 0 && k.game.stars <= 1e6) kid.game = { stars: k.game.stars };

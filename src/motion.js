@@ -3,6 +3,7 @@
 // still happens then is the text of a celebration or a new medal, which appears and is announced without movement.
 import gsap from 'gsap';
 import { charImg } from './util.js';
+import { friendOf } from './state.js';
 
 const mq = matchMedia('(prefers-reduced-motion: reduce)');
 const calm = () => mq.matches;
@@ -21,7 +22,7 @@ const STAGGER = {
 const STATIC = new Set(['home', 'about', 'certificate']);
 const MAX_STAGGER = 14;
 
-let ready = false, last = { page: '', t: 0 };
+let ready = false, last = { page: '', t: 0 }, lastNavX = null;
 /** Data pages stay still until quran.json has rendered them, so the entrance plays on real content. */
 export const motionReady = () => { ready = true };
 
@@ -32,8 +33,12 @@ export function pageIn(name) {
   last = { page: name, t: now };
   const page = document.getElementById('page-' + name); if (!page) return;
   gsap.killTweensOf(page);
-  gsap.fromTo(page, { opacity: 0, y: 14 }, { opacity: 1, y: 0, duration: 0.45, ease: 'power2.out', clearProps: 'opacity,transform' });
-  const items = [...page.querySelectorAll(STAGGER[name] || '.none')].slice(0, MAX_STAGGER);
+  // slide in from the side of the tab that was tapped (the tab bar reads right to left); other pages just rise
+  const cur = document.querySelector('#nav [aria-current]'), x = cur ? cur.getBoundingClientRect().left : null;
+  const dir = x != null && lastNavX != null && Math.abs(x - lastNavX) > 4 ? (x < lastNavX ? -1 : 1) : 0;
+  if (x != null) lastNavX = x;
+  gsap.fromTo(page, { opacity: 0, y: dir ? 0 : 14, x: dir * 40 }, { opacity: 1, y: 0, x: 0, duration: 0.45, ease: 'power2.out', clearProps: 'opacity,transform' });
+  const items = [...page.querySelectorAll('.banner, ' + (STAGGER[name] || '.none'))].slice(0, MAX_STAGGER);
   if (items.length) gsap.from(items, { opacity: 0, y: 10, duration: 0.4, stagger: 0.045, delay: 0.08, ease: 'power2.out', clearProps: 'opacity,transform' });
   page.querySelectorAll('.bar i').forEach(i => {
     const w = i.style.width; if (!w) return;
@@ -68,6 +73,12 @@ function burst(el, n = 6, glyph = '⭐') {
       { x: Math.cos(a) * d, y: Math.sin(a) * d - 14, scale: 1, rotation: (Math.random() - 0.5) * 120, duration: 0.7, ease: 'power2.out' });
     gsap.to(s, { opacity: 0, duration: 0.35, delay: 0.45, onComplete: () => s.remove() });
   }
+}
+
+/** A character pops into view (used when the tour changes card). */
+export function popIn(el) {
+  if (calm() || !el) return;
+  gsap.from(el, { scale: 0.3, rotation: -14, opacity: 0, duration: 0.6, ease: 'back.out(2)', clearProps: 'transform,opacity' });
 }
 
 /** Tap or click any cartoon friend and it hops with a wiggle and a few sparkles. */
@@ -141,6 +152,6 @@ function show({ text, withStars, friend }) {
 }
 
 /** A completed surah: a message with a gold ring, and falling-up stars for young children. */
-export const celebrate = (text, withStars) => enqueue({ text, withStars, friend: 'nujum' });
+export const celebrate = (text, withStars) => enqueue({ text, withStars, friend: friendOf() });
 /** A plain notice (for example a newly unlocked medal). */
-export const announce = text => enqueue({ text, withStars: false, friend: 'shams' });
+export const announce = text => enqueue({ text, withStars: false, friend: 'nujum' });
