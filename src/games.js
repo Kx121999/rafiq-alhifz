@@ -1,6 +1,6 @@
-// Three memorisation games. Every question is built from ayat the child marked as memorised;
+// Six memorisation games. Every question is built from ayat the child marked as memorised;
 // wrong options are real words or endings taken from other ayat in quran.json. Nothing is generated.
-import { $, AR, el, norm, nujum, charImg } from './util.js';
+import { $, AR, ayahs, el, norm, nujum, charImg } from './util.js';
 import { Q } from './data.js';
 import { S, activeKid, addGameStars } from './state.js';
 import { correct, wrong } from './motion.js';
@@ -33,9 +33,36 @@ export function runs() {
   return out;
 }
 
+/** Normalised ayah text -> the surahs it appears in. A question about "which surah" needs an ayah that is only in one. */
+let IDX = null;
+function textIndex() {
+  if (!IDX) { IDX = new Map(); Q.forEach((c, k) => c.v.forEach(t => { const key = norm(t), set = IDX.get(key) || new Set(); set.add(k + 1); IDX.set(key, set) })) }
+  return IDX;
+}
+const whichPool = () => memorisedPool().filter(a => { const n = words(a.t).length; return n >= 3 && n <= 30 && textIndex().get(norm(a.t)).size === 1 });
+
+/** Memorised ayat whose next ayah (same surah) is memorised too, and where neither text repeats inside the surah, so there is one right answer. */
+export function nextPairs() {
+  const out = [];
+  for (const [key, r] of Object.entries(S.s)) {
+    const id = +key, v = Q[id - 1].v, count = new Map();
+    v.forEach(t => { const k = norm(t); count.set(k, (count.get(k) || 0) + 1) });
+    for (let i = 0; i + 1 < r.m.length; i++) {
+      if (r.m[i] !== '1' || r.m[i + 1] !== '1') continue;
+      const a = words(v[i]).length, b = words(v[i + 1]).length;
+      if (a < 2 || a > 25 || b < 2 || b > 22 || count.get(norm(v[i])) > 1 || count.get(norm(v[i + 1])) > 1) continue;
+      out.push({ id, i });
+    }
+  }
+  return out;
+}
+
 const GAMES = {
   complete: { name: 'أكمل الآية', icon: '🧩', desc: 'تظهر بداية آية حفظتَها، اختر تتمتها الصحيحة.', ok: () => eligible(3, 16).length > 0, need: 'علّم بعض الآيات (٣ كلمات فأكثر) كمحفوظة أولًا.' },
   order: { name: 'رتّب الآيات', icon: '🔢', desc: 'ثلاث آيات متتالية حفظتَها مخلوطة، اضغطها بالترتيب الصحيح.', ok: () => runs().length > 0, need: 'علّم ثلاث آيات متتالية على الأقل من سورة واحدة كمحفوظة.' },
+  which: { name: 'من أي سورة؟', icon: '🧭', desc: 'تظهر آية حفظتَها، اختر اسم السورة التي هي منها.', ok: () => whichPool().length > 0, need: 'علّم بعض الآيات (٣ كلمات فأكثر) كمحفوظة أولًا.' },
+  next: { name: 'ما الآية التالية؟', icon: '➡️', desc: 'آية حفظتَها، اختر الآية التي تأتي بعدها.', ok: () => nextPairs().length > 0, need: 'علّم آيتين متتاليتين على الأقل من سورة واحدة كمحفوظتين.' },
+  count: { name: 'كم آية في السورة؟', icon: '🧮', desc: 'سورة بدأتَ حفظها، اختر عدد آياتها.', ok: () => Object.keys(S.s).length > 0, need: 'ابدأ حفظ سورة أولًا.' },
   missing: { name: 'الكلمة الناقصة', icon: '❓', desc: 'آية حفظتَها وفيها كلمة ناقصة، اختر الكلمة الصحيحة.', ok: () => eligible(2, 30).length > 0, need: 'علّم بعض الآيات (كلمتين فأكثر) كمحفوظة أولًا.' },
 };
 
@@ -77,6 +104,41 @@ export function buildMissing(prev) {
   return { a, prompt: w.map((x, i) => i === h ? '＿＿＿' : x).join(' '), options: opts, correct, full: a.t };
 }
 
+/** "Which surah?": an ayah the child memorised and that exists in exactly one surah. */
+export function buildWhich(prev) {
+  let pool = whichPool(); if (!pool.length) return null;
+  if (young()) { const short = pool.filter(a => words(a.t).length <= 10); if (short.length) pool = short }
+  let a = pick(pool); for (let t = 0; t < 5 && pool.length > 1 && prev && a.id === prev.id && a.i === prev.i; t++) a = pick(pool);
+  const correct = 'سورة ' + Q[a.id - 1].n;
+  const opts = distinctOptions(correct, () => 'سورة ' + Q[Math.floor(Math.random() * 114)].n, 4);
+  if (!opts) return null;
+  return { a, prompt: a.t, options: opts, correct, full: 'سورة ' + Q[a.id - 1].n + ' · الآية ' + AR(a.i + 1) };
+}
+
+/** "What comes next?": two consecutive memorised ayat; the wrong options are other ayat of the same surah (or of the mushaf). */
+export function buildNext(prev) {
+  let pool = nextPairs(); if (!pool.length) return null;
+  if (young()) { const short = pool.filter(p => words(Q[p.id - 1].v[p.i + 1]).length <= 8); if (short.length) pool = short }
+  let p = pick(pool); for (let t = 0; t < 5 && pool.length > 1 && prev && p.id === prev.id && p.i === prev.i; t++) p = pick(pool);
+  const v = Q[p.id - 1].v, correct = v[p.i + 1];
+  const near = v.filter((t, k) => k !== p.i && k !== p.i + 1 && words(t).length >= 2 && words(t).length <= 22);
+  const opts = distinctOptions(correct, () => near.length >= 3 ? pick(near) : randomAyah().t, 3);
+  if (!opts) return null;
+  return { a: { id: p.id, i: p.i }, prompt: v[p.i], options: opts, correct, full: v[p.i] + ' ' + correct };
+}
+
+/** "How many ayat?": a surah the child started; the wrong options are nearby numbers. */
+export function buildCount(prev) {
+  const ids = Object.keys(S.s).map(Number); if (!ids.length) return null;
+  let id = pick(ids); for (let t = 0; t < 5 && ids.length > 1 && prev && id === prev.id; t++) id = pick(ids);
+  const n = Q[id - 1].v.length, correct = AR(n);
+  const near = [];
+  for (let d = 1; d <= 8; d++) { if (n + d <= 300) near.push(n + d); if (n - d >= 1) near.push(n - d) }
+  const opts = [correct, ...shuffle(near).slice(0, 3).map(AR)];
+  if (opts.length !== 4) return null;
+  return { a: { id, i: 0 }, prompt: 'كم عدد آيات سورة ' + Q[id - 1].n + '؟', options: shuffle(opts), correct, full: 'سورة ' + Q[id - 1].n + ' فيها ' + ayahs(n) + '.' };
+}
+
 /* ---------- play ---------- */
 let G = null;
 let onStars = () => {};
@@ -103,7 +165,7 @@ function leave() { G = null; renderGames() }
 function next() {
   G.round++;
   if (G.round > G.total) return finish();
-  G.cur = G.type === 'complete' ? buildComplete(G.prev) : G.type === 'missing' ? buildMissing(G.prev) : buildOrder();
+  G.cur = ({ complete: buildComplete, missing: buildMissing, which: buildWhich, next: buildNext, count: buildCount, order: buildOrder })[G.type](G.prev);
   if (!G.cur) { G.round--; return finish() }
   G.prev = G.cur.a || null;
   renderGames();

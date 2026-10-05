@@ -2,7 +2,7 @@
 import { $, AR, day, charImg } from './util.js';
 import { Q } from './data.js';
 import { announce } from './motion.js';
-import { S, mem, gameStars, azStats, FRIENDS, kids, activeKid, switchKid, addKid, updateKid, removeKid, save, applyImport, ICONS, MODES } from './state.js';
+import { S, mem, gameStars, azStats, streakNow, friendsFor, shopTheme, shopFrame, weeksDone, kids, activeKid, switchKid, addKid, updateKid, removeKid, save, applyImport, ICONS, MODES } from './state.js';
 import { downloadBackup, lastExport, parseBackup } from './backup.js';
 import { go } from './router.js';
 import { applyReading } from './reading.js';
@@ -17,6 +17,7 @@ const el = (tag, cls, text) => { const e = document.createElement(tag); if (cls)
 export function applyMode() {
   const k = activeKid(); document.body.dataset.mode = k ? k.mode : 'reader';
   applyReading();   // the child's reading size
+  const th = shopTheme(); if (th) document.body.dataset.theme = th; else delete document.body.dataset.theme;   // a pastel colour from the shop
 }
 
 export function renderKidBar() {
@@ -25,6 +26,7 @@ export function renderKidBar() {
   kids().forEach(k => {
     const b = el('button', 'kid'); b.type = 'button'; b.dataset.id = k.id;
     b.setAttribute('aria-pressed', act && k.id === act.id);
+    const fr = shopFrame(k); if (fr) b.dataset.frame = fr;
     b.append(el('span', 'kicon', k.icon), el('span', 'kname', k.name));
     box.appendChild(b);
   });
@@ -34,8 +36,8 @@ export function renderKidBar() {
 function totals() {
   let ay = 0, done = 0;
   Q.forEach((c, k) => { const m = mem(k + 1); ay += m; if (m === c.v.length) done++ });
-  const streak = (S.last === day() || S.last === day(-1)) ? S.streak : 0;
-  return { ay, done, streak, games: gameStars(), az: azStats() };
+  const streak = streakNow();
+  return { ay, done, streak, games: gameStars(), az: azStats(), weeks: weeksDone() };
 }
 const BADGES = [
   { icon: '🌱', name: 'البداية', ok: t => t.ay >= 1 },
@@ -50,7 +52,13 @@ const BADGES = [
   { icon: '🌙', name: 'أذكار المساء', ok: t => t.az.masaa },
   { icon: '😴', name: 'أذكار النوم', ok: t => t.az.nawm },
   { icon: '📿', name: 'ملتزم بالأذكار', ok: t => t.az.days >= 7 },
+  { icon: '🏆', name: 'بطل الأسبوع', ok: t => t.weeks >= 1 },
+  { icon: '👑', name: 'ملك التحديات', ok: t => t.weeks >= 4 },
 ];
+
+/** What the child has earned so far, for the share card. */
+export const kidTotals = totals;
+export const unlockedBadges = () => { const t = totals(); return BADGES.filter(b => b.ok(t)) };
 
 export function renderRewards(id = 'rewards') {
   const box = $(id); box.textContent = '';
@@ -106,7 +114,7 @@ function renderParent() {
       modes.appendChild(b);
     });
     const friends = el('div', 'icons friends'); friends.setAttribute('role', 'group'); friends.setAttribute('aria-label', 'صديق ' + k.name);
-    FRIENDS.forEach(f => {
+    friendsFor(k).forEach(f => {
       const b = el('button', 'chip friendchip'); b.type = 'button';
       b.setAttribute('aria-pressed', f.id === (k.friend || 'rafiq')); b.setAttribute('aria-label', 'الصديق ' + f.name);
       b.append(charImg(f.id), el('span', '', f.name));

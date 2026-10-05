@@ -1,7 +1,8 @@
 // Backup file: export every child's progress as JSON, and import one back after strict validation.
 import { day } from './util.js';
 import { Q } from './data.js';
-import { ICONS, FRIENDS, AZ_KEY, FAV_REF, MAX_FAV, FS_MIN, FS_MAX, snapshot } from './state.js';
+import { ICONS, isFriend, AZ_KEY, FAV_REF, MAX_FAV, FS_MIN, FS_MAX, snapshot } from './state.js';
+import { SHOP, itemOf } from './catalog.js';
 import { PRESETS } from './plan.js';
 
 const APP = 'rafiq-alhifz', VERSION = 1, MAX_BYTES = 2e6, MAX_KIDS = 30;
@@ -79,6 +80,23 @@ function cleanAz(az) {
   return Object.keys(out).length ? out : null;
 }
 
+/** Shop: only known item ids, each once; a theme or frame in use must be owned and of the right type. */
+function cleanShop(sh) {
+  if (!sh || typeof sh !== 'object' || !Array.isArray(sh.own)) return null;
+  const own = [...new Set(sh.own.filter(id => typeof id === 'string' && itemOf(id)))];
+  if (!own.length) return null;
+  const out = { own };
+  for (const type of ['theme', 'frame']) { const it = itemOf(sh[type]); if (it && it.type === type && own.includes(it.id)) out[type] = it.id }
+  return out;
+}
+
+/** An object of ISO dates mapped to 1 (rest days, finished challenge weeks): bad keys are dropped, at most max kept (the latest). */
+function cleanDates(o, max) {
+  if (!o || typeof o !== 'object') return null;
+  const keys = Object.keys(o).filter(d => DATE.test(d) && o[d] === 1).sort().slice(-max);
+  return keys.length ? Object.fromEntries(keys.map(d => [d, 1])) : null;
+}
+
 function cleanKid(k, idx, skip) {
   if (!k || typeof k !== 'object' || !k.S || typeof k.S !== 'object') { skip.kids++; return null }
   const kid = {
@@ -90,7 +108,7 @@ function cleanKid(k, idx, skip) {
   const p = k.plan;
   if (p && Object.hasOwn(PRESETS, p.id) && DATE.test(p.start) && Number.isInteger(p.weeks) && p.weeks >= 1 && p.weeks <= 104) kid.plan = { id: p.id, weeks: p.weeks, start: p.start };
   if (Number.isInteger(k.last) && k.last >= 1 && k.last <= 114) kid.last = k.last;
-  if (FRIENDS.some(f => f.id === k.friend)) kid.friend = k.friend;
+  if (isFriend(k.friend)) kid.friend = k.friend;
   const log = cleanLog(k.log);
   if (log) kid.log = log;
   const az = cleanAz(k.az);
@@ -100,7 +118,17 @@ function cleanKid(k, idx, skip) {
     const fav = [...new Set(k.fav.filter(r => typeof r === 'string' && FAV_REF.test(r)))].slice(0, MAX_FAV);
     if (fav.length) kid.fav = fav;
   }
-  if (k.game && Number.isInteger(k.game.stars) && k.game.stars >= 0 && k.game.stars <= 1e6) kid.game = { stars: k.game.stars };
+  if (k.game && Number.isInteger(k.game.stars) && k.game.stars >= 0 && k.game.stars <= 1e6) {
+    kid.game = { stars: k.game.stars };
+    if (Number.isInteger(k.game.spent) && k.game.spent > 0) kid.game.spent = Math.min(k.game.spent, k.game.stars);   // can never have spent more than was earned
+  }
+  const shop = cleanShop(k.shop);
+  if (shop) kid.shop = shop;
+  const rest = cleanDates(k.rest, 60), wk = cleanDates(k.wk, 26);
+  if (rest) kid.rest = rest;
+  if (wk) kid.wk = wk;
+  // a bought friend can only be used if it is owned
+  if (kid.friend && SHOP.some(i => i.id === kid.friend && i.type === 'friend') && !(shop && shop.own.includes(kid.friend))) delete kid.friend;
   return kid;
 }
 

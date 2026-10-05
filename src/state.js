@@ -1,7 +1,8 @@
 // Progress is kept per child in localStorage under hifz-kids-v1.
 // Each child's S has exactly the shape of the original single-user progress (hifz-progress-v1),
 // which is migrated into the first child once and then left untouched as a backup.
-import { day } from './util.js';
+import { day, shiftDay } from './util.js';
+import { itemOf, EXTRA_FRIENDS } from './catalog.js';
 import { Q } from './data.js';
 
 const KEY = 'hifz-kids-v1';
@@ -15,7 +16,9 @@ export const MODES = { young: 'صغير (٤–٦ سنوات)', reader: 'قارئ
 export const FRIENDS = [
   { id: 'rafiq', name: 'رفيق' }, { id: 'nujum', name: 'نجوم' }, { id: 'shams', name: 'شمس' }, { id: 'ghayma', name: 'غيمة' }, { id: 'sabr', name: 'صبر' },
 ];
-export const isFriend = id => FRIENDS.some(f => f.id === id);
+export const isFriend = id => FRIENDS.some(f => f.id === id) || EXTRA_FRIENDS.some(f => f.id === id);
+/** The free friends plus the ones this child bought in the shop. */
+export const friendsFor = k => [...FRIENDS, ...EXTRA_FRIENDS.filter(f => ((k || {}).shop || {}).own && k.shop.own.includes(f.id))];
 
 /** The active child's progress: {s: {<surah id>: {m: "0101…", d: "YYYY-MM-DD", i: days}}, goal, day, n, streak, last} */
 export const S = fresh();
@@ -66,7 +69,54 @@ export function setLast(id) { const k = activeKid(); if (!k || k.last === id) re
 export const gameStars = () => ((activeKid() || {}).game || {}).stars || 0;
 export function addGameStars(n) {
   const k = activeKid(); if (!k || !(n > 0)) return;
-  k.game = { stars: Math.min(1e6, gameStars() + Math.floor(n)) }; addLog('g', Math.floor(n)); persist();
+  k.game = { ...(k.game || {}), stars: Math.min(1e6, gameStars() + Math.floor(n)) }; addLog('g', Math.floor(n)); persist();
+}
+
+/* Star shop. game.stars is everything ever earned (medals use it), game.spent what was spent; the balance is the difference.
+   Optional field shop: {own: [item ids], theme?: id, frame?: id}. A bought friend is used through the child's friend field. */
+export const starBalance = () => { const g = (activeKid() || {}).game || {}; return Math.max(0, (g.stars || 0) - (g.spent || 0)) };
+export const owns = id => { const k = activeKid(); return !!(k && k.shop && k.shop.own && k.shop.own.includes(id)) };
+export const shopTheme = () => { const k = activeKid(); return k && k.shop && k.shop.theme && owns(k.shop.theme) ? k.shop.theme : '' };
+export const shopFrame = k => (k && k.shop && k.shop.frame && k.shop.own && k.shop.own.includes(k.shop.frame)) ? k.shop.frame : '';
+/** Buys an item with stars. Returns 'ok' | 'owned' | 'poor' | 'unknown'. */
+export function buyItem(id) {
+  const k = activeKid(), it = itemOf(id); if (!k || !it) return 'unknown';
+  if (owns(id)) return 'owned';
+  if (starBalance() < it.price) return 'poor';
+  k.game = { ...(k.game || {}), spent: ((k.game || {}).spent || 0) + it.price };
+  const sh = k.shop || (k.shop = { own: [] }); sh.own.push(id);
+  persist(); return 'ok';
+}
+/** Uses an owned item: a friend becomes the child's friend, a theme or frame is switched on. Passing the item that is already on switches it off (themes and frames). */
+export function useItem(id) {
+  const k = activeKid(), it = itemOf(id); if (!k || !it || !owns(id)) return false;
+  if (it.type === 'friend') k.friend = id;
+  else { const sh = k.shop, key = it.type; if (sh[key] === id) delete sh[key]; else sh[key] = id }
+  persist(); return true;
+}
+
+/* Rest days and weekly challenges. Optional fields on the child: rest {date: 1} (days off that keep the streak alive,
+   one per week) and wk {week start date: 1} (weeks whose challenge was finished). Weeks start on Saturday. */
+export const weekStartOf = iso => { const w = new Date(iso + 'T12:00:00').getDay(); return shiftDay(iso, -((w + 1) % 7)) };
+export const restDays = () => (activeKid() || {}).rest || {};
+export const restUsedThisWeek = () => { const ws = weekStartOf(day()); return Object.keys(restDays()).some(d => weekStartOf(d) === ws) };
+/** True when every day between the last active day and today is a rest day (so the streak did not break). */
+const gapIsRest = (last, rest) => { let d = day(-1); for (let i = 0; i < 9; i++) { if (d === last) return true; if (!rest[d]) return false; d = shiftDay(d, -1) } return false };
+/** The streak as it stands now: alive if the child was active today, or only rest days lie between then and today. */
+export const streakNow = (p = S, rest = restDays()) => (!p.last ? 0 : p.last === day() || gapIsRest(p.last, rest) ? p.streak : 0);
+export function useRestDay() {
+  const k = activeKid(); if (!k || restUsedThisWeek()) return false;
+  const r = k.rest || (k.rest = {}); r[day()] = 1;
+  const cutoff = day(-60); for (const d of Object.keys(r)) if (d < cutoff) delete r[d];
+  persist(); return true;
+}
+export const weeksDone = () => Object.keys((activeKid() || {}).wk || {}).length;
+export const weekDone = ws => !!((activeKid() || {}).wk || {})[ws];
+export function markWeekDone(ws) {
+  const k = activeKid(); if (!k) return false;
+  const w = k.wk || (k.wk = {}); if (w[ws]) return false;
+  w[ws] = 1; const keep = Object.keys(w).sort().slice(-26); for (const d of Object.keys(w)) if (!keep.includes(d)) delete w[d];
+  persist(); return true;
 }
 
 /* Activity log for the weekly report: per day {a: ayat memorised, r: surah reviews, w: weak ayat mastered, g: game stars}.
@@ -184,7 +234,7 @@ export function bump(delta) {
   addLog('a', delta);
   if (S.day !== day()) { S.day = day(); S.n = 0 }
   S.n = Math.max(0, S.n + delta);
-  if (delta > 0 && S.last !== day()) { S.streak = (S.last === day(-1) ? S.streak : 0) + 1; S.last = day() }
+  if (delta > 0 && S.last !== day()) { S.streak = (gapIsRest(S.last, restDays()) ? S.streak : 0) + 1; S.last = day() }
 }
 
 /** Marks ayah i of surah id as memorised (on) or not. Returns +1, -1 or 0 for the daily count. */

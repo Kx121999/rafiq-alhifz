@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="200" height="200" fill="none">
+  <style>
+  .blink{transform-box:fill-box;transform-origin:center;animation:blink 4.2s infinite}
+  @keyframes blink{0%,92%,100%{transform:scaleY(1)}95%{transform:scaleY(.08)}}
+  .sway{transform-box:view-box;transform-origin:100px 184px;animation:sway 3.4s ease-in-out infinite}
+  @keyframes sway{0%,100%{transform:rotate(-3deg)}50%{transform:rotate(3deg)}}
+  @media (prefers-reduced-motion:reduce){*{animation:none!important}}
+</style>
+  <ellipse cx="100" cy="186" rx="44" ry="7" fill="#000" opacity=".12"/>
+  <g class="sway">
+    <path d="M100 120v62" stroke="#3f9e57" stroke-width="9" stroke-linecap="round"/>
+    <path d="M100 160c-22-2-36-12-40-28 22-2 36 8 40 28z" fill="#5bc470" stroke="#3f9e57" stroke-width="4" stroke-linejoin="round"/>
+    <path d="M100 148c20-2 34-12 38-26-20-2-34 8-38 26z" fill="#5bc470" stroke="#3f9e57" stroke-width="4" stroke-linejoin="round"/>
+    <g fill="#ff8fb1" stroke="#e8628d" stroke-width="5"><circle cx="100" cy="44" r="24"/><circle cx="144" cy="76" r="24"/><circle cx="127" cy="124" r="24" transform="translate(-12 -8)"/><circle cx="73" cy="124" r="24" transform="translate(12 -8)"/><circle cx="56" cy="76" r="24"/></g>
+    <circle cx="100" cy="86" r="38" fill="#ffd34d" stroke="#f0a800" stroke-width="5"/>
+    <g class="blink"><ellipse cx="88" cy="82" rx="5" ry="7.5" fill="#1b2e44"/><ellipse cx="112" cy="82" rx="5" ry="7.5" fill="#1b2e44"/><circle cx="90" cy="79.5" r="2" fill="#fff"/><circle cx="114" cy="79.5" r="2" fill="#fff"/></g>
+    <circle cx="80" cy="96" r="6" fill="#ff8f70" opacity=".6"/><circle cx="120" cy="96" r="6" fill="#ff8f70" opacity=".6"/>
+    <path d="M91 98c4 8 14 8 18 0" stroke="#1b2e44" stroke-width="4" stroke-linecap="round"/>
+  </g>
+</svg>

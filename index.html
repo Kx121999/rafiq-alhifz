@@ -95,6 +95,10 @@
       <a class="tile" href="#/adhkar"><i aria-hidden="true">📿</i><b>الأذكار</b></a>
       <a class="tile" href="#/search"><i aria-hidden="true">🔍</i><b>بحث</b></a>
       <a class="tile" href="#/report"><i aria-hidden="true">📊</i><b>التقرير</b></a>
+      <a class="tile" href="#/shop"><i aria-hidden="true">🛍️</i><b>المتجر</b></a>
+      <a class="tile" href="#/challenge"><i aria-hidden="true">🏆</i><b>التحدّي</b></a>
+      <a class="tile" href="#/share"><i aria-hidden="true">🖼️</i><b>بطاقتي</b></a>
+      <a class="tile" href="#/family"><i aria-hidden="true">👨‍👩‍👧</i><b>العائلة</b></a>
     </nav>
     <section class="rewards" id="rewards" aria-label="النجوم والأوسمة"></section>
   </main>
@@ -176,6 +180,33 @@
     <div class="azbar"><span class="fsctl" role="group" aria-label="حجم الخط"><button type="button" class="btn fsbtn" data-fs="-1" aria-label="تصغير الخط">أ−</button><span class="fsval" aria-hidden="true"></span><button type="button" class="btn fsbtn" data-fs="1" aria-label="تكبير الخط">أ+</button></span><button type="button" class="btn" id="azFocus" aria-pressed="false">قراءة مركّزة</button></div>
     <div id="azBox" class="azbox" aria-busy="true"></div>
     <p class="sr" id="azLive" role="status"></p>
+  </main>
+
+  <!-- المتجر -->
+  <main class="page" id="page-shop" data-page="shop" tabindex="-1" hidden>
+    <header class="banner b-sun"><div><h1 class="ptitle">متجر النجوم</h1><p>اصرف نجوم الألعاب على أشياء جميلة</p></div><img class="char" src="/chars/qamar.svg" alt="" width="84" height="84"></header>
+    <div id="shopBox" class="shopbox"></div>
+  </main>
+
+  <!-- تحدّي الأسبوع -->
+  <main class="page" id="page-challenge" data-page="challenge" tabindex="-1" hidden>
+    <header class="banner b-coral"><div><h1 class="ptitle">تحدّي الأسبوع</h1><p>هدف صغير كل أسبوع وجائزة</p></div><img class="char" src="/chars/shams.svg" alt="" width="84" height="84"></header>
+    <div id="chBox" class="chbox"></div>
+  </main>
+
+  <!-- بطاقة الإنجاز -->
+  <main class="page" id="page-share" data-page="share" tabindex="-1" hidden>
+    <header class="banner b-sky"><div><h1 class="ptitle">بطاقة الإنجاز</h1><p>صورة جميلة تشاركها مع أهلك</p></div><img class="char" src="/chars/nujum.svg" alt="" width="84" height="84"></header>
+    <div id="shareBox" class="sharebox"></div>
+  </main>
+
+  <!-- تقرير العائلة -->
+  <main class="page" id="page-family" data-page="family" tabindex="-1" hidden>
+    <div class="noprint certbar">
+      <a class="btn" href="#/dashboard">→ رجوع</a>
+      <button type="button" class="btn primary" id="printFamily">طباعة التقرير</button>
+    </div>
+    <article class="report" id="famBox" aria-label="تقرير العائلة"></article>
   </main>
 
   <!-- السورة -->

@@ -14,6 +14,10 @@ import { initTour, needsTour, openTour } from './tour.js';
 import { renderToday } from './dashboard.js';
 import { renderAdhkar, refreshAdhkar } from './adhkar.js';
 import { initReading, setFocusRead } from './reading.js';
+import { renderShop, onShopChange } from './shop.js';
+import { renderChallenge, checkChallenge } from './challenge.js';
+import { renderShare } from './share.js';
+import { renderFamily } from './family.js';
 import { initReminders, setReminderContext } from './remind.js';
 import { renderReview, renderWeak, onReviewGraded, clearReviewNote, dueList } from './review.js';
 import { renderPlan, onPlanChanged } from './plan.js';
@@ -25,14 +29,15 @@ function render() {
   if (!Q.length) return;
   applyMode(); renderSummary(); renderToday(); renderRewards(); renderList(); renderReview(); renderWeak(); renderPlan(); updateDue(); renderAchievements();
   if (!$('page-games').hidden) renderGames();
-  refreshAdhkar();
+  refreshAdhkar(); checkChallenge();
+  for (const [id, fn] of [['shop', renderShop], ['challenge', renderChallenge], ['share', renderShare], ['family', renderFamily]]) if (!$('page-' + id).hidden) fn();
   if (view.cur) renderSurah(false);
 }
 function updateDue() {
   const n = dueList().length + weakList().length, c = $('dueCount');
   c.textContent = AR(n); c.hidden = !n; c.setAttribute('aria-label', AR(n) + ' للمراجعة');
 }
-const refreshStats = () => { renderSummary(); renderToday(); renderRewards(); updateDue(); announceBadges() };
+const refreshStats = () => { checkChallenge(); renderSummary(); renderToday(); renderRewards(); updateDue(); announceBadges() };
 
 /** Celebrates when a surah goes from incomplete to fully memorised. */
 function checkCompleted(id, wasComplete) {
@@ -69,6 +74,12 @@ for (const p of ['home', 'about']) onPage(p, () => { view.cur = 0 });
 onPage('review', () => { view.cur = 0; clearReviewNote(); render() });
 onPage('plan', () => { view.cur = 0; render() });
 onPage('adhkar', arg => { view.cur = 0; renderAdhkar(arg) });
+onPage('shop', () => { view.cur = 0; renderShop() });
+onPage('challenge', () => { view.cur = 0; checkChallenge(); renderChallenge() });
+onPage('share', () => { view.cur = 0; renderShare() });
+onPage('family', () => { view.cur = 0; if (Q.length) renderFamily() });
+onShopChange(() => render());
+$('printFamily').addEventListener('click', () => window.print());
 onPage('games', () => { view.cur = 0; resetGame(); render(); renderGames() });
 onPage('achievements', () => { view.cur = 0; render() });
 onPage('certificate', arg => {
@@ -76,7 +87,7 @@ onPage('certificate', arg => {
   if (!renderCertificate(+arg)) return '/achievements';
   document.title = 'شهادة سورة ' + Q[+arg - 1].n + ' · رفيق الحفظ';
 });
-onGameStars(() => { renderRewards(); renderAchievements(); announceBadges() });
+onGameStars(() => { checkChallenge(); renderRewards(); renderAchievements(); announceBadges() });
 $('printCert').addEventListener('click', () => window.print());
 $('printReport').addEventListener('click', () => window.print());
 onReviewGraded(() => { renderSummary(); renderToday(); renderRewards(); updateDue() });

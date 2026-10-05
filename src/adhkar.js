@@ -6,6 +6,7 @@ import { loadAdhkar } from './data.js';
 import { azToday, azSave, favList, isFav, toggleFav } from './state.js';
 import { celebrate, markPop } from './motion.js';
 import { sfx } from './sound.js';
+import { checkChallenge } from './challenge.js';
 import { AZ_TABS, tabOf, azNow, COUNT_FIX } from './azmeta.js';
 
 let token = 0, lastArg;
@@ -84,7 +85,7 @@ function showList(box, key, entries, title, { back = false, persist = true, onUn
   const commit = (i, popped) => {
     paint(i); summary();
     const all = doneN() === entries.length;
-    if (persist) azSave(key, counts, all);
+    if (persist) { azSave(key, counts, all); if (all) checkChallenge() }
     if (live) live.textContent = AR(counts[i]) + ' من ' + AR(entries[i].n);
     if (popped) markPop(cards[i].btn);
     if (persist && all && !finished) { celebrate('ما شاء الله، أتممتَ ' + title, true); tabsBar(tabOf(key) ? key : null) }

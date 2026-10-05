@@ -551,3 +551,56 @@ footer.foot{margin-top:6px}
 .remrows{display:flex;flex-direction:column;gap:8px}
 .remrow{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
 .remrow input[type=time]{min-height:44px;padding:4px 10px;border:2px solid var(--line);border-radius:14px;background:var(--surface);font-size:1rem}
+
+/* ======================= star shop, themes, name frames ======================= */
+.tile:nth-child(9){--tint:var(--violet)} .tile:nth-child(10){--tint:var(--sun)} .tile:nth-child(11){--tint:var(--sky)} .tile:nth-child(12){--tint:var(--rose)}
+.shopbal{display:flex;align-items:center;gap:8px;margin:0;font-size:1.1rem;font-weight:600}
+.shopbal b{font-family:var(--display);font-weight:800;font-size:2rem;color:var(--accent);font-variant-numeric:tabular-nums}
+.shopbox,.chbox,.sharebox{display:flex;flex-direction:column;gap:14px}
+.shopsec{background:var(--surface);border:2px solid var(--line);border-radius:var(--r);box-shadow:0 4px 0 var(--line);padding:16px 18px;display:flex;flex-direction:column;gap:8px}
+.shopsec h2{margin:0;font-family:var(--display);font-weight:800;font-size:1.4rem}
+.shoplist{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:10px}
+.shopitem{display:grid;grid-template-columns:auto minmax(0,1fr);gap:4px 12px;align-items:center;padding:10px 12px;border:2px solid var(--line);border-radius:20px;background:var(--bg)}
+.shopitem .btn{grid-column:1 / -1;min-height:44px}
+.shopinfo{display:flex;flex-direction:column;line-height:1.35}
+.shopinfo b{font-family:var(--display);font-weight:700;font-size:1.1rem}
+.shpre{width:84px;height:84px;display:grid;place-items:center}
+.shpre .char{--cs:84px;cursor:default}
+.shpre.sw{width:64px;height:64px;border-radius:50%;border:3px solid var(--line);margin:10px}
+.frameprev{min-height:40px;padding:2px 12px 2px 4px;font-size:.85rem;pointer-events:none}
+.frameprev .kicon{width:28px;height:28px;font-size:1.1rem}
+
+body[data-theme="lilac"]{--bg:#fdf4ff;background:linear-gradient(180deg,#e6dcff 0,#efe9ff 170px,var(--bg) 520px) no-repeat var(--bg)}
+body[data-theme="mint"]{--bg:#f4fff0;background:linear-gradient(180deg,#d4f5e6 0,#e4f9ee 170px,var(--bg) 520px) no-repeat var(--bg)}
+body[data-theme="peach"]{--bg:#fff6e5;background:linear-gradient(180deg,#ffe3d6 0,#ffeee3 170px,var(--bg) 520px) no-repeat var(--bg)}
+body[data-theme="rose"]{--bg:#fff0f6;background:linear-gradient(180deg,#ffd9ea 0,#ffe7f1 170px,var(--bg) 520px) no-repeat var(--bg)}
+
+.kid[data-frame="gold"]{border-color:#b9820f;box-shadow:0 3px 0 #b9820f,0 0 0 4px #ffe08a}
+.kid[data-frame="rainbow"]{border:3px solid transparent;background:linear-gradient(var(--surface),var(--surface)) padding-box,linear-gradient(120deg,#ff6b4a,#ffb800,#4cd964,#3b9eff,#9b6bff) border-box;box-shadow:0 3px 0 #9b6bff}
+.kid[data-frame="rainbow"][aria-pressed="true"]{background:linear-gradient(var(--accent-soft),var(--accent-soft)) padding-box,linear-gradient(120deg,#ff6b4a,#ffb800,#4cd964,#3b9eff,#9b6bff) border-box}
+
+/* ======================= weekly challenge ======================= */
+.chcard{position:relative;background:var(--surface);border:2px solid var(--line);border-radius:var(--r);box-shadow:0 4px 0 var(--line);padding:18px 20px;display:flex;flex-direction:column;gap:10px;align-items:flex-start}
+.chcard.done{background:var(--accent-soft);border-color:var(--accent)}
+.chcard h2{margin:0;font-family:var(--display);font-weight:800;font-size:1.4rem}
+.chtitle{margin:0;font-family:var(--display);font-weight:700;font-size:1.7rem;line-height:1.4}
+.chicon{font-size:2.6rem;line-height:1}
+.chcard .bar{align-self:stretch}
+.chcard p{margin:0}
+.chweeks{margin:0;font-weight:600}
+
+/* ======================= share card ======================= */
+.sharecard{width:100%;max-width:26rem;height:auto;align-self:center;border-radius:28px;border:2px solid var(--line);box-shadow:0 6px 0 var(--line)}
+.sharebox .acts{display:flex;gap:10px;flex-wrap:wrap;justify-content:center}
+.sharebox .note{text-align:center}
+
+/* ======================= family report ======================= */
+.famchart{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:8px}
+.famchart li{display:grid;grid-template-columns:minmax(6rem,9rem) 1fr 2.5rem;gap:10px;align-items:center}
+.famname{font-weight:600;overflow-wrap:anywhere}
+.rbar.h{height:18px;align-items:stretch}
+.rbar.h i{height:100%;border-radius:8px}
+.famgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:12px}
+.famcard{border:1px solid #d5dfd9;border-radius:10px;padding:12px 14px;background:#fff;break-inside:avoid}
+.famcard h3{font-family:var(--display);font-weight:500;font-size:1.2rem;color:#0e6b50;margin:0 0 4px}
+@media (min-width:1180px){#page-family,#page-challenge,#page-share{width:100%;max-width:58rem;margin-inline:auto}}

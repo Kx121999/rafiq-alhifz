@@ -1,6 +1,6 @@
 import { $, AR, day, norm, charSrc } from './util.js';
 import { Q } from './data.js';
-import { S, activeKid, mem, isDue, weakList, friendOf } from './state.js';
+import { S, activeKid, mem, isDue, weakList, friendOf, streakNow } from './state.js';
 
 let filter = 'all';
 export const setFilter = f => { filter = f };
@@ -22,7 +22,7 @@ export function renderSummary() {
   $('sBar').style.width = (ay ? Math.max(3, ay / 6236 * 100) : 0).toFixed(2) + '%';
   $('sSurahs').textContent = AR(done) + ' من ١١٤';
   $('sToday').textContent = AR(S.n) + ' / ' + AR(S.goal);
-  $('sStreak').textContent = AR((S.last === day() || S.last === day(-1)) ? S.streak : 0);
+  $('sStreak').textContent = AR(streakNow());
   const dueCount = Q.filter((_, i) => isDue(i + 1)).length;
   $('bubble').textContent = moodText(ay, S.goal, S.n, dueCount, weakList().length);
   $('moodChar').src = charSrc(friendOf());

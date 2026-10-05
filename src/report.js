@@ -2,7 +2,7 @@
 // It reads the activity log (daily totals), so it only knows about days since the log started.
 import { $, AR, ayahs, day, el, nujum, shiftDay } from './util.js';
 import { Q } from './data.js';
-import { S, activeKid, activityLog, mem, kidPlan, weakList } from './state.js';
+import { S, activeKid, activityLog, mem, kidPlan, weakList, streakNow } from './state.js';
 import { planStats } from './plan.js';
 import { dueList } from './review.js';
 
@@ -56,7 +56,7 @@ export function renderReport(offset = 0) {
   // overall standing (now, not per week)
   let memorised = 0, done = 0;
   Q.forEach((c, i) => { const m = mem(i + 1); memorised += m; if (m === c.v.length) done++ });
-  const streak = (S.last === day() || S.last === day(-1)) ? S.streak : 0;
+  const streak = streakNow();
   const rows = el('ul', 'rrows');
   const row = (label, value) => { const li = el('li'); li.append(el('span', '', label), el('b', '', value)); rows.appendChild(li) };
   row('الآيات المحفوظة إجمالًا', AR(memorised) + ' من ' + AR(6236));

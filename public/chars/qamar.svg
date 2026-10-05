@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="200" height="200" fill="none">
+  <style>
+  .blink{transform-box:fill-box;transform-origin:center;animation:blink 4.2s infinite}
+  @keyframes blink{0%,92%,100%{transform:scaleY(1)}95%{transform:scaleY(.08)}}
+  .bobu{animation:bobu 2.8s ease-in-out infinite}
+  @keyframes bobu{0%,100%{transform:translateY(0) rotate(-3deg)}50%{transform:translateY(-7px) rotate(3deg)}}
+  .tw{transform-box:fill-box;transform-origin:center;animation:tw 2.4s ease-in-out infinite}
+  @keyframes tw{0%,100%{opacity:.35;transform:scale(.7)}50%{opacity:1;transform:scale(1.15)}}
+  @media (prefers-reduced-motion:reduce){*{animation:none!important}}
+</style>
+  <ellipse cx="100" cy="184" rx="50" ry="8" fill="#000" opacity=".12"/>
+  <path class="tw" d="M164 34l4 11 11 4-11 4-4 11-4-11-11-4 11-4z" fill="#ffc233"/>
+  <path class="tw" style="animation-delay:-1.2s" d="M36 58l3 8 8 3-8 3-3 8-3-8-8-3 8-3z" fill="#ffc233"/>
+  <g class="bobu" style="transform-origin:100px 100px">
+    <path d="M128 22C84 24 50 58 50 102s34 78 78 80c-52 4-88-36-88-82S76 18 128 22z" fill="#ffd34d" stroke="#f0a800" stroke-width="7" stroke-linejoin="round"/>
+    <g class="blink"><ellipse cx="86" cy="104" rx="5.5" ry="8" fill="#1b2e44"/><circle cx="88" cy="101" r="2.2" fill="#fff"/></g>
+    <circle cx="74" cy="122" r="7" fill="#ff8f70" opacity=".55"/>
+    <path d="M78 134c5 8 18 7 22-3" stroke="#1b2e44" stroke-width="4" stroke-linecap="round"/>
+  </g>
+</svg>
