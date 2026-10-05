@@ -616,3 +616,7 @@ body[data-theme="rose"]{--bg:#fff0f6;background:linear-gradient(180deg,#ffd9ea 0
 .chkrow span{color:var(--muted);font-size:.92rem}
 .chkmark{font-size:1.4rem;line-height:1.3}
 @media (min-width:1180px){#page-check{width:100%;max-width:58rem;margin-inline:auto}}
+
+/* ======================= install guide ======================= */
+.installsteps{margin:8px 0 12px;padding-inline-start:1.4rem;display:flex;flex-direction:column;gap:10px;line-height:1.7}
+.installsteps li::marker{font-weight:700;color:var(--accent)}

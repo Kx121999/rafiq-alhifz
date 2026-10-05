@@ -53,7 +53,7 @@
       <div class="acts">
         <a class="btn primary" href="#/mushaf">ابدأ الحفظ</a>
         <a class="btn" href="#/dashboard">لوحتي</a>
-        <button type="button" class="btn" id="installBtn" hidden>ثبّت التطبيق</button>
+        <button type="button" class="btn" id="installBtn">📲 ثبّت التطبيق</button>
       </div>
     </section>
     <ul class="feats">
@@ -260,6 +260,8 @@
       <p>عند حفظ أول آية من سورة تُجدول مراجعتها بعد يوم. كلما أتقنتَ المراجعة تضاعفت المدة (يومان، أربعة، ثمانية…) حتى ٣٠ يومًا، وإن احتجت إعادة عادت إلى يوم واحد.</p>
       <h2>تثبيت التطبيق والعمل بدون إنترنت</h2>
       <p>بعد فتح الموقع مرة واحدة يعمل المصحف والتفسير وتقدّمك بدون إنترنت. على أندرويد وكروم يظهر زر «ثبّت التطبيق» في الصفحة الرئيسية. على أيفون: زر المشاركة في سفاري ثم «إضافة إلى الشاشة الرئيسية». الصوت وحده يحتاج إنترنت.</p>
+      <h2>تثبيت التطبيق</h2>
+      <p><button type="button" class="btn" data-install>📲 كيف أثبّت التطبيق؟</button></p>
       <h2>فحص الجهاز</h2>
       <p><a class="btn" href="#/check">افحص هذا الجهاز</a></p>
       <h2>جولة تعريفية</h2>
@@ -283,6 +285,13 @@
 <div id="updateBar" class="updatebar" role="status" hidden><span>تم تحديث الموقع.</span> <button type="button" class="btn primary" id="updateReload">تحديث الآن</button></div>
 
 <div id="celebrate" class="celebrate" role="status" aria-live="polite" hidden></div>
+
+<dialog id="installDlg" class="dlg" aria-labelledby="installT">
+  <h2 id="installT">تثبيت التطبيق</h2>
+  <ol class="installsteps" id="installSteps"></ol>
+  <p class="note">بعد التثبيت يعمل رفيق الحفظ بدون إنترنت (ما عدا التلاوة) ويفتح من أيقونته مثل أي تطبيق.</p>
+  <div class="acts"><button type="button" class="btn primary" data-close>تم</button></div>
+</dialog>
 
 <dialog id="tour" class="dlg tour" aria-labelledby="tourT"><div id="tourBody"></div></dialog>
 

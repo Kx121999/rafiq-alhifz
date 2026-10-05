@@ -46,6 +46,7 @@ const STATES = [
   ['adhkar: focus reading + bigger text', '#/adhkar/sabah', async p => { await p.waitForSelector('.azcard', { timeout: 20000 }); await p.evaluate(() => { document.querySelector('[data-fs="1"]').click(); document.querySelector('[data-fs="1"]').click(); document.getElementById('azFocus').click() }); await wait(300) }],
   ['adhkar: all categories', '#/adhkar/all', p => p.waitForSelector('.azcat', { timeout: 20000 })],
   ['adhkar: one category', '#/adhkar/c7', p => p.waitForSelector('.azcard', { timeout: 20000 })],
+  ['install guide', '#/', click('ثبّت التطبيق')],
   ['device check', '#/check'],
   ['device check: results', '#/check', async p => { await p.evaluate(() => document.getElementById('chkRun').click()); await p.waitForFunction(() => document.querySelectorAll('.chkrow').length > 8, { timeout: 30000 }); await wait(300) }],
   ['shop', '#/shop', p => p.waitForSelector('.shopitem', { timeout: 20000 })],
@@ -111,8 +112,11 @@ for (let i = 0; i < wideJobs.length; i += 6) await Promise.all(wideJobs.slice(i,
 // WCAG 1.4.10 reflow: nothing may force sideways scrolling at 320 CSS px
 const REFLOW = ['#/', '#/dashboard', '#/mushaf', '#/search/' + encodeURIComponent('الرحمن'), '#/review', '#/plan', '#/games', '#/achievements', '#/certificate/114', '#/report', '#/about', '#/surah/112', '#/adhkar/sabah', '#/adhkar/all', '#/shop', '#/challenge', '#/share', '#/family', '#/check'];
 for (const hash of REFLOW) for (const width of [320, 768, 1180, 1280]) {
-  const { ctx, page } = await open('dark', hash, width, 640);
-  const o = await page.evaluate(() => ({ sw: document.documentElement.scrollWidth, iw: document.documentElement.clientWidth }));
+  let ctx, o;
+  for (let attempt = 1; attempt <= 2 && !o; attempt++) {   // a page can detach on a busy machine: look again once
+    try { let page; ({ ctx, page } = await open('dark', hash, width, 640)); o = await page.evaluate(() => ({ sw: document.documentElement.scrollWidth, iw: document.documentElement.clientWidth })) }
+    catch (e) { if (attempt === 2) throw e; try { await ctx.close() } catch (e2) {} }
+  }
   if (o.sw > o.iw + 1) failures.push({ where: width + 'px / ' + hash, id: 'reflow', impact: 'serious', help: 'Page scrolls sideways at ' + width + ' px', nodes: [o.sw + ' > ' + o.iw] });
   await ctx.close();
 }
