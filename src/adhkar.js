@@ -3,31 +3,35 @@
 // per dhikr, saved per child and per day (see azSave in state.js), and a small celebration when a list is finished.
 import { $, AR, el, norm } from './util.js';
 import { loadAdhkar } from './data.js';
-import { azToday, azSave } from './state.js';
+import { azToday, azSave, favList, isFav, toggleFav } from './state.js';
 import { celebrate, markPop } from './motion.js';
+import { sfx } from './sound.js';
 import { AZ_TABS, tabOf, azNow, COUNT_FIX } from './azmeta.js';
 
 let token = 0, lastArg;
 
+const FAV = { key: 'fav', label: 'المفضلة', icon: '⭐' };
 const ALL = { key: 'all', label: 'كل الأذكار', icon: '📚' };
 const times = n => n === 1 ? 'ذكر واحد' : n === 2 ? 'ذكران' : n <= 10 ? AR(n) + ' أذكار' : AR(n) + ' ذكرًا';
 
 function tabsBar(active) {
   const nav = $('azTabs'); nav.textContent = '';
-  [...AZ_TABS, ALL].forEach(t => {
+  [...AZ_TABS, FAV, ALL].forEach(t => {
     const a = el('a', 'chip aztab'); a.href = '#/adhkar/' + t.key;
     const icon = el('span', '', t.icon); icon.setAttribute('aria-hidden', 'true');
     a.append(icon, el('span', '', t.label));
-    if (t.key !== 'all' && azToday(t.key).d) { const ok = el('span', 'azok', '✓'); ok.setAttribute('aria-hidden', 'true'); a.append(ok, el('span', 'sr', 'تمّ اليوم')) }
+    if (t.key !== 'all' && t.key !== 'fav' && azToday(t.key).d) { const ok = el('span', 'azok', '✓'); ok.setAttribute('aria-hidden', 'true'); a.append(ok, el('span', 'sr', 'تمّ اليوم')) }
     if (t.key === active) a.setAttribute('aria-current', 'page');
     nav.appendChild(a);
   });
 }
 
-/** One list of adhkar with its counters. key is the progress key, title what the heading says. */
-function showList(box, key, cat, title, back) {
-  const entries = cat.array.map(a => ({ text: a.text, n: COUNT_FIX[cat.id + '.' + a.id] || a.count }));
-  const saved = azToday(key), counts = entries.map((e, i) => Math.min(saved.c[i] || 0, e.n));
+const entryOf = (cat, a) => ({ ref: cat.id + '.' + a.id, text: a.text, n: COUNT_FIX[cat.id + '.' + a.id] || a.count });
+
+/** One list of adhkar with its counters. key is the progress key, title what the heading says.
+    With persist off (the favourites tab, whose list changes) counts live only on screen and nothing is celebrated. */
+function showList(box, key, entries, title, { back = false, persist = true, onUnfav } = {}) {
+  const saved = persist ? azToday(key) : { c: [] }, counts = entries.map((e, i) => Math.min(saved.c[i] || 0, e.n));
   const doneN = () => entries.filter((e, i) => counts[i] >= e.n).length;
   let finished = doneN() === entries.length;
 
@@ -47,12 +51,14 @@ function showList(box, key, cat, title, back) {
     const btn = el('button', 'azbtn'); btn.type = 'button';
     const more = el('button', 'azmini', 'أتممتُها'); more.type = 'button';
     const redo = el('button', 'azmini', 'إعادة'); redo.type = 'button';
+    const fav = el('button', 'azfav'); fav.type = 'button';
     row.append(btn);
     if (e.n >= 10) row.append(more);
     if (e.n > 1) row.append(redo);
+    row.append(fav);
     li.append(text, row);
     ol.appendChild(li);
-    return { li, btn, more, redo };
+    return { li, btn, more, redo, fav };
   });
 
   const live = $('azLive');
@@ -64,6 +70,11 @@ function showList(box, key, cat, title, back) {
     c.btn.setAttribute('aria-pressed', done);
     c.more.hidden = done; c.redo.hidden = !counts[i];
   };
+  const paintFav = i => {
+    const on = isFav(entries[i].ref), f = cards[i].fav;
+    f.textContent = on ? '★ في المفضلة' : '☆ أضف للمفضلة'; f.setAttribute('aria-pressed', on);
+    f.setAttribute('aria-label', (on ? 'إزالة الذكر ' : 'إضافة الذكر ') + AR(i + 1) + (on ? ' من المفضلة' : ' إلى المفضلة'));
+  };
   const summary = () => {
     const d = doneN();
     fill.style.width = Math.round((d / entries.length) * 100) + '%';
@@ -73,24 +84,31 @@ function showList(box, key, cat, title, back) {
   const commit = (i, popped) => {
     paint(i); summary();
     const all = doneN() === entries.length;
-    azSave(key, counts, all);
+    if (persist) azSave(key, counts, all);
     if (live) live.textContent = AR(counts[i]) + ' من ' + AR(entries[i].n);
     if (popped) markPop(cards[i].btn);
-    if (all && !finished) { celebrate('ما شاء الله، أتممتَ ' + title, true); tabsBar(tabOf(key) ? key : null) }
-    if (!all && finished) tabsBar(tabOf(key) ? key : null);
+    if (persist && all && !finished) { celebrate('ما شاء الله، أتممتَ ' + title, true); tabsBar(tabOf(key) ? key : null) }
+    if (persist && !all && finished) tabsBar(tabOf(key) ? key : null);
     finished = all;
   };
   cards.forEach((c, i) => {
     const n = entries[i].n;
     c.btn.addEventListener('click', () => {
       if (n === 1) counts[i] = counts[i] ? 0 : 1; else if (counts[i] < n) counts[i]++; else return;
+      if (counts[i] < n) sfx('tap');   // finishing a dhikr plays the star sound instead
       commit(i, counts[i] >= n);
     });
     c.more.addEventListener('click', () => { counts[i] = n; commit(i, true) });
     c.redo.addEventListener('click', () => { counts[i] = 0; commit(i, false) });
-    paint(i);
+    c.fav.addEventListener('click', () => {
+      const on = toggleFav(entries[i].ref);
+      if (live) live.textContent = on ? 'أُضيف إلى المفضلة' : 'أُزيل من المفضلة';
+      if (onUnfav && !on) { onUnfav(); return }
+      paintFav(i);
+    });
+    paint(i); paintFav(i);
   });
-  reset.addEventListener('click', () => { counts.fill(0); cards.forEach((c, i) => paint(i)); summary(); azSave(key, counts, false); const was = finished; finished = false; if (was) tabsBar(tabOf(key) ? key : null) });
+  reset.addEventListener('click', () => { counts.fill(0); cards.forEach((c, i) => paint(i)); summary(); if (persist) azSave(key, counts, false); const was = finished; finished = false; if (persist && was) tabsBar(tabOf(key) ? key : null) });
   summary();
   box.append(head, ol);
 }
@@ -114,12 +132,26 @@ function showAll(box, data) {
   box.append(q, ul);
 }
 
-/** Shows #/adhkar/<tab | c<id>>; with no argument, the list that fits the time of day. */
+/** The adhkar this child starred, from every category, in the order they were added. */
+function showFavs(box, data) {
+  const entries = favList().map(ref => {
+    const [c, e] = ref.split('.').map(Number), cat = data.find(x => x.id === c), a = cat && cat.array.find(x => x.id === e);
+    return a ? entryOf(cat, a) : null;
+  }).filter(Boolean);
+  if (!entries.length) {
+    const p = el('p', 'empty', 'لم تضف أذكارًا إلى المفضلة بعد. اضغط «☆ أضف للمفضلة» تحت أي ذكر ليظهر هنا.');
+    const a = el('a', 'btn primary', 'تصفّح كل الأذكار'); a.href = '#/adhkar/all';
+    const wrap = el('div', 'azempty'); wrap.append(p, a); box.appendChild(wrap); return;
+  }
+  showList(box, 'fav', entries, 'أذكاري المفضلة', { persist: false, onUnfav: () => renderAdhkar('fav') });
+}
+
+/** Shows #/adhkar/<tab | fav | c<id>>; with no argument, the list that fits the time of day. */
 export async function renderAdhkar(arg) {
   lastArg = arg;
   const my = ++token, box = $('azBox'), key = arg || azNow();
   const m = /^c(\d{1,3})$/.exec(key), tab = tabOf(key);
-  tabsBar(tab ? key : key === 'all' ? 'all' : null);
+  tabsBar(tab || key === 'all' || key === 'fav' ? key : null);
   box.setAttribute('aria-busy', 'true'); box.replaceChildren(el('p', 'empty', 'جارٍ تحميل الأذكار…'));
   let data; try { data = await loadAdhkar() } catch (e) {
     if (my === token) { box.setAttribute('aria-busy', 'false'); box.replaceChildren(el('p', 'empty', 'تعذّر تحميل الأذكار. تأكد من الاتصال وأعد فتح الصفحة.')) }
@@ -129,10 +161,12 @@ export async function renderAdhkar(arg) {
   box.textContent = ''; box.setAttribute('aria-busy', 'false');
   if (tab) {
     const cat = data.find(c => c.id === tab.cat);
-    showList(box, key, cat, tab.title, false); document.title = tab.title + ' · رفيق الحفظ';
+    showList(box, key, cat.array.map(a => entryOf(cat, a)), tab.title); document.title = tab.title + ' · رفيق الحفظ';
   } else if (m && data.some(c => c.id === +m[1])) {
     const cat = data.find(c => c.id === +m[1]);
-    showList(box, 'c' + cat.id, cat, cat.category, true); document.title = cat.category + ' · رفيق الحفظ';
+    showList(box, 'c' + cat.id, cat.array.map(a => entryOf(cat, a)), cat.category, { back: true }); document.title = cat.category + ' · رفيق الحفظ';
+  } else if (key === 'fav') {
+    showFavs(box, data); document.title = 'المفضلة · رفيق الحفظ';
   } else {
     showAll(box, data); document.title = 'كل الأذكار · رفيق الحفظ';
   }

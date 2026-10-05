@@ -1,7 +1,7 @@
 import './styles.css';
 import { $, AR, days } from './util.js';
 import { Q, loadQuran } from './data.js';
-import { S, save, rec, mem, isDue, bump, setAyah, grade, setLast, activeKid, isWeak, setWeak, weakList } from './state.js';
+import { S, save, rec, mem, isDue, bump, setAyah, grade, setLast, activeKid, isWeak, setWeak, weakList, azToday } from './state.js';
 import { renderSummary, renderList, setFilter } from './home.js';
 import { view, renderSurah, toggleTafsir } from './surah.js';
 import { go, onPage, onShown, startRouter, route } from './router.js';
@@ -13,6 +13,8 @@ import { renderReport } from './report.js';
 import { initTour, needsTour, openTour } from './tour.js';
 import { renderToday } from './dashboard.js';
 import { renderAdhkar, refreshAdhkar } from './adhkar.js';
+import { initReading, setFocusRead } from './reading.js';
+import { initReminders, setReminderContext } from './remind.js';
 import { renderReview, renderWeak, onReviewGraded, clearReviewNote, dueList } from './review.js';
 import { renderPlan, onPlanChanged } from './plan.js';
 import { renderGames, onGameStars, resetGame } from './games.js';
@@ -50,6 +52,7 @@ function jumpToAyah() {
 }
 onShown(page => {
   pageIn(page);
+  if (page !== 'adhkar') setFocusRead(false);
   if (page !== 'surah') stopPlayer(); else setTimeout(jumpToAyah, 450);
   if (page === 'search' && !$('sq').value) $('sq').focus();
 });
@@ -122,7 +125,8 @@ $('revGood').addEventListener('click', () => onGrade(true));
 $('revBad').addEventListener('click', () => onGrade(false));
 
 /* ---------- boot ---------- */
-initCharacters(); initKids(); onKidsChange(render); initTour({ onDone: () => { renderKidBar(); render() } }); initPlayer(); initPwa(); initSearch();
+initCharacters(); initKids(); initReading(); onKidsChange(render); initTour({ onDone: () => { renderKidBar(); render() } }); initPlayer(); initPwa(); initSearch();
+setReminderContext(() => ({ reviewDue: Q.length ? dueList().length + weakList().length : 0, adhkarDone: id => azToday(id).d === 1 }));
 startRouter();
-loadQuran().then(() => { render(); announceBadges(); motionReady(); route(); if (needsTour()) openTour() })
+loadQuran().then(() => { render(); initReminders(); announceBadges(); motionReady(); route(); if (needsTour()) openTour() })
   .catch(() => { $('list').innerHTML = '<li class="empty">تعذّر تحميل نص المصحف. أعد فتح الصفحة للمحاولة مرة أخرى.</li>' });

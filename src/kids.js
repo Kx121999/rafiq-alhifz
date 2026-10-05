@@ -5,6 +5,8 @@ import { announce } from './motion.js';
 import { S, mem, gameStars, azStats, FRIENDS, kids, activeKid, switchKid, addKid, updateKid, removeKid, save, applyImport, ICONS, MODES } from './state.js';
 import { downloadBackup, lastExport, parseBackup } from './backup.js';
 import { go } from './router.js';
+import { applyReading } from './reading.js';
+import { deviceSection } from './devicepanel.js';
 
 let onChange = () => {};
 export const onKidsChange = fn => { onChange = fn };
@@ -12,7 +14,10 @@ export const onKidsChange = fn => { onChange = fn };
 const el = (tag, cls, text) => { const e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e };
 
 /** Young children get bigger text, star buttons and no tafsir; readers get the full page. */
-export function applyMode() { const k = activeKid(); document.body.dataset.mode = k ? k.mode : 'reader' }
+export function applyMode() {
+  const k = activeKid(); document.body.dataset.mode = k ? k.mode : 'reader';
+  applyReading();   // the child's reading size
+}
 
 export function renderKidBar() {
   const box = $('kids'); box.textContent = '';
@@ -123,6 +128,7 @@ function renderParent() {
     card.append(el('h3', '', k.icon + ' ' + k.name), name, icons, modes, friends, foot);
     box.appendChild(card);
   });
+  box.appendChild(deviceSection());
   box.appendChild(backupSection());
 }
 

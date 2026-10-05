@@ -4,6 +4,7 @@
 import gsap from 'gsap';
 import { charImg } from './util.js';
 import { friendOf } from './state.js';
+import { sfx } from './sound.js';
 
 const mq = matchMedia('(prefers-reduced-motion: reduce)');
 const calm = () => mq.matches;
@@ -96,6 +97,7 @@ export function initCharacters() {
 
 /** The memorise button jumps and throws a few stars when an ayah is marked as memorised. */
 export function markPop(btn) {
+  sfx('star');
   if (calm() || !btn) return;
   gsap.fromTo(btn, { scale: 0.55 }, { scale: 1, duration: 0.5, ease: 'back.out(2.4)', clearProps: 'transform' });
   burst(btn, 6);
@@ -103,6 +105,7 @@ export function markPop(btn) {
 
 /** A wave of jumping stars down the page when a whole surah is marked at once. */
 export function markWave(btns) {
+  sfx('star');
   const list = [...btns].slice(0, 14);
   if (calm() || !list.length) return;
   gsap.fromTo(list, { scale: 0.65 }, { scale: 1, duration: 0.45, stagger: 0.05, ease: 'back.out(2.2)', clearProps: 'transform' });
@@ -111,11 +114,12 @@ export function markWave(btns) {
 
 /** Feedback on a game answer: a happy hop and stars for a right one, a little shake for a wrong one. */
 export function correct(el) {
+  sfx('right');
   if (calm()) return;
   gsap.fromTo(el, { scale: 1 }, { scale: 1.06, duration: 0.18, yoyo: true, repeat: 1, ease: 'power1.inOut', clearProps: 'transform' });
   burst(el, 4);
 }
-export function wrong(el) { if (!calm()) gsap.fromTo(el, { x: 0 }, { x: 6, duration: 0.07, yoyo: true, repeat: 3, ease: 'sine.inOut', clearProps: 'transform' }) }
+export function wrong(el) { sfx('wrong'); if (!calm()) gsap.fromTo(el, { x: 0 }, { x: 6, duration: 0.07, yoyo: true, repeat: 3, ease: 'sine.inOut', clearProps: 'transform' }) }
 
 /* ---------- celebrations and new-medal notices: shown one at a time so none hides another ---------- */
 const queue = [];
@@ -126,6 +130,7 @@ function enqueue(item) { if (queue.length >= MAX_QUEUE) queue.shift(); queue.pus
 function next() { const it = queue.shift(); if (!it) { busy = false; return } busy = true; show(it) }
 
 function show({ text, withStars, friend }) {
+  sfx('win');
   const box = document.getElementById('celebrate'); if (!box) { busy = false; return }
   current && current.kill(); clearTimeout(hideTimer);
   box.removeAttribute('style');   // drop the end state of any earlier animation so the message is always visible

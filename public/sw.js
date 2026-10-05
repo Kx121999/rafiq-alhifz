@@ -48,3 +48,16 @@ self.addEventListener('fetch', e => {
   }
   // anything else (audio, etc.) goes straight to the network
 });
+
+// Tapping a reminder opens (or focuses) the app on the page it is about.
+self.addEventListener('notificationclick', e => {
+  e.notification.close();
+  const url = new URL((e.notification.data && e.notification.data.url) || './', self.registration.scope).href;
+  e.waitUntil(
+    self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then(list => {
+      const open = list.find(c => 'focus' in c);
+      if (!open) return self.clients.openWindow(url);
+      return (open.navigate ? open.navigate(url).catch(() => {}) : Promise.resolve()).then(() => open.focus());
+    })
+  );
+});

@@ -104,6 +104,30 @@ export function azStats() {
   for (const e of Object.values(az)) { let any = false; for (const [key, v] of Object.entries(e)) if (v.d) { any = true; seen.add(key) } if (any) days++ }
   return { days, sabah: seen.has('sabah'), masaa: seen.has('masaa'), nawm: seen.has('nawm') };
 }
+/* Reading size, per child: optional field fs, a whole step from FS_MIN to FS_MAX (0 or missing = normal). */
+export const FS_MIN = -1, FS_MAX = 4;
+export const fontLevel = () => { const v = (activeKid() || {}).fs; return Number.isInteger(v) && v >= FS_MIN && v <= FS_MAX ? v : 0 };
+export function setFontLevel(n) {
+  const k = activeKid(); if (!k) return;
+  n = Math.max(FS_MIN, Math.min(FS_MAX, Math.round(n)));
+  if (n) k.fs = n; else delete k.fs;
+  persist();
+}
+
+/* Favourite adhkar, per child: optional field fav, a list of "<category id>.<entry id>" in the order they were added. */
+export const FAV_REF = /^\d{1,3}\.\d{1,3}$/;
+export const MAX_FAV = 100;
+export const favList = () => ((activeKid() || {}).fav || []).slice();
+export const isFav = ref => favList().includes(ref);
+/** Adds or removes a favourite; returns whether it is a favourite afterwards (false too when the list is full). */
+export function toggleFav(ref) {
+  const k = activeKid(); if (!k || !FAV_REF.test(ref)) return false;
+  const f = k.fav || [], i = f.indexOf(ref);
+  if (i >= 0) f.splice(i, 1); else if (f.length < MAX_FAV) f.push(ref);
+  if (f.length) k.fav = f; else delete k.fav;
+  persist();
+  return f.includes(ref);
+}
 /** Marks a weak ayah as mastered (as opposed to un-flagging it by mistake) and counts it for the report. */
 export function masterWeak(id, i) { if (!setWeak(id, i, false)) return false; addLog('w', 1); return true }
 

@@ -184,6 +184,29 @@ describe('the adhkar page', () => {
     expect(document.getElementById('azBox').textContent).toContain('تعذّر');
   });
 
+  it('stars a dhikr, lists it on the favourites tab with its own counter, and removes it again', async () => {
+    const { state, mod } = await open('c1');
+    const favs = () => [...document.querySelectorAll('.azfav')];
+    favs()[1].click();
+    expect(state.favList()).toEqual(['1.2']);
+    expect(favs()[1].getAttribute('aria-pressed')).toBe('true');
+    await mod.renderAdhkar('fav');
+    expect(document.querySelectorAll('.azcard')).toHaveLength(1);
+    expect(document.querySelector('.azt').textContent).toBe('نص ثانٍ');
+    buttons()[0].click();
+    expect(state.azToday('fav').c).toEqual([]);                                   // the favourites list is never saved as progress
+    document.querySelector('.azfav').click();                                     // un-star: the card leaves the list
+    await flush();
+    expect(state.favList()).toEqual([]);
+    expect(document.querySelector('.azempty')).toBeTruthy();
+  });
+
+  it('shows a friendly empty favourites tab', async () => {
+    await open('fav');
+    expect(document.querySelector('.azempty a').getAttribute('href')).toBe('#/adhkar/all');
+    expect(document.querySelector('.aztab[aria-current="page"]').textContent).toContain('المفضلة');
+  });
+
   it('marks the tab of a list finished today', async () => {
     SMALL[0].id = 1;
     globalThis.fetch = vi.fn(async () => ({ ok: true, json: async () => SOURCE }));

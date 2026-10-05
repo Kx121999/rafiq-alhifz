@@ -1,7 +1,7 @@
 // Backup file: export every child's progress as JSON, and import one back after strict validation.
 import { day } from './util.js';
 import { Q } from './data.js';
-import { ICONS, FRIENDS, AZ_KEY, snapshot } from './state.js';
+import { ICONS, FRIENDS, AZ_KEY, FAV_REF, MAX_FAV, FS_MIN, FS_MAX, snapshot } from './state.js';
 import { PRESETS } from './plan.js';
 
 const APP = 'rafiq-alhifz', VERSION = 1, MAX_BYTES = 2e6, MAX_KIDS = 30;
@@ -95,6 +95,11 @@ function cleanKid(k, idx, skip) {
   if (log) kid.log = log;
   const az = cleanAz(k.az);
   if (az) kid.az = az;
+  if (Number.isInteger(k.fs) && k.fs >= FS_MIN && k.fs <= FS_MAX && k.fs !== 0) kid.fs = k.fs;
+  if (Array.isArray(k.fav)) {
+    const fav = [...new Set(k.fav.filter(r => typeof r === 'string' && FAV_REF.test(r)))].slice(0, MAX_FAV);
+    if (fav.length) kid.fav = fav;
+  }
   if (k.game && Number.isInteger(k.game.stars) && k.game.stars >= 0 && k.game.stars <= 1e6) kid.game = { stars: k.game.stars };
   return kid;
 }

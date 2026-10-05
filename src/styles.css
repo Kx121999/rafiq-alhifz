@@ -524,3 +524,30 @@ footer.foot{margin-top:6px}
 @media (hover:hover){.azcat{transition:transform .15s,box-shadow .15s}.azcat:hover{transform:translateY(-3px);box-shadow:0 7px 0 var(--line)}}
 @media (min-width:1180px){#page-adhkar{width:100%;max-width:58rem;margin-inline:auto}}
 @media (min-width:1180px){#page-adhkar:has(.azcats){max-width:none}}
+
+/* ======================= reading size (per child) and focus reading ======================= */
+.basmala{font-size:calc(1.8rem*var(--rs,1))}
+.tx{font-size:calc(1.7rem*var(--rs,1))}
+.ordcard .tx{font-size:calc(1.45rem*var(--rs,1))}
+[data-mode="young"] .tx{font-size:calc(2.25rem*var(--rs,1))}
+.quizq,.quizfull{font-size:calc(1.8rem*var(--rs,1))}
+.opt{font-size:calc(1.5rem*var(--rs,1))}
+.hittx{font-size:calc(1.5rem*var(--rs,1))}
+.azt{font-size:calc(1.5rem*var(--rs,1))}
+[data-mode="young"] .azt{font-size:calc(1.9rem*var(--rs,1))}
+.fsctl{display:inline-flex;align-items:center;gap:4px}
+.fsbtn{min-width:46px;padding:6px 10px;font-family:var(--display);font-weight:800}
+.fsval{min-width:3.4rem;text-align:center;font-size:.85rem;font-weight:600;color:var(--muted);font-variant-numeric:tabular-nums}
+.azbar{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.focusread .top,.focusread .nav,.focusread .kidbar,.focusread .sitefoot,.focusread #azTabs{display:none}
+.focusread #page-adhkar .banner{position:absolute;width:1px;height:1px;margin:-1px;padding:0;overflow:hidden;clip:rect(0 0 0 0);border:0;box-shadow:none}   /* keeps the page heading for screen readers */
+.focusread .wrap{padding-block-start:14px}
+.focusread #azBox .azcard{box-shadow:none}
+.shead .fsctl{margin-inline-start:2px}
+.azfav{border:0;background:transparent;color:var(--gold);font-weight:600;font-size:.9rem;min-height:44px;padding:0 8px;margin-inline-start:auto}
+.azfav[aria-pressed="true"]{font-weight:700}
+.azempty{display:flex;flex-direction:column;gap:10px;align-items:center;text-align:center}
+.kcard h3.sub{margin-top:6px;border-top:2px dashed var(--line);padding-top:10px}
+.remrows{display:flex;flex-direction:column;gap:8px}
+.remrow{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.remrow input[type=time]{min-height:44px;padding:4px 10px;border:2px solid var(--line);border-radius:14px;background:var(--surface);font-size:1rem}
