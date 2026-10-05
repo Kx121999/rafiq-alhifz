@@ -105,7 +105,11 @@ async function audit(scheme, state, attempt = 1, width = 430) {
     // a real violation shows up every time; one that vanishes on a second look was a half-painted frame on a busy machine
     if (found.length && attempt < 2) { await ctx.close(); return audit(scheme, state, attempt + 1, width) }
     found.forEach(v => failures.push({ where: scheme + ' / ' + label + (width > 700 ? ' @' + width : ''), ...v }));
-  } catch (e) { failures.push({ where: scheme + ' / ' + label, id: 'audit-error', impact: 'error', help: String(e).slice(0, 160), nodes: [] }) }
+  } catch (e) {
+    // a step that timed out or lost its page on a slow machine: look once more before calling it a failure
+    if (attempt < 2) { try { await ctx.close() } catch (e2) {} return audit(scheme, state, attempt + 1, width) }
+    failures.push({ where: scheme + ' / ' + label, id: 'audit-error', impact: 'error', help: String(e).slice(0, 160), nodes: [] });
+  }
   await ctx.close();
 }
 
