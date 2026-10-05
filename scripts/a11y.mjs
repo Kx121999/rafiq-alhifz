@@ -6,6 +6,10 @@ import puppeteer from 'puppeteer-core';
 import { existsSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 
+// On GitHub Actions every finding (and any crash) is also written as an annotation, so the reason shows on the run page
+const annotate = msg => { if (process.env.GITHUB_ACTIONS) console.log('::error title=a11y::' + String(msg).split(String.fromCharCode(10)).join('%0A').split(String.fromCharCode(13)).join('').slice(0, 900)) };
+for (const ev of ['uncaughtException', 'unhandledRejection']) process.on(ev, e => { annotate('crash: ' + ((e && e.stack) || e)); console.error(e); process.exit(1) });
+
 const ROOT = process.cwd();
 const AXE = readFileSync(join(ROOT, 'node_modules/axe-core/axe.min.js'), 'utf8');
 if (!existsSync(join(ROOT, 'dist/index.html'))) { console.error('dist/ not found: run "npm run build" first'); process.exit(2) }
@@ -130,5 +134,6 @@ server.httpServer.close();
 const checked = jobs.length + wideJobs.length + REFLOW.length * 4;
 if (!failures.length) { console.log('Accessibility check passed: ' + jobs.length + ' phone states (light and dark), ' + wideJobs.length + ' wide-screen states and ' + REFLOW.length * 4 + ' reflow checks (320 to 1280 px), no violations.'); process.exit(0) }
 console.error('Accessibility check FAILED (' + failures.length + ' finding(s) in ' + checked + ' checks):\n');
+for (const f of failures) annotate(f.where + ' | ' + f.id + ' | ' + f.help + ' | ' + f.nodes.join(' ; '));
 for (const f of failures) console.error('- [' + f.impact + '] ' + f.id + ' in ' + f.where + ': ' + f.help + '\n    ' + f.nodes.join('\n    '));
 process.exit(1);
