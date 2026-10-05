@@ -620,3 +620,28 @@ body[data-theme="rose"]{--bg:#fff0f6;background:linear-gradient(180deg,#ffd9ea 0
 /* ======================= install guide ======================= */
 .installsteps{margin:8px 0 12px;padding-inline-start:1.4rem;display:flex;flex-direction:column;gap:10px;line-height:1.7}
 .installsteps li::marker{font-weight:700;color:var(--accent)}
+
+/* ======================= guided memorising session ======================= */
+.dlg.sess{text-align:center}
+.sess .char.big{--cs:110px;margin:0 auto 6px;cursor:default}
+.sess h2{margin-bottom:4px}
+.sess .sesshead{margin:0 0 6px}
+.sess .bar{margin-bottom:10px}
+.sess .sesstitle{font-size:1.6rem}
+.sess .sesshint{margin:0 0 8px;font-size:1.02rem}
+.sess label{display:block;margin:8px 0 4px;font-weight:600;text-align:start}
+.sess select.search{padding:10px 14px}
+.sess .icons,.sess .acts{justify-content:center}
+.sess .acts{display:flex;flex-wrap:wrap;gap:10px;margin-top:12px}
+.sesstx{margin:8px 0;font-size:calc(1.7rem*var(--rs,1));line-height:2.2}
+.sessbox{display:flex;flex-direction:column;gap:2px;background:var(--surface);border:2px solid var(--line);border-radius:22px;padding:8px 14px}
+.sesstx.veil .sw{filter:blur(9px);opacity:.45;user-select:none}
+.sessquit{margin-top:14px;font-size:.85rem;min-height:40px;box-shadow:none;border-style:dashed}
+
+/* ======================= family goal ======================= */
+.famgoal{background:#fff;border:2px solid #d5dfd9;border-radius:12px;padding:12px 14px;display:flex;flex-direction:column;gap:8px;break-inside:avoid}
+.famgoal.won{background:#dcefe7;border-color:#0e6b50}
+.famgoal h2{margin:0}
+.famgoaltext{margin:0;font-size:1.2rem;font-weight:600}
+.famgoal .bar{border-color:#d5dfd9}
+.famgoal p.note{margin:0;color:#3f5a4f}

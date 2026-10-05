@@ -124,9 +124,10 @@ function cleanKid(k, idx, skip) {
   }
   const shop = cleanShop(k.shop);
   if (shop) kid.shop = shop;
-  const rest = cleanDates(k.rest, 60), wk = cleanDates(k.wk, 26);
+  const rest = cleanDates(k.rest, 60), wk = cleanDates(k.wk, 26), fam = cleanDates(k.fam, 26);
   if (rest) kid.rest = rest;
   if (wk) kid.wk = wk;
+  if (fam) kid.fam = fam;
   // a bought friend can only be used if it is owned
   if (kid.friend && SHOP.some(i => i.id === kid.friend && i.type === 'friend') && !(shop && shop.own.includes(kid.friend))) delete kid.friend;
   return kid;

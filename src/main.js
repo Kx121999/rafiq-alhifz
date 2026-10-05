@@ -19,6 +19,7 @@ import { renderChallenge, checkChallenge } from './challenge.js';
 import { renderShare } from './share.js';
 import { renderFamily } from './family.js';
 import { initCheck } from './diagnose.js';
+import { initSession, openSession } from './session.js';
 import { initReminders, setReminderContext } from './remind.js';
 import { renderReview, renderWeak, onReviewGraded, clearReviewNote, dueList } from './review.js';
 import { renderPlan, onPlanChanged } from './plan.js';
@@ -80,6 +81,11 @@ onPage('challenge', () => { view.cur = 0; checkChallenge(); renderChallenge() })
 onPage('share', () => { view.cur = 0; renderShare() });
 onPage('family', () => { view.cur = 0; if (Q.length) renderFamily() });
 onShopChange(() => render());
+$('sessBtn').addEventListener('click', () => { if (view.cur) openSession(view.cur) });
+initSession({ mark: (id, i) => {
+  const was = mem(id) === Q[id - 1].v.length;
+  bump(setAyah(id, i, true)); save(); if (view.cur === id) renderSurah(false); refreshStats(); checkCompleted(id, was);
+} });
 onPage('check', () => { view.cur = 0 });
 initCheck();
 $('printFamily').addEventListener('click', () => window.print());

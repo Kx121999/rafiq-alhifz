@@ -203,3 +203,39 @@ describe('family report', () => {
     expect(rows[1]).toMatchObject({ memorised: 6, done: 1, azDays: 1 }); expect(rows[1].week.a).toBe(6);
   });
 });
+
+describe('family goal', () => {
+  it('needs two children, adds up everybody\'s new ayat, and gives every child the medal once', async () => {
+    today('2026-05-12');
+    const { state } = await boot();
+    const c = await import('../src/challenge.js');
+    const ws = state.weekStartOf('2026-05-12');
+    state.bump(20);
+    expect(c.familyGoalOf(state.kids(), ws).on).toBe(false);          // one child: no family goal
+    expect(c.checkFamilyGoal()).toBe(false);
+    const first = state.activeKid().id;
+    state.addKid({ name: 'يوسف', icon: '🌙', mode: 'young' });        // target: 15 (reader) + 8 (young) = 23
+    expect(c.familyGoalOf(state.snapshot().kids, ws)).toMatchObject({ on: true, target: 23, total: 20, reached: false });
+    expect(c.checkFamilyGoal()).toBe(false);
+    state.bump(3);                                                    // young child adds 3: 23 in total
+    expect(c.checkFamilyGoal()).toBe(true);
+    expect(c.checkFamilyGoal()).toBe(false);                          // never twice for the same week
+    expect(state.famWeeks()).toBe(1);
+    state.switchKid(first); expect(state.famWeeks()).toBe(1);         // the other child has it too
+  });
+
+  it('a child added later does not lose a goal already won, and backups keep the medal', async () => {
+    today('2026-05-12');
+    const { state } = await boot();
+    const c = await import('../src/challenge.js');
+    state.addKid({ name: 'يوسف', icon: '🌙', mode: 'young' });
+    state.bump(8); state.switchKid(state.kids()[0].id); state.bump(15);
+    expect(c.checkFamilyGoal()).toBe(true);
+    state.addKid({ name: 'نور', icon: '🌸', mode: 'reader' });
+    expect(c.checkFamilyGoal()).toBe(false);
+    const b = await import('../src/backup.js');
+    const r = b.parseBackup(JSON.stringify(b.buildBackup()));
+    expect(r.kids[0].fam).toEqual({ [state.weekStartOf('2026-05-12')]: 1 });
+    expect(r.kids[2].fam).toBeUndefined();                            // the newcomer was not part of that week's win
+  });
+});

@@ -2,7 +2,7 @@
 import { $, AR, day, charImg } from './util.js';
 import { Q } from './data.js';
 import { announce } from './motion.js';
-import { S, mem, gameStars, azStats, streakNow, friendsFor, shopTheme, shopFrame, weeksDone, kids, activeKid, switchKid, addKid, updateKid, removeKid, save, applyImport, ICONS, MODES } from './state.js';
+import { S, mem, gameStars, azStats, streakNow, friendsFor, shopTheme, shopFrame, weeksDone, famWeeks, kids, activeKid, switchKid, addKid, updateKid, removeKid, save, applyImport, ICONS, MODES } from './state.js';
 import { downloadBackup, lastExport, parseBackup } from './backup.js';
 import { go } from './router.js';
 import { applyReading } from './reading.js';
@@ -37,7 +37,7 @@ function totals() {
   let ay = 0, done = 0;
   Q.forEach((c, k) => { const m = mem(k + 1); ay += m; if (m === c.v.length) done++ });
   const streak = streakNow();
-  return { ay, done, streak, games: gameStars(), az: azStats(), weeks: weeksDone() };
+  return { ay, done, streak, games: gameStars(), az: azStats(), weeks: weeksDone(), fam: famWeeks() };
 }
 const BADGES = [
   { icon: '🌱', name: 'البداية', ok: t => t.ay >= 1 },
@@ -54,6 +54,7 @@ const BADGES = [
   { icon: '📿', name: 'ملتزم بالأذكار', ok: t => t.az.days >= 7 },
   { icon: '🏆', name: 'بطل الأسبوع', ok: t => t.weeks >= 1 },
   { icon: '👑', name: 'ملك التحديات', ok: t => t.weeks >= 4 },
+  { icon: '🤝', name: 'أسرة متعاونة', ok: t => t.fam >= 1 },
 ];
 
 /** What the child has earned so far, for the share card. */

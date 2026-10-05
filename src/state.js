@@ -119,6 +119,20 @@ export function markWeekDone(ws) {
   persist(); return true;
 }
 
+/* Family goal: when two or more children together reach the week's target, every child gets a medal. Optional field fam on each child
+   {week start date: 1}, like wk. */
+export const famWeeks = () => Object.keys((activeKid() || {}).fam || {}).length;
+export const famDone = ws => !!((activeKid() || {}).fam || {})[ws];
+/** Marks the week as won for every child at once. Returns false if it already was. */
+export function markFamilyWeek(ws) {
+  if (famDone(ws)) return false;
+  for (const k of store.kids) {
+    const f = k.fam || (k.fam = {}); f[ws] = 1;
+    const keep = Object.keys(f).sort().slice(-26); for (const d of Object.keys(f)) if (!keep.includes(d)) delete f[d];
+  }
+  persist(); return true;
+}
+
 /* Activity log for the weekly report: per day {a: ayat memorised, r: surah reviews, w: weak ayat mastered, g: game stars}.
    Daily totals only (not every tap), kept for LOG_DAYS days, as an optional field log on the child. */
 const LOG_DAYS = 90;

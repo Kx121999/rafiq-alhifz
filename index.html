@@ -226,6 +226,7 @@
       <a class="btn" id="back" href="#/mushaf">→ السور</a>
       <span class="grow"></span>
       <span class="fsctl" role="group" aria-label="حجم الخط"><button type="button" class="btn fsbtn" data-fs="-1" aria-label="تصغير الخط">أ−</button><span class="fsval" aria-hidden="true"></span><button type="button" class="btn fsbtn" data-fs="1" aria-label="تكبير الخط">أ+</button></span>
+      <button type="button" class="btn primary" id="sessBtn">🎯 جلسة حفظ</button>
       <button type="button" class="btn" id="veilBtn" aria-pressed="false">وضع التسميع</button>
       <button type="button" class="btn" id="allBtn">حفظتُ السورة كاملة</button>
     </div>
@@ -285,6 +286,11 @@
 <div id="updateBar" class="updatebar" role="status" hidden><span>تم تحديث الموقع.</span> <button type="button" class="btn primary" id="updateReload">تحديث الآن</button></div>
 
 <div id="celebrate" class="celebrate" role="status" aria-live="polite" hidden></div>
+
+<dialog id="session" class="dlg wide sess" aria-labelledby="sessT">
+  <p class="sr" id="sessT">جلسة حفظ موجّهة</p>
+  <div id="sessBody"></div>
+</dialog>
 
 <dialog id="installDlg" class="dlg" aria-labelledby="installT">
   <h2 id="installT">تثبيت التطبيق</h2>

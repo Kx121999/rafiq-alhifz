@@ -2,10 +2,29 @@
 // for the child (activity log and adhkar progress). Finishing it once gives bonus game stars and a medal. A "rest day"
 // (one per week) keeps the streak alive when the child needs a day off. Nothing here is religious text.
 import { $, AR, day, el, nujum, shiftDay } from './util.js';
-import { activeKid, activityLog, addGameStars, markWeekDone, weekDone, weeksDone, weekStartOf, restUsedThisWeek, restDays, useRestDay, streakNow } from './state.js';
+import { activeKid, kids, addGameStars, markWeekDone, weekDone, weeksDone, weekStartOf, restUsedThisWeek, restDays, useRestDay, streakNow, famDone, markFamilyWeek } from './state.js';
 import { celebrate } from './motion.js';
 
 export const BONUS_STARS = 5;
+/** New ayat per child per week that the whole family aims for together (young children: fewer). */
+export const FAMILY_PER_KID = { reader: 15, young: 8 };
+
+/** The family's goal for the week that starts on ws: everyone's new ayat added up against a target. Needs two children or more. */
+export function familyGoalOf(list, ws) {
+  const dates = Array.from({ length: 7 }, (_, k) => shiftDay(ws, k));
+  const target = list.reduce((t, k) => t + (k.mode === 'young' ? FAMILY_PER_KID.young : FAMILY_PER_KID.reader), 0);
+  const total = list.reduce((t, k) => t + dates.reduce((s, d) => s + (((k.log || {})[d] || {}).a || 0), 0), 0);
+  return { on: list.length >= 2, target, total: Math.min(total, target), reached: total >= target };
+}
+
+/** Gives every child the family medal the first time the family target is reached in a week. */
+export function checkFamilyGoal() {
+  const ws = weekStartOf(day()), g = familyGoalOf(kids(), ws);
+  if (!g.on || !g.reached || famDone(ws)) return false;
+  if (!markFamilyWeek(ws)) return false;
+  celebrate('ما شاء الله، حقّقتم هدف الأسرة معًا 🤝 ونلتم وسام «أسرة متعاونة»', true);
+  return true;
+}
 
 /** n: the target for readers, young: the target for young children. */
 export const CHALLENGES = [
@@ -38,6 +57,7 @@ export function progressOf(ch, kid, ws) {
 export function checkChallenge() {
   const k = activeKid(); if (!k) return false;
   const ws = weekStartOf(day()), ch = challengeOf(ws);
+  checkFamilyGoal();
   if (weekDone(ws) || progressOf(ch, k, ws) < targetOf(ch, k)) return false;
   if (!markWeekDone(ws)) return false;
   addGameStars(BONUS_STARS);

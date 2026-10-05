@@ -2,9 +2,9 @@
 // It reads the same activity log as the weekly report (daily totals kept on this device).
 import { $, AR, day, el, nujum } from './util.js';
 import { Q } from './data.js';
-import { snapshot, streakNow, weekStartOf } from './state.js';
+import { snapshot, streakNow, weekStartOf, famDone } from './state.js';
 import { weekDays, summarize } from './report.js';
-import { challengeOf, targetOf, progressOf } from './challenge.js';
+import { challengeOf, targetOf, progressOf, familyGoalOf, FAMILY_PER_KID } from './challenge.js';
 
 /** The numbers for one child object (as saved), without touching the active child. */
 export function familyRow(k, dates = weekDays(0)) {
@@ -30,6 +30,19 @@ export function renderFamily() {
   box.appendChild(el('p', 'rep-brand', 'رفيق الحفظ'));
   box.appendChild(el('h1', 'rep-name', 'تقرير العائلة'));
   box.appendChild(el('p', 'rep-range', fmt(dates[0], { day: 'numeric', month: 'long' }) + ' – ' + fmt(dates[6], { day: 'numeric', month: 'long', year: 'numeric' })));
+
+  // the goal the whole family shares this week
+  const ws = weekStartOf(day()), goal = familyGoalOf(snapshot().kids, ws);
+  if (goal.on) {
+    const card = el('section', 'famgoal' + (famDone(ws) || goal.reached ? ' won' : ''));
+    const bar = el('div', 'bar'), fill = el('i'); fill.style.width = Math.round(goal.total / goal.target * 100) + '%'; bar.appendChild(fill);
+    bar.setAttribute('role', 'progressbar'); bar.setAttribute('aria-valuemin', '0'); bar.setAttribute('aria-valuemax', String(goal.target)); bar.setAttribute('aria-valuenow', String(goal.total)); bar.setAttribute('aria-label', 'هدف الأسرة');
+    card.append(el('h2', '', '🤝 هدف الأسرة هذا الأسبوع'),
+      el('p', 'famgoaltext', 'احفظوا معًا ' + AR(goal.target) + ' آية جديدة'),
+      bar,
+      el('p', 'note', famDone(ws) || goal.reached ? 'حقّقتم الهدف معًا، أحسنتم! نال كل طفل وسام «أسرة متعاونة».' : AR(goal.total) + ' من ' + AR(goal.target) + ' آية. كل آية جديدة من أي طفل تُحسب، فتعاونوا! (' + AR(FAMILY_PER_KID.reader) + ' لكل قارئ و' + AR(FAMILY_PER_KID.young) + ' لكل صغير.)'));
+    box.appendChild(card);
+  }
 
   // who memorised the most new ayat this week
   const max = Math.max(1, ...rows.map(r => r.week.a));
