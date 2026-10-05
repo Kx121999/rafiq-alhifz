@@ -10,6 +10,28 @@ const LAST_EXPORT = 'hifz-lastexport';
 const DATE = /^\d{4}-\d{2}-\d{2}$/;
 const int = (v, lo, hi, dflt) => Number.isInteger(v) && v >= lo && v <= hi ? v : dflt;
 
+const RESTORE = 'hifz-restore-v1';
+/** A copy of everything, kept on this device before something replaces it (an import), so it can be put back. Returns false if it could not be kept. */
+export function makeRestorePoint() {
+  try { localStorage.setItem(RESTORE, JSON.stringify({ at: new Date().toISOString(), data: buildBackup() })); return true } catch (e) { return false }
+}
+/** The kept copy, validated like any import: {at, kids} or null. */
+export function restorePoint() {
+  try {
+    const raw = JSON.parse(localStorage.getItem(RESTORE) || 'null'); if (!raw || !raw.data) return null;
+    const r = parseBackup(JSON.stringify(raw.data)); if (r.error) return null;
+    return { at: new Date(raw.at), kids: r.kids };
+  } catch (e) { return null }
+}
+export const dropRestorePoint = () => { try { localStorage.removeItem(RESTORE) } catch (e) {} };
+
+/** What a child's saved progress amounts to, for the preview before an import: ayat memorised and surahs finished. */
+export function kidSummary(k) {
+  let ay = 0, done = 0;
+  for (const [key, r] of Object.entries((k.S && k.S.s) || {})) { const id = Number(key); const n = [...r.m].filter(c => c === '1').length; ay += n; if (Q[id - 1] && n === Q[id - 1].v.length) done++ }
+  return { ay, done };
+}
+
 export function buildBackup() {
   const s = snapshot();
   return { app: APP, version: VERSION, exported: new Date().toISOString(), active: s.active, kids: s.kids };

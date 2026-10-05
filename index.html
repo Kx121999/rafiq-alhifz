@@ -38,6 +38,8 @@
     <a href="#/achievements" data-nav="achievements"><i aria-hidden="true">🏆</i><span>إنجازاتي</span></a>
   </nav>
 
+  <div class="savebar" id="saveBar" role="alert" hidden><b>⚠️ لم يُحفظ تقدّمك</b><span id="saveWhy"></span><span class="acts"><button type="button" class="btn primary" id="saveExport">صدّر نسخة احتياطية الآن</button><button type="button" class="btn" id="saveRetry">حاول الحفظ مرة أخرى</button></span></div>
+
   <p class="note netnote" id="netNote" role="status" hidden>أنت غير متصل بالإنترنت. المصحف وتقدّمك يعملان، أما الصوت فيحتاج إنترنت.</p>
 
   <nav class="kidbar" aria-label="الأطفال">
@@ -297,6 +299,8 @@
     </div>
   </footer>
 </div>
+
+<div id="undoBar" class="undobar" role="status" hidden></div>
 
 <div id="updateBar" class="updatebar" role="status" hidden><span>تم تحديث الموقع.</span> <button type="button" class="btn primary" id="updateReload">تحديث الآن</button></div>
 

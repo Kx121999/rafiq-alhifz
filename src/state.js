@@ -32,7 +32,22 @@ function adopt(o) {
   if (S.day !== day()) { S.day = day(); S.n = 0 }
 }
 
-function persist() { try { localStorage.setItem(KEY, JSON.stringify(store)) } catch (e) {} }
+/** Whether the last attempt to write the children's data to this device worked. Every "saved" the site says is based on this. */
+export const storageState = { ok: true, error: '' };
+const storageListeners = new Set();
+export const onStorageState = fn => { storageListeners.add(fn); return () => storageListeners.delete(fn) };
+function setStorageState(ok, error = '') {
+  if (storageState.ok === ok && storageState.error === error) return;
+  storageState.ok = ok; storageState.error = error;
+  storageListeners.forEach(f => { try { f(storageState) } catch (e) {} });
+}
+/** Writes everything; returns false (and tells the listeners) when the browser refuses, for example when storage is full. */
+function persist() {
+  try { localStorage.setItem(KEY, JSON.stringify(store)); setStorageState(true); return true }
+  catch (e) { setStorageState(false, (e && e.name) || 'error'); return false }
+}
+/** Tries to write again, for the "try again" button after a failure. */
+export const retrySave = () => { save(); return storageState.ok };
 
 function load() {
   let saved = null;
@@ -208,13 +223,30 @@ export function snapshot() { save(); return clone(store) }
 
 /** Adds imported (already validated) profiles as new children, or replaces everything with them. */
 export function applyImport(list, mode) {
-  if (!list.length) return;
+  if (!list.length) return false;
   save();
   const fresh = list.map(k => ({ ...clone(k), id: newId() }));
-  if (mode === 'replace') { store.kids = fresh; store.active = fresh[0].id }
-  else store.kids.push(...fresh);
-  adopt(activeKid().S); persist();
+  let kids, active = store.active;
+  if (mode === 'replace') { kids = fresh; active = fresh[0].id }
+  else {
+    // a new child never takes the name of one that is already there: the second one becomes "name (٢)"
+    const taken = new Set(store.kids.map(k => k.name.trim()));
+    fresh.forEach(k => {
+      let name = k.name.trim() || 'طفل', n = 1;
+      while (taken.has(name)) { n++; name = k.name.trim().slice(0, 14) + ' (' + n.toLocaleString('ar-EG') + ')' }
+      k.name = name; taken.add(name);
+    });
+    kids = [...store.kids, ...fresh];
+  }
+  // all or nothing: write first, and only change what is on screen once the browser accepted it
+  try { localStorage.setItem(KEY, JSON.stringify({ active, kids })) } catch (e) { setStorageState(false, (e && e.name) || 'error'); return false }
+  store.kids = kids; store.active = active; adopt(activeKid().S); setStorageState(true);
+  return true;
 }
+
+/** One surah's record as it is now (or null), and putting it back: used by "undo". */
+export const surahSnapshot = id => (S.s[id] ? clone(S.s[id]) : null);
+export function restoreSurah(id, snap) { if (snap) S.s[id] = clone(snap); else delete S.s[id] }
 
 export function switchKid(id) {
   if (!store.kids.some(k => k.id === id)) return;

@@ -726,3 +726,9 @@ body[data-theme="rose"]{--bg:#fff0f6;background:linear-gradient(180deg,#ffd9ea 0
 body:not(.ready) .sitefoot{display:none}
 .kidbar{min-height:48px}
 .companion{position:absolute;top:-4px;inset-inline-end:0;margin:0}
+
+/* ======================= safety bars: not saved, undo ======================= */
+.savebar{position:sticky;top:0;z-index:40;display:flex;flex-wrap:wrap;align-items:center;gap:8px 14px;padding:10px 14px;border:2px solid var(--alert);border-radius:16px;background:#fff1ee;color:var(--fg)}
+.savebar .acts{display:flex;gap:8px;flex-wrap:wrap}
+.undobar{position:fixed;inset-inline:0;bottom:calc(var(--tab-h) + 14px + env(safe-area-inset-bottom));margin-inline:auto;width:max-content;max-width:92vw;z-index:55;display:flex;align-items:center;gap:12px;background:var(--fg);color:#fff;border-radius:16px;padding:8px 8px 8px 16px;box-shadow:0 8px 24px rgba(0,0,0,.25)}
+.undobar .btn{min-height:40px;padding:4px 16px}

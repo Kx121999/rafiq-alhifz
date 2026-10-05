@@ -1,7 +1,8 @@
 import './styles.css';
 import { $, AR, days } from './util.js';
 import { Q, loadQuran } from './data.js';
-import { S, save, rec, mem, isDue, bump, setAyah, grade, setLast, activeKid, isWeak, setWeak, weakList, azToday } from './state.js';
+import { S, save, rec, mem, isDue, bump, setAyah, grade, setLast, activeKid, isWeak, setWeak, weakList, azToday, surahSnapshot, restoreSurah } from './state.js';
+import { initGuard, offerUndo, clearUndo } from './guard.js';
 import { renderSummary, renderList, setFilter } from './home.js';
 import { view, renderSurah, toggleTafsir } from './surah.js';
 import { go, onPage, onShown, startRouter, route } from './router.js';
@@ -70,6 +71,7 @@ onShown(page => {
 onPage('report', arg => { view.cur = 0; if (Q.length) renderReport(+arg || 0) });
 onPage('search', arg => { view.cur = 0; openSearch(arg) });
 onPage('surah', (arg, ayah) => {
+  clearUndo();
   const id = +arg; if (!(id >= 1 && id <= 114)) return false;
   if (!Q.length) { view.cur = 0; return }   // quran.json still loading: boot re-routes once it arrives
   view.cur = id; view.veil = isDue(id); setLast(id); renderSurah(true); loadSurah(id); renderOffline(id);
@@ -126,11 +128,19 @@ $('gPlus').addEventListener('click', () => { S.goal = Math.min(50, S.goal + 1); 
 
 /* ---------- surah ---------- */
 $('veilBtn').addEventListener('click', () => { view.veil = !view.veil; $('ayat').querySelectorAll('.shown').forEach(x => x.classList.remove('shown')); renderSurah(false) });
+/** Puts a surah back as it was (after "undo"), with the daily count and the lists redrawn. */
+function undoSurah(id, snap, delta) { restoreSurah(id, snap); bump(-delta); save(); if (view.cur === id) renderSurah(false); refreshStats() }
+
 $('allBtn').addEventListener('click', () => {
-  const tot = Q[view.cur - 1].v.length, was = mem(view.cur) === tot, on = !was; let d = 0;
-  for (let i = 0; i < tot; i++) d += setAyah(view.cur, i, on);
-  bump(d); save(); renderSurah(false); refreshStats(); checkCompleted(view.cur, was);
+  const id = view.cur, c = Q[id - 1], tot = c.v.length, was = mem(id) === tot, on = !was;
+  // a change to the whole surah at once is asked about first, and can be taken back
+  const ask = on ? 'هل حفظتَ كل آيات سورة ' + c.n + ' (' + AR(tot) + ' آية)؟ ستُعلَّم كلها محفوظة.' : 'إلغاء حفظ سورة ' + c.n + ' كلها؟ سيُمسح تعليم ' + AR(mem(id)) + ' آية.';
+  if (!confirm(ask)) return;
+  const snap = surahSnapshot(id); let d = 0;
+  for (let i = 0; i < tot; i++) d += setAyah(id, i, on);
+  bump(d); save(); renderSurah(false); refreshStats(); checkCompleted(id, was);
   if (on) markWave(document.querySelectorAll('#ayat .ck'));
+  if (d) offerUndo(on ? 'عُلّمت سورة ' + c.n + ' كاملة.' : 'أُلغي حفظ سورة ' + c.n + '.', () => undoSurah(id, snap, d));
 });
 $('ayat').addEventListener('click', e => {
   const li = e.target.closest('.ay'); if (!li) return;
@@ -139,9 +149,10 @@ $('ayat').addEventListener('click', e => {
   if (e.target.closest('.tf')) { toggleTafsir(li); return }
   if (e.target.closest('.tfx')) return;
   if (e.target.closest('.ck')) {
-    const i = +li.dataset.i, r = rec(view.cur), was = mem(view.cur) === Q[view.cur - 1].v.length, turnOn = !(r && r.m[i] === '1');
-    bump(setAyah(view.cur, i, turnOn)); save(); renderSurah(false); refreshStats(); checkCompleted(view.cur, was);
+    const id = view.cur, i = +li.dataset.i, r = rec(id), was = mem(id) === Q[id - 1].v.length, turnOn = !(r && r.m[i] === '1'), snap = surahSnapshot(id);
+    const d = setAyah(id, i, turnOn); bump(d); save(); renderSurah(false); refreshStats(); checkCompleted(id, was);
     if (turnOn) markPop(li.querySelector('.ck'));
+    else offerUndo('أُلغي تعليم الآية ' + AR(i + 1) + '.', () => undoSurah(id, snap, d), 7000);   // an un-mark is often an accidental tap
   } else if (view.veil && li.classList.toggle('shown')) revealAyah(li);
 });
 $('ayat').addEventListener('keydown', e => {
@@ -156,7 +167,7 @@ $('revGood').addEventListener('click', () => onGrade(true));
 $('revBad').addEventListener('click', () => onGrade(false));
 
 /* ---------- boot ---------- */
-initCharacters(); initKids(); initReading(); initCompanion(); onKidsChange(render); initTour({ onDone: () => { renderKidBar(); render() } }); initPlayer(); initPwa(); initSearch();
+initGuard(); initCharacters(); initKids(); initReading(); initCompanion(); onKidsChange(render); initTour({ onDone: () => { renderKidBar(); render() } }); initPlayer(); initPwa(); initSearch();
 setReminderContext(() => ({ reviewDue: Q.length ? dueList().length + weakList().length : 0, adhkarDone: id => azToday(id).d === 1 }));
 startRouter();
 loadQuran().then(() => { render(); initReminders(); announceBadges(); motionReady(); route(); if (needsTour()) openTour() })
