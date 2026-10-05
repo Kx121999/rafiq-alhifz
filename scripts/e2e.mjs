@@ -163,10 +163,58 @@ await scenario('works when storage is unavailable', async () => {
 await scenario('every page opens without errors', async () => {
   const k = kid({ S: { s: { 112: { m: '1100', d: ymd(-1), i: 1 } }, goal: 5, day: ymd(), n: 2, streak: 1, last: ymd() } });
   const { ctx, page, errors } = await open('#/', { seed: { 'hifz-tour-v1': '1', 'hifz-kids-v1': store([k]) } });
-  for (const h of ['dashboard', 'mushaf', 'surah/112', 'review', 'plan', 'games', 'achievements', 'adhkar/sabah', 'adhkar/all', 'shop', 'challenge', 'share', 'family', 'ramadan', 'report', 'about', 'check', 'search/' + encodeURIComponent('الرحمن')]) {
+  for (const h of ['dashboard', 'more', 'mushaf', 'surah/112', 'review', 'plan', 'games', 'achievements', 'adhkar/sabah', 'adhkar/all', 'shop', 'challenge', 'share', 'family', 'ramadan', 'report', 'about', 'check', 'search/' + encodeURIComponent('الرحمن')]) {
     await page.goto(BASE + '#/' + h); await wait(700);
     ok(await page.evaluate(() => !!document.querySelector('.page:not([hidden])')), 'no page shown for #/' + h);
   }
+  noErrors(errors); await ctx.close();
+});
+
+/* 9. where I stopped: mode and ayah come back, nothing plays by itself, bookmarks and pins show on the mushaf page */
+await scenario('resume in a surah, bookmark and pin', async () => {
+  const { ctx, page, errors } = await open('#/surah/2', { seed: { 'hifz-tour-v1': '1', 'hifz-kids-v1': store([kid()]) } });
+  await page.waitForSelector('#ayat .ay', { timeout: 20000 });
+  await page.evaluate(() => document.querySelector('.mode[data-mode="listen"]').click()); await wait(300);
+  await page.evaluate(() => document.querySelector('#ayat .ay[data-i="30"]').scrollIntoView({ block: 'start' })); await wait(1500);
+  let d = await saved(page), p = d.kids[0].pos;
+  ok(p && p.id === 2 && p.mode === 'listen' && p.i >= 28 && p.i <= 31, 'the place was not saved: ' + JSON.stringify(p));
+  await page.evaluate(() => document.querySelector('#ayat .ay[data-i="30"] .bm').click());
+  await page.evaluate(() => document.getElementById('pinBtn').click()); await wait(300);
+  d = await saved(page); ok(d.kids[0].bm.includes('2.31') && d.kids[0].pin.includes(2), 'the bookmark or pin was not saved');
+  await page.goto(BASE + '#/mushaf'); await page.waitForSelector('#mushafNow .resume', { timeout: 10000 });
+  ok(await page.evaluate(() => document.getElementById('mushafNow').textContent.includes('سورة البقرة') && document.querySelectorAll('#mushafNow .chip').length === 2), 'the resume card, bookmark and pin are not shown');
+  await page.evaluate(() => document.querySelector('#mushafNow .resume').click()); await wait(1800);
+  ok(await page.evaluate(() => { const li = document.querySelector('#ayat .ay[data-i="30"]'), r = li.getBoundingClientRect(); return r.bottom > 0 && r.top < innerHeight && document.querySelector('.mode[data-mode="listen"]').getAttribute('aria-pressed') === 'true' }), 'the surah did not open at the saved ayah and mode');
+  ok(await page.evaluate(() => document.querySelector('.pl-play').getAttribute('aria-label') === 'تشغيل'), 'something started playing by itself');
+  noErrors(errors); await ctx.close();
+});
+
+/* 10. two children never mix: progress, place and bookmarks are each their own */
+await scenario('two children do not mix', async () => {
+  const a = kid({ id: 'k1', name: 'سلمى' }), b = kid({ id: 'k2', name: 'يوسف', icon: '🌙', mode: 'young' });
+  const { ctx, page, errors } = await open('#/surah/112', { seed: { 'hifz-tour-v1': '1', 'hifz-kids-v1': store([a, b]) } });
+  await page.waitForSelector('#ayat .ay', { timeout: 20000 });
+  await page.evaluate(() => document.querySelector('.mode[data-mode="memorise"]').click()); await wait(200);
+  await page.evaluate(() => { document.querySelector('#ayat .ck').click(); document.querySelector('#ayat .bm').click() }); await wait(400);
+  await clickText(page, 'يوسف', '.kid'); await wait(500);
+  ok(await page.evaluate(() => [...document.querySelectorAll('#ayat .ck')].every(c => c.getAttribute('aria-pressed') !== 'true') && [...document.querySelectorAll('#ayat .bm')].every(c => c.getAttribute('aria-pressed') !== 'true')), 'the second child sees the first child progress');
+  const d = await saved(page); ok(d.kids[0].S.s[112] && d.kids[0].bm.length === 1 && !d.kids[1].S.s[112] && !d.kids[1].bm, 'saved data mixed between children');
+  await clickText(page, 'سلمى', '.kid'); await wait(500);
+  ok(await page.evaluate(() => document.querySelector('#ayat .ck').getAttribute('aria-pressed') === 'true'), 'the first child progress was lost after switching');
+  noErrors(errors); await ctx.close();
+});
+
+/* 11. marking a whole surah asks first, can be undone, and the undo puts everything back */
+await scenario('whole surah mark and undo', async () => {
+  const { ctx, page, errors } = await open('#/surah/112', { seed: { 'hifz-tour-v1': '1', 'hifz-kids-v1': store([kid()]) } });
+  await page.waitForSelector('#ayat .ay', { timeout: 20000 });
+  page.on('dialog', d => d.accept());
+  await page.evaluate(() => document.querySelector('.mode[data-mode="memorise"]').click()); await wait(200);
+  await page.evaluate(() => document.getElementById('allBtn').click()); await wait(500);
+  let d = await saved(page); ok(d.kids[0].S.s[112] && d.kids[0].S.s[112].m === '1111', 'the whole surah was not marked');
+  await page.waitForSelector('#undoBar:not([hidden]) button', { timeout: 5000 });
+  await page.evaluate(() => document.querySelector('#undoBar button').click()); await wait(500);
+  d = await saved(page); ok(!d.kids[0].S.s[112] || !d.kids[0].S.s[112].m.includes('1'), 'undo did not put the surah back');
   noErrors(errors); await ctx.close();
 });
 

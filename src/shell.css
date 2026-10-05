@@ -196,3 +196,98 @@ body[data-view="landing"]{background:radial-gradient(1100px 520px at 85% -120px,
 .dbsession .dbchar{position:absolute;inset-inline-end:16px;top:14px;width:72px;height:72px;opacity:.95}
 .dbsession h2{padding-inline-end:84px}
 .dbcard .acts .btn{min-width:48px}
+
+/* =============== the surah page: calm reading, one thing at a time =============== */
+#page-surah{max-width:52rem;margin-inline:auto;width:100%;gap:12px}
+.shead{display:flex;flex-wrap:wrap;align-items:center;gap:8px 12px;padding:2px 0}
+.shead #back{order:0;padding-inline:10px}
+.stitle{order:1;flex:1 1 12rem;min-width:0;display:flex;flex-direction:column;gap:2px}
+.stitle h1{margin:0;font-family:var(--display);font-weight:800;font-size:1.9rem;line-height:1.3}
+.stitle p{margin:0;color:var(--muted);font-size:.92rem}
+.sacts{order:2;display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.sacts .btn,.memtools .btn{min-height:44px;font-size:.92rem}
+.sacts .btn .ic,.memtools .btn .ic,.arow .ic,.mode .ic{width:1.15em;height:1.15em;flex:none}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px}
+#pinBtn[aria-pressed="true"] .ic,.bm[aria-pressed="true"] .ic{fill:currentColor}
+#pinBtn[aria-pressed="true"]{border-color:var(--accent);background:var(--accent-soft);color:var(--accent-ink)}
+
+.modebar{position:sticky;top:0;z-index:4;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:4px;padding:4px;background:var(--surface);border:1px solid var(--line);border-radius:16px;box-shadow:var(--sh)}
+.mode{display:flex;align-items:center;justify-content:center;gap:6px;min-height:44px;padding:4px 6px;border:0;border-radius:12px;background:transparent;color:var(--muted);font:inherit;font-weight:600;font-size:.95rem;cursor:pointer}
+.mode:hover{background:var(--accent-soft)}
+.mode[aria-pressed="true"]{background:var(--accent);color:var(--on-accent)}
+@media (max-width:420px){.mode{flex-direction:column;gap:2px;font-size:.8rem;min-height:52px}}
+
+.sprog{height:8px;border-radius:99px;background:var(--line);overflow:hidden}
+.sprog i{display:block;height:100%;width:0;border-radius:99px;background:var(--accent);transition:width .5s ease}
+.sprog.done i{background:var(--reward)}
+.modenote{margin:0}
+.modenote:empty{display:none}
+.memtools{display:flex;flex-wrap:wrap;gap:8px}
+
+/* the text sits on one calm sheet; each ayah is a row, not a card */
+.ayat{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--sh);gap:0;padding:4px 18px}
+.ay{border:0;border-bottom:1px solid var(--line);border-radius:0;box-shadow:none;background:transparent;padding:14px 0 10px;grid-template-columns:minmax(0,1fr) auto}
+.ay:last-child{border-bottom:0}
+.ay.playing{background:var(--accent-soft);margin-inline:-18px;padding-inline:18px;border-color:var(--line)}
+.ay.found{background:var(--gold-soft);margin-inline:-18px;padding-inline:18px}
+.ay:has(.wk[aria-pressed="true"]){border-color:var(--line)}
+.ay:has(.wk[aria-pressed="true"]) .tx .end{border-color:var(--alert);color:var(--alert)}
+#page-surah:not([data-mode="memorise"]):not([data-mode="recite"]) .ck,
+#page-surah:not([data-mode="memorise"]):not([data-mode="recite"]) .wk{display:none}
+#page-surah:not([data-mode="memorise"]):not([data-mode="recite"]) .ay{grid-template-columns:minmax(0,1fr)}
+#page-surah:not([data-mode="listen"]) .arow .pl:not(:focus-visible){opacity:1}
+.arow{gap:8px}
+.arow .pl,.arow .bm,.arow .wk,.arow .tf{display:inline-flex;align-items:center;gap:6px;min-height:40px;padding:4px 12px;border:1px solid var(--line-strong);border-radius:12px;background:var(--surface);color:var(--accent-ink);font-size:.88rem;font-weight:600;text-decoration:none}
+.arow .bm{padding-inline:10px}
+.arow .pl:hover,.arow .bm:hover,.arow .wk:hover,.arow .tf:hover{background:var(--accent-soft);border-color:var(--accent)}
+.arow .wk{color:var(--gold)}
+.arow .wk[aria-pressed="true"]{border-color:var(--gold);background:var(--gold-soft)}
+.tx{line-height:2.5}
+
+/* the player: pinned to the bottom while listening, a plain card otherwise */
+.player{position:static;border-radius:var(--r)}
+#page-surah:not([data-mode="read"]) .player{position:sticky}
+.pl-play{display:grid;place-items:center}
+.pl-play .ic{width:1.4rem;height:1.4rem}
+.pl-range{grid-column:1 / -1;display:flex;flex-wrap:wrap;align-items:center;gap:8px}
+.pl-range select{padding:8px 10px;border:1px solid var(--line-strong);border-radius:12px;background:var(--bg);font:inherit;color:inherit;min-height:44px}
+.pl-range .btn[aria-pressed="true"]{background:var(--accent);color:var(--on-accent);border-color:var(--accent)}
+@media (min-width:1024px){.player{bottom:12px!important}}
+
+/* focus reading: only the text */
+.focusexit{display:none;position:fixed;top:12px;inset-inline-start:12px;z-index:40;box-shadow:var(--sh-hover)}
+body.focusread #page-surah .focusexit{display:inline-flex}
+body.focusread #page-surah .modebar,body.focusread #page-surah .sprog,body.focusread #page-surah .modenote,body.focusread #page-surah .memtools,
+body.focusread #page-surah .sacts,body.focusread #page-surah #back,body.focusread #page-surah .arow,body.focusread #page-surah .player,
+body.focusread #page-surah .offline,body.focusread #page-surah .review,body.focusread #page-surah .listenlink{display:none}
+body.focusread #page-surah .ayat{border:0;box-shadow:none;background:transparent}
+body.focusread .col{max-width:48rem;padding-bottom:40px}
+body.focusread #page-surah .tx{font-size:calc(2rem*var(--rs,1))}
+
+/* compact player and surah header on phones */
+.pl-row{flex-wrap:nowrap}
+.pl-step{min-width:44px;padding:0 10px}
+.pl-step .ic{width:1.2rem;height:1.2rem}
+.pl-label{min-width:0;font-size:.9rem}
+.player{padding:8px 12px}
+@media (max-width:640px){
+  .sacts{width:100%;justify-content:space-between}
+  .sacts #pinBtn span,.sacts #focusBtn span{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+  .sacts #pinBtn,.sacts #focusBtn{min-width:44px;padding-inline:12px}
+  .stitle h1{font-size:1.6rem}
+}
+
+/* =============== the mushaf page: where I stopped, marks, pins =============== */
+.mushafnow{display:flex;flex-direction:column;gap:12px}
+.resume{display:flex;align-items:center;gap:14px;padding:16px 18px;border-radius:var(--r);background:var(--accent);color:var(--on-accent);text-decoration:none;box-shadow:var(--sh-hover)}
+.resume:hover{background:var(--accent-ink)}
+.resume .ic{width:1.6rem;height:1.6rem}
+.resume span{display:flex;flex-direction:column;line-height:1.5}
+.resume small{opacity:.92;font-size:.9rem}
+.resume .chev{margin-inline-start:auto}
+.nowrow{display:flex;flex-direction:column;gap:6px}
+.nowrow h2{margin:0;display:flex;align-items:center;gap:6px;font-size:.95rem;color:var(--muted)}
+.nowrow h2 .ic{width:1.1rem;height:1.1rem}
+.nowrow ul{list-style:none;margin:0;padding:0;display:flex;flex-wrap:wrap;gap:8px}
+.nowrow .chip{display:inline-flex;align-items:center;min-height:44px;text-decoration:none;color:var(--fg)}
+.pill{display:inline-block;padding:2px 10px;border-radius:99px;background:var(--accent-soft);color:var(--accent-ink);font-size:.78rem;font-weight:600}

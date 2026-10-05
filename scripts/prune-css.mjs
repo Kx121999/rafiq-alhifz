@@ -2,7 +2,9 @@
 // A small brace-aware parser: it understands nested @media blocks and drops only the selectors that match.
 import { readFileSync, writeFileSync } from 'node:fs';
 
-const OLD = [
+// extra class names to remove, from the command line: node scripts/prune-css.mjs stitle,journey
+const EXTRA = (process.argv[2] || '').split(',').filter(Boolean).map(p => new RegExp('^\\.' + p + '\\b'));
+const OLD = [...EXTRA,
   /^\.wrap\b/, /^\.top\b/, /^\.brand\b/, /^\.logo\b/, /^\.topacts\b/, /^\.iconbtn\b/, /^\.nav\b/, /^\.sky\b/, /^\.cloud\b/, /^\.twinkle\b/,
   /^\.hero\b/, /^\.mascot\b/, /^\.feats\b/, /^\.summary\b/, /^\.greet\b/, /^\.mood\b/, /^\.bubble\b/, /^\.tiles\b/, /^\.tile\b/, /^\.banner\b/, /^\.b-(sun|sky|coral|violet|rose|mint)\b/,
   /^\.sitefoot\b/, /^\.sf-brand\b/, /^\.sf-main\b/, /^\.sf-links\b/, /^\.sf-src\b/, /^\.sf-cast\b/, /^\.foot\b/, /^footer\.foot\b/, /^\.todayhead\b/, /^\.cast\b/, /^\.kidbar\b/,

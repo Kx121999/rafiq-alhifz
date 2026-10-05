@@ -2,13 +2,13 @@ import './styles.css';
 import './shell.css';
 import { $, AR, days } from './util.js';
 import { Q, loadQuran } from './data.js';
-import { S, save, rec, mem, isDue, bump, setAyah, grade, setLast, activeKid, isWeak, setWeak, weakList, azToday, surahSnapshot, restoreSurah } from './state.js';
+import { S, save, rec, mem, isDue, bump, setAyah, grade, setLast, activeKid, isWeak, setWeak, weakList, azToday, surahSnapshot, restoreSurah, setPos, readPos, toggleBookmark, togglePin } from './state.js';
 import { initGuard, offerUndo, clearUndo } from './guard.js';
-import { renderList, setFilter } from './home.js';
-import { view, renderSurah, toggleTafsir } from './surah.js';
+import { renderList, renderMushafTop, setFilter } from './home.js';
+import { view, renderSurah, toggleTafsir, setMode } from './surah.js';
 import { go, onPage, onShown, startRouter, route } from './router.js';
 import { pageIn, revealAyah, celebrate, markPop, markWave, motionReady, initCharacters } from './motion.js';
-import { initPlayer, loadSurah, playFrom, stopPlayer } from './player.js';
+import { initPlayer, loadSurah, playFrom, stopPlayer, onPlayerPos } from './player.js';
 import { initPwa } from './pwa.js';
 import { initSearch, openSearch } from './search.js';
 import { renderReport } from './report.js';
@@ -36,7 +36,7 @@ import { initKids, onKidsChange, renderKidBar, applyMode, announceBadges } from 
 
 function render() {
   if (!Q.length) return;
-  applyMode(); renderDashboard(); renderList(); renderReview(); renderWeak(); renderPlan(); updateDue(); renderAchievements();
+  applyMode(); renderDashboard(); renderList(); renderMushafTop(); renderReview(); renderWeak(); renderPlan(); updateDue(); renderAchievements();
   if (!$('page-games').hidden) renderGames();
   refreshAdhkar(); checkChallenge(); refreshCompanion(); recordRamadan();
   for (const [id, fn] of [['shop', renderShop], ['challenge', renderChallenge], ['share', renderShare], ['family', renderFamily], ['ramadan', renderRamadan]]) if (!$('page-' + id).hidden) fn();
@@ -57,16 +57,29 @@ function checkCompleted(id, wasComplete) {
 
 /* ---------- routes ---------- */
 /** Opening #/surah/<n>/<ayah> (from a search result) scrolls to that ayah and highlights it for a moment. */
-let pendingAyah = 0;
+let pendingAyah = 0, quietJump = false, tracking = false;
 function jumpToAyah() {
-  const n = pendingAyah; pendingAyah = 0; if (!n) return;
-  const li = document.querySelector('#ayat .ay[data-i="' + (n - 1) + '"]'); if (!li) return;
-  li.scrollIntoView({ block: 'center' }); li.classList.add('found');
-  setTimeout(() => li.classList.remove('found'), 3500);
+  const n = pendingAyah, quiet = quietJump; pendingAyah = 0; quietJump = false;
+  const li = n && document.querySelector('#ayat .ay[data-i="' + (n - 1) + '"]');
+  if (li) {
+    li.scrollIntoView({ block: 'center' });
+    if (!quiet) { li.classList.add('found'); setTimeout(() => li.classList.remove('found'), 3500) }   // from a search result: shown; from "where I stopped": just there
+  }
+  setTimeout(() => { tracking = true }, 600);   // only now do scrolls count as "where the child is"
 }
+/** Remembers the ayah at the top of the screen (and the study mode) as the child's place in this surah. */
+function savePlace(i) { if (view.cur && tracking) setPos(view.cur, i == null ? topAyah() : i, view.mode) }
+function topAyah() {
+  const list = document.querySelectorAll('#ayat .ay');
+  for (const li of list) if (li.getBoundingClientRect().bottom > 150) return +li.dataset.i;
+  return 0;
+}
+let scrollTimer = 0;
+window.addEventListener('scroll', () => { if (!view.cur || !tracking) return; clearTimeout(scrollTimer); scrollTimer = setTimeout(savePlace, 400) }, { passive: true });
+onPlayerPos((id, i) => { if (id === view.cur) { tracking = true; setPos(id, i, view.mode) } });
 onShown(page => {
   pageIn(page); companionPage(page);
-  if (page !== 'adhkar') setFocusRead(false);
+  if (page !== 'adhkar' && page !== 'surah') setFocusRead(false);
   if (page !== 'surah') stopPlayer(); else setTimeout(jumpToAyah, 450);
   if (page === 'search' && !$('sq').value) $('sq').focus();
 });
@@ -76,8 +89,13 @@ onPage('surah', (arg, ayah) => {
   clearUndo();
   const id = +arg; if (!(id >= 1 && id <= 114)) return false;
   if (!Q.length) { view.cur = 0; return }   // quran.json still loading: boot re-routes once it arrives
-  view.cur = id; view.veil = isDue(id); setLast(id); renderSurah(true); loadSurah(id); renderOffline(id);
-  pendingAyah = +ayah >= 1 && +ayah <= Q[id - 1].v.length ? +ayah : 0;
+  const pos = readPos(), back = pos && pos.id === id ? pos : null, len = Q[id - 1].v.length;
+  view.cur = id; tracking = false; setLast(id);
+  // where the child was last time (mode and ayah) comes back, without playing anything; a surah that is due opens in recitation mode
+  setMode(back ? back.mode : isDue(id) ? 'recite' : mem(id) > 0 && mem(id) < len ? 'memorise' : 'read');
+  renderSurah(true); loadSurah(id, back ? back.i : 0); renderOffline(id);
+  pendingAyah = +ayah >= 1 && +ayah <= len ? +ayah : back && back.i > 0 ? back.i + 1 : 0;
+  quietJump = !(+ayah >= 1);
   document.title = 'سورة ' + Q[id - 1].n + ' · رفيق الحفظ';
 });
 for (const p of ['home', 'about']) onPage(p, () => { view.cur = 0 });
@@ -128,7 +146,13 @@ $('chips').addEventListener('click', e => {
 });
 
 /* ---------- surah ---------- */
-$('veilBtn').addEventListener('click', () => { view.veil = !view.veil; $('ayat').querySelectorAll('.shown').forEach(x => x.classList.remove('shown')); renderSurah(false) });
+$('modes').addEventListener('click', e => {
+  const b = e.target.closest('.mode'); if (!b) return;
+  tracking = true; setMode(b.dataset.mode); renderSurah(false); savePlace();
+});
+$('pinBtn').addEventListener('click', () => { togglePin(view.cur); renderSurah(false) });
+$('focusBtn').addEventListener('click', () => setFocusRead(!document.body.classList.contains('focusread')));
+$('focusExit').addEventListener('click', () => setFocusRead(false));
 /** Puts a surah back as it was (after "undo"), with the daily count and the lists redrawn. */
 function undoSurah(id, snap, delta) { restoreSurah(id, snap); bump(-delta); save(); if (view.cur === id) renderSurah(false); refreshStats() }
 
@@ -146,7 +170,8 @@ $('allBtn').addEventListener('click', () => {
 $('ayat').addEventListener('click', e => {
   const li = e.target.closest('.ay'); if (!li) return;
   if (e.target.closest('.wk')) { const i = +li.dataset.i; setWeak(view.cur, i, !isWeak(view.cur, i)); save(); renderSurah(false); refreshStats(); return }
-  if (e.target.closest('.pl')) { playFrom(+li.dataset.i); return }
+  if (e.target.closest('.bm')) { toggleBookmark(view.cur, +li.dataset.i); renderSurah(false); return }
+  if (e.target.closest('.pl')) { tracking = true; playFrom(+li.dataset.i); return }
   if (e.target.closest('.tf')) { toggleTafsir(li); return }
   if (e.target.closest('.tfx')) return;
   if (e.target.closest('.ck')) {

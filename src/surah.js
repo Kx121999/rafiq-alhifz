@@ -1,24 +1,47 @@
-import { $, AR, day, charSrc, charImg } from './util.js';
+import { $, AR, day, icon } from './util.js';
 import { Q, loadTafsir } from './data.js';
-import { mem, rec, isWeak, weakList, friendOf } from './state.js';
+import { mem, rec, isWeak, weakList, isBookmarked, pinned } from './state.js';
 
-/** The open surah (0 = index page) and whether recitation mode hides the ayat. */
-export const view = { cur: 0, veil: false };
+/** The open surah (0 = index page), the study mode (read / listen / memorise / recite) and whether recitation hides the ayat. */
+export const view = { cur: 0, veil: false, mode: 'read' };
+
+const NOTES = {
+  read: '',
+  listen: 'اضغط «استمع» تحت أي آية، أو شغّل السورة من الشريط في الأسفل. يمكنك تكرار الآية أو مقطع كامل ووضع وقفة للتسميع.',
+  memorise: 'علّم الآية بالدائرة حين تحفظها. التعليم بيدك أنت، وهو تقييم ذاتي.',
+  recite: 'الآيات مخفية إلا كلمتها الأولى. اقرأ من حفظك ثم اضغط الآية لتتحقق.',
+};
+
+/** Switches the study mode: what is visible on the page follows from it (the CSS reads data-mode). */
+export function setMode(mode) {
+  view.mode = NOTES[mode] != null ? mode : 'read'; view.veil = view.mode === 'recite';
+  const page = $('page-surah'); page.dataset.mode = view.mode;
+  document.querySelectorAll('#modes .mode').forEach(b => b.setAttribute('aria-pressed', b.dataset.mode === view.mode));
+  $('modeNote').textContent = NOTES[view.mode]; $('memTools').hidden = view.mode !== 'memorise';
+  $('ayat').querySelectorAll('.shown').forEach(x => x.classList.remove('shown'));
+  $('ayat').classList.toggle('veil', view.veil);
+}
+
+const btn = (cls, ic, label, text) => {
+  const b = document.createElement('button'); b.type = 'button'; b.className = cls;
+  if (ic) b.appendChild(icon(ic));
+  if (text) { const t = document.createElement('span'); t.textContent = text; b.appendChild(t) }
+  if (label) b.setAttribute('aria-label', label);
+  return b;
+};
 
 export function renderSurah(full) {
   const cur = view.cur, c = Q[cur - 1], tot = c.v.length, m = mem(cur), r = rec(cur);
-  $('stchar').src = charSrc(friendOf());
   $('stName').textContent = 'سورة ' + c.n; $('listen').href = 'https://quran.com/' + cur;
   const weak = weakList().filter(a => a.id === cur).length;
-  $('stMeta').textContent = (c.t ? 'مدنية' : 'مكية') + ' · حفظتَ ' + AR(m) + ' من ' + AR(tot) + ' آية' + (weak ? ' · ' + AR(weak) + ' تحتاج تثبيتًا' : '');
-  // the journey: the child's friend walks along the road as more ayat are memorised
-  const pct = (tot ? m / tot * 100 : 0).toFixed(1) + '%', walker = $('walker'), road = $('jtrack'), friend = friendOf();
-  $('jfill').style.width = pct; walker.style.insetInlineStart = 'calc(' + pct + ' - 28px)';
-  if (walker.dataset.f !== friend) { walker.dataset.f = friend; walker.replaceChildren(charImg(friend)); walker.classList.toggle('flip', friend === 'sabr') }
+  $('stMeta').textContent = (c.t ? 'مدنية' : 'مكية') + ' · ' + AR(tot) + ' آية · ' + (m ? 'حفظتَ ' + AR(m) : 'لم تبدأ حفظها بعد') + (weak ? ' · ' + AR(weak) + ' تحتاج تثبيتًا' : '');
+  const pct = (tot ? m / tot * 100 : 0).toFixed(1) + '%', road = $('jtrack');
+  $('jfill').style.width = pct;
   road.setAttribute('aria-valuemax', tot); road.setAttribute('aria-valuenow', m); road.setAttribute('aria-valuetext', AR(m) + ' من ' + AR(tot) + ' آية');
   road.classList.toggle('done', tot > 0 && m === tot);
   $('allBtn').textContent = m === tot ? 'إلغاء حفظ السورة' : 'حفظتُ السورة كاملة';
-  $('veilBtn').setAttribute('aria-pressed', view.veil); $('veilNote').hidden = !view.veil;
+  const pin = $('pinBtn'), on = pinned().includes(cur);
+  pin.setAttribute('aria-pressed', on); pin.querySelector('span').textContent = on ? 'السورة مثبّتة' : 'تثبيت السورة';
   const b = $('basmala'); b.hidden = (cur === 1 || cur === 9); b.textContent = Q[0].v[0];
   const ol = $('ayat'); ol.classList.toggle('veil', view.veil);
   if (full) {
@@ -30,22 +53,26 @@ export function renderSurah(full) {
       const r1 = document.createElement('span'); r1.className = 'rest'; r1.textContent = rest;
       const e = document.createElement('span'); e.className = 'end'; e.textContent = AR(i + 1);
       tx.append(first, r1, e);
-      const ck = document.createElement('button'); ck.type = 'button'; ck.className = 'ck';
-      ck.setAttribute('aria-label', 'حفظتُ الآية ' + AR(i + 1));
+      const ck = btn('ck', '', 'حفظتُ الآية ' + AR(i + 1));
       const body = document.createElement('div'); body.className = 'body';
-      const tf = document.createElement('button'); tf.type = 'button'; tf.className = 'tf'; tf.textContent = 'التفسير'; tf.setAttribute('aria-expanded', 'false');
+      const tf = btn('tf', 'bulb', '', 'التفسير'); tf.setAttribute('aria-expanded', 'false');
       const tfx = document.createElement('div'); tfx.className = 'tfx'; tfx.hidden = true;
-      const pl = document.createElement('button'); pl.type = 'button'; pl.className = 'pl'; pl.textContent = '▶ استمع'; pl.setAttribute('aria-label', 'استمع من الآية ' + AR(i + 1));
-      const wk = document.createElement('button'); wk.type = 'button'; wk.className = 'wk'; wk.hidden = true;
-      const row = document.createElement('div'); row.className = 'arow'; row.append(pl, wk, tf);
+      const pl = btn('pl', 'play', 'استمع من الآية ' + AR(i + 1), 'استمع');
+      const bm = btn('bm', 'bookmark', '', '');
+      const wk = btn('wk', 'flag', '', ''); wk.hidden = true;
+      const row = document.createElement('div'); row.className = 'arow'; row.append(pl, bm, wk, tf);
       body.append(tx, row, tfx); li.append(body, ck); ol.appendChild(li);
     });
   }
   ol.querySelectorAll('.ck').forEach((ck, i) => ck.setAttribute('aria-pressed', !!r && r.m[i] === '1'));
+  ol.querySelectorAll('.bm').forEach((bm, i) => {
+    const on2 = isBookmarked(cur, i);
+    bm.setAttribute('aria-pressed', on2); bm.setAttribute('aria-label', (on2 ? 'إزالة العلامة من الآية ' : 'ضع علامة عند الآية ') + AR(i + 1));
+  });
   ol.querySelectorAll('.wk').forEach((wk, i) => {
     const memorised = !!r && r.m[i] === '1', weakNow = isWeak(cur, i);
     wk.hidden = !memorised; wk.setAttribute('aria-pressed', weakNow);
-    wk.textContent = weakNow ? '⚑ ضعيفة' : '⚐ علّمها ضعيفة';
+    wk.replaceChildren(icon('flag'), Object.assign(document.createElement('span'), { textContent: weakNow ? 'ضعيفة' : 'علّمها ضعيفة' }));
     wk.setAttribute('aria-label', (weakNow ? 'إلغاء تعليم الآية ' : 'علّم الآية ') + AR(i + 1) + (weakNow ? ' كضعيفة' : ' كضعيفة تحتاج تثبيتًا'));
   });
   const rv = $('review'); rv.hidden = !m;
@@ -58,14 +85,14 @@ export function renderSurah(full) {
 
 const MARK = '[التفسير]';
 export async function toggleTafsir(li) {
-  const b = li.querySelector('.tf'), x = li.querySelector('.tfx');
-  if (!x.hidden) { x.hidden = true; b.setAttribute('aria-expanded', 'false'); b.textContent = 'التفسير'; return }
-  const id = view.cur, i = +li.dataset.i; b.textContent = 'جارٍ تحميل التفسير…';
+  const b = li.querySelector('.tf'), x = li.querySelector('.tfx'), label = b.querySelector('span');
+  if (!x.hidden) { x.hidden = true; b.setAttribute('aria-expanded', 'false'); label.textContent = 'التفسير'; return }
+  const id = view.cur, i = +li.dataset.i; label.textContent = 'جارٍ تحميل التفسير…';
   let T;
-  try { T = await loadTafsir() } catch (e) { b.textContent = 'تعذّر تحميل التفسير. اضغط للمحاولة مجددًا'; return }
+  try { T = await loadTafsir() } catch (e) { label.textContent = 'تعذّر تحميل التفسير. اضغط للمحاولة مجددًا'; return }
   if (id !== view.cur) return;
   const t = T[id - 1][i] || '', k = t.indexOf(MARK); x.textContent = '';
   if (k >= 0) { const pre = document.createElement('span'); pre.className = 'pre'; pre.textContent = t.slice(0, k).trim(); x.append(pre, t.slice(k + MARK.length).trim()) }
   else x.textContent = t.trim();
-  x.hidden = false; b.setAttribute('aria-expanded', 'true'); b.textContent = 'إخفاء التفسير';
+  x.hidden = false; b.setAttribute('aria-expanded', 'true'); label.textContent = 'إخفاء التفسير';
 }

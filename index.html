@@ -216,10 +216,12 @@
   <!-- المصحف -->
   <main class="page" id="page-mushaf" data-page="mushaf" tabindex="-1" hidden>
     <header class="phead"><div><h1 class="ptitle">المصحف</h1><p>اختر سورة وابدأ الحفظ</p></div></header>
+    <section class="mushafnow" id="mushafNow" aria-label="تابع من حيث توقفت" hidden></section>
     <div class="tools">
       <input class="search" id="q" type="search" placeholder="ابحث باسم السورة أو رقمها" aria-label="بحث في السور">
       <div class="chips" id="chips">
         <button type="button" class="chip" data-f="all" aria-pressed="true">الكل</button>
+        <button type="button" class="chip" data-f="pinned" aria-pressed="false">المثبّتة</button>
         <button type="button" class="chip" data-f="due" aria-pressed="false">مراجعة اليوم</button>
         <button type="button" class="chip" data-f="doing" aria-pressed="false">قيد الحفظ</button>
         <button type="button" class="chip" data-f="done" aria-pressed="false">مكتملة</button>
@@ -340,19 +342,31 @@
 
   <!-- السورة -->
   <main class="page" id="page-surah" data-page="surah" tabindex="-1" hidden>
-    <div class="shead">
-      <a class="btn" id="back" href="#/mushaf">→ السور</a>
-      <span class="grow"></span>
-      <span class="fsctl" role="group" aria-label="حجم الخط"><button type="button" class="btn fsbtn" data-fs="-1" aria-label="تصغير الخط">أ−</button><span class="fsval" aria-hidden="true"></span><button type="button" class="btn fsbtn" data-fs="1" aria-label="تكبير الخط">أ+</button></span>
-      <button type="button" class="btn primary" id="sessBtn">🎯 جلسة حفظ</button>
-      <button type="button" class="btn" id="veilBtn" aria-pressed="false">وضع التسميع</button>
+    <header class="shead">
+      <a class="btn ghost" id="back" href="#/mushaf"><svg class="ic" aria-hidden="true" focusable="false"><use href="#i-back"/></svg><span>السور</span></a>
+      <div class="stitle"><h1 id="stName"></h1><p id="stMeta"></p></div>
+      <div class="sacts">
+        <span class="fsctl" role="group" aria-label="حجم الخط"><button type="button" class="btn fsbtn" data-fs="-1" aria-label="تصغير الخط">أ−</button><span class="fsval" aria-hidden="true"></span><button type="button" class="btn fsbtn" data-fs="1" aria-label="تكبير الخط">أ+</button></span>
+        <button type="button" class="btn" id="pinBtn" aria-pressed="false"><svg class="ic" aria-hidden="true" focusable="false"><use href="#i-bookmark"/></svg><span>تثبيت السورة</span></button>
+        <button type="button" class="btn" id="focusBtn" aria-pressed="false"><svg class="ic" aria-hidden="true" focusable="false"><use href="#i-eye"/></svg><span>قراءة مركّزة</span></button>
+      </div>
+    </header>
+
+    <div class="modebar" id="modes" role="group" aria-label="طريقة الدراسة">
+      <button type="button" class="mode" data-mode="read" aria-pressed="true"><svg class="ic" aria-hidden="true" focusable="false"><use href="#i-book"/></svg><span>قراءة</span></button>
+      <button type="button" class="mode" data-mode="listen" aria-pressed="false"><svg class="ic" aria-hidden="true" focusable="false"><use href="#i-headphones"/></svg><span>استماع</span></button>
+      <button type="button" class="mode" data-mode="memorise" aria-pressed="false"><svg class="ic" aria-hidden="true" focusable="false"><use href="#i-check"/></svg><span>حفظ</span></button>
+      <button type="button" class="mode" data-mode="recite" aria-pressed="false"><svg class="ic" aria-hidden="true" focusable="false"><use href="#i-eyeoff"/></svg><span>تسميع</span></button>
+    </div>
+
+    <div class="sprog" id="jtrack" role="progressbar" aria-label="تقدّم حفظ السورة" aria-valuemin="0" aria-valuemax="1" aria-valuenow="0"><i id="jfill"></i></div>
+    <p class="note modenote" id="modeNote" role="status"></p>
+
+    <div class="memtools" id="memTools" hidden>
+      <button type="button" class="btn primary" id="sessBtn"><svg class="ic" aria-hidden="true" focusable="false"><use href="#i-sparkle"/></svg><span>جلسة حفظ موجّهة</span></button>
       <button type="button" class="btn" id="allBtn">حفظتُ السورة كاملة</button>
     </div>
-    <div class="stitle"><img class="char stchar" id="stchar" src="/mascot.svg" alt="" width="68" height="68"><h1 id="stName"></h1><p id="stMeta"></p></div>
-    <div class="journey"><span class="jflag" aria-hidden="true">🌱</span>
-      <div class="jtrack" id="jtrack" role="progressbar" aria-label="تقدّم حفظ السورة" aria-valuemin="0" aria-valuemax="1" aria-valuenow="0"><i class="jfill" id="jfill"></i><span class="walker" id="walker"></span></div>
-      <span class="jflag" aria-hidden="true">🏁</span></div>
-    <p class="note" id="veilNote" hidden>الآيات مخفية إلا كلمتها الأولى. اقرأ من حفظك ثم اضغط الآية لتتحقق.</p>
+
     <div class="basmala" id="basmala" hidden></div>
     <ol class="ayat" id="ayat"></ol>
     <p class="listenlink"><a id="listen" target="_blank" rel="noopener" href="https://quran.com">أو استمع لهذه السورة على Quran.com ↗</a></p>
@@ -365,6 +379,7 @@
       </div>
     </section>
     <section class="player" id="player" aria-label="مشغّل التلاوة"></section>
+    <button type="button" class="btn focusexit" id="focusExit"><svg class="ic" aria-hidden="true" focusable="false"><use href="#i-x"/></svg><span>إنهاء القراءة المركّزة</span></button>
   </main>
 
   <!-- عن المنصة -->

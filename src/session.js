@@ -7,6 +7,7 @@ import { Q } from './data.js';
 import { rec, friendOf, activeKid } from './state.js';
 import { ayahUrl } from './player.js';
 import { sfx } from './sound.js';
+import { registerAudio, takeAudio } from './audiobus.js';
 
 const LISTENS = 3;
 export const COUNTS = [1, 2, 3, 5];
@@ -40,12 +41,14 @@ export function suggestedStart(id) {
 let st = null, setup = { id: 0, from: 0, count: 3 }, onMark = () => {}, player = null;
 export const initSession = opts => { onMark = (opts && opts.mark) || onMark; const d = $('session'); if (d) d.addEventListener('close', () => { stopAudio(); st = null }) };
 
+registerAudio('session', () => stopAudio());
 function stopAudio() { if (player) { try { player.pause() } catch (e) {} player.onended = player.onerror = null; player = null } }
 
 /** Plays one ayah n times in a row, reporting how many have finished. Resolves to 'done' or 'error'. */
 function playTimes(url, n, onCount) {
   stopAudio();
   return new Promise(res => {
+    takeAudio('session');   // the surah player is silenced first: never two recitations at once
     let k = 0; const a = player = new Audio(url);
     a.onended = () => { k++; onCount(k); if (k >= n) { player = null; res('done') } else { a.currentTime = 0; a.play().catch(() => res('error')) } };
     a.onerror = () => { player = null; res('error') };

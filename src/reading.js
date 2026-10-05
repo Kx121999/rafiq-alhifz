@@ -21,6 +21,7 @@ export function applyReading() {
 export function setFocusRead(on) {
   document.body.classList.toggle('focusread', on);
   const b = $('azFocus'); if (b) { b.setAttribute('aria-pressed', on); b.textContent = on ? 'إنهاء القراءة المركّزة' : 'قراءة مركّزة' }
+  const sb = $('focusBtn'); if (sb) { sb.setAttribute('aria-pressed', on); sb.querySelector('span').textContent = on ? 'إنهاء القراءة المركّزة' : 'قراءة مركّزة' }
 }
 
 export function initReading() {

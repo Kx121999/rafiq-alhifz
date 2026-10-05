@@ -69,7 +69,7 @@ const STATES = [
   ['theme lilac: adhkar', '#/adhkar/sabah', async p => { await p.waitForSelector('.azcard', { timeout: 20000 }); await p.evaluate(() => { document.body.dataset.theme = 'rose' }) }],
   ['game: which surah', '#/games', click('من أي سورة', '.gamecard')], ['game: next ayah', '#/games', click('ما الآية التالية', '.gamecard')], ['game: count', '#/games', click('كم آية', '.gamecard')],
   ['achievements', '#/achievements'], ['certificate', '#/certificate/114'], ['report', '#/report'], ['about', '#/about'],
-  ['surah (reader)', '#/surah/112'], ['surah (veil)', '#/surah/114', p => p.evaluate(() => document.getElementById('veilBtn').click())],
+  ['surah (reader)', '#/surah/112'], ['surah (recite)', '#/surah/114', p => p.evaluate(() => document.querySelector('.mode[data-mode="recite"]').click())], ['surah (listen)', '#/surah/112', p => p.evaluate(() => document.querySelector('.mode[data-mode="listen"]').click())], ['surah (memorise)', '#/surah/112', p => p.evaluate(() => document.querySelector('.mode[data-mode="memorise"]').click())], ['surah (focus)', '#/surah/112', p => p.evaluate(() => document.getElementById('focusBtn').click())], ['more', '#/more'],
   ['surah (young child)', '#/surah/114', null, 'k2'], ['surah + tafsir', '#/surah/112', async p => { await p.waitForSelector('.ay .tf', { timeout: 20000 }); await p.evaluate(() => document.querySelector('.ay .tf').click()); await wait(800) }],
   ['player settings', '#/surah/112', p => p.evaluate(() => { document.getElementById('plToggle').click(); document.querySelector('#player details').open = true })],
   ['parent gate', '#/dashboard', p => p.evaluate(() => document.getElementById('parentBtn').click())], ['parent corner', '#/dashboard', openParent],
