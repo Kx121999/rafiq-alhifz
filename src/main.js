@@ -20,6 +20,7 @@ import { renderShare } from './share.js';
 import { renderFamily } from './family.js';
 import { initCheck } from './diagnose.js';
 import { initSession, openSession } from './session.js';
+import { initCompanion, companionPage, refreshCompanion } from './companion.js';
 import { initReminders, setReminderContext } from './remind.js';
 import { renderReview, renderWeak, onReviewGraded, clearReviewNote, dueList } from './review.js';
 import { renderPlan, onPlanChanged } from './plan.js';
@@ -31,7 +32,7 @@ function render() {
   if (!Q.length) return;
   applyMode(); renderSummary(); renderToday(); renderRewards(); renderList(); renderReview(); renderWeak(); renderPlan(); updateDue(); renderAchievements();
   if (!$('page-games').hidden) renderGames();
-  refreshAdhkar(); checkChallenge();
+  refreshAdhkar(); checkChallenge(); refreshCompanion();
   for (const [id, fn] of [['shop', renderShop], ['challenge', renderChallenge], ['share', renderShare], ['family', renderFamily]]) if (!$('page-' + id).hidden) fn();
   if (view.cur) renderSurah(false);
 }
@@ -58,7 +59,7 @@ function jumpToAyah() {
   setTimeout(() => li.classList.remove('found'), 3500);
 }
 onShown(page => {
-  pageIn(page);
+  pageIn(page); companionPage(page);
   if (page !== 'adhkar') setFocusRead(false);
   if (page !== 'surah') stopPlayer(); else setTimeout(jumpToAyah, 450);
   if (page === 'search' && !$('sq').value) $('sq').focus();
@@ -145,7 +146,7 @@ $('revGood').addEventListener('click', () => onGrade(true));
 $('revBad').addEventListener('click', () => onGrade(false));
 
 /* ---------- boot ---------- */
-initCharacters(); initKids(); initReading(); onKidsChange(render); initTour({ onDone: () => { renderKidBar(); render() } }); initPlayer(); initPwa(); initSearch();
+initCharacters(); initKids(); initReading(); initCompanion(); onKidsChange(render); initTour({ onDone: () => { renderKidBar(); render() } }); initPlayer(); initPwa(); initSearch();
 setReminderContext(() => ({ reviewDue: Q.length ? dueList().length + weakList().length : 0, adhkarDone: id => azToday(id).d === 1 }));
 startRouter();
 loadQuran().then(() => { render(); initReminders(); announceBadges(); motionReady(); route(); if (needsTour()) openTour() })

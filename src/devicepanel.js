@@ -1,6 +1,7 @@
 // The "this device" card in the parent corner: sounds and reminders. Both are stored on the device, not per child.
 import { el } from './util.js';
 import { soundOn, setSound, sfx } from './sound.js';
+import { companionOn, setCompanion } from './companion.js';
 import { SLOTS, loadRemind, saveRemind, supported, permission, askPermission, notify, tick } from './remind.js';
 
 export function deviceSection() {
@@ -13,6 +14,13 @@ export function deviceSection() {
   snd.addEventListener('click', () => { setSound(!soundOn()); paintSound(); sfx('star') });
   paintSound();
   card.append(el('p', 'note', 'أصوات قصيرة مرحة عند الحفظ والإجابة الصحيحة. مغلقة افتراضيًا.'), snd);
+
+  /* the friend in the corner of every page */
+  const fr = el('button', 'chip', ''); fr.type = 'button';
+  const paintFriend = () => { fr.textContent = companionOn() ? '🧸 الصديق المرافق ظاهر' : '🧸 الصديق المرافق مخفي'; fr.setAttribute('aria-pressed', companionOn()) };
+  fr.addEventListener('click', () => { setCompanion(!companionOn()); paintFriend() });
+  paintFriend();
+  card.append(el('p', 'note', 'صديقك الكرتوني يظهر في ركن كل صفحة ويقول جملة قصيرة مفيدة.'), fr);
 
   /* reminders */
   const msg = el('p', 'note'); msg.setAttribute('role', 'status');

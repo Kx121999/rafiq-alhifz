@@ -645,3 +645,33 @@ body[data-theme="rose"]{--bg:#fff0f6;background:linear-gradient(180deg,#ffd9ea 0
 .famgoaltext{margin:0;font-size:1.2rem;font-weight:600}
 .famgoal .bar{border-color:#d5dfd9}
 .famgoal p.note{margin:0;color:#3f5a4f}
+
+/* ======================= cartoon friends everywhere ======================= */
+/* the companion: in the row of the children's names, at the far end, so it never sits on top of a button */
+.kidbar{position:relative}
+.companion{position:relative;margin-inline-start:auto;flex:none;align-self:flex-start}
+.cbubble{position:absolute;top:calc(100% + 2px);inset-inline-end:0;z-index:8;width:max-content;max-width:min(78vw,18rem);margin:0;background:var(--surface);border:2px solid var(--line);border-radius:20px;padding:8px 14px;font-size:.92rem;font-weight:600;line-height:1.5;box-shadow:0 3px 0 var(--line);animation:cfade .35s ease-out;cursor:pointer}
+@keyframes cfade{from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:none}}
+.cchar{display:grid;place-items:center;border:0;background:transparent;padding:0;border-radius:50%;filter:drop-shadow(0 5px 5px rgba(27,46,68,.16))}
+.cchar .char{--cs:58px}
+@media (prefers-reduced-motion:reduce){.cbubble{animation:none}}
+.focusread .companion{display:none}
+@media (min-width:1180px){.cchar .char{--cs:68px}}
+@media print{.companion{display:none}}
+
+/* a small friend at the top of the cards that had none */
+.todayhead{display:flex;align-items:center;justify-content:space-between;gap:10px;align-self:stretch}
+.todayhead .char.mini{--cs:56px;margin-block:-6px}
+.azhead{position:relative}
+.azhead .azchar{position:absolute;top:8px;inset-inline-end:12px;--cs:72px}
+.azhead h2{padding-inline-end:84px}
+.dlgchar{--cs:72px;margin:0 auto 4px}
+.dlg .dlgchar{display:block}
+
+/* empty and waiting states always get a friend (unless they already have one) */
+.empty:not(:has(.char))::before{content:"";display:block;width:84px;height:84px;margin:0 auto 8px;background:url("/chars/ghayma.svg") center/contain no-repeat}
+.azcats .empty::before,.list .empty::before{width:72px;height:72px}
+
+/* the row of friends in the footer */
+.sf-cast{display:flex;gap:2px;grid-column:1 / -1;justify-content:center;opacity:.95}
+.sf-cast img{width:44px;height:44px}

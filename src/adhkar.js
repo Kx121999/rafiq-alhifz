@@ -1,7 +1,7 @@
 // The adhkar page: tabs for morning, evening, sleep, waking and after prayer, plus every other category of Hisn al-Muslim.
 // The texts come from public/adhkar.json exactly as they are and are only ever shown with textContent. A tap counter
 // per dhikr, saved per child and per day (see azSave in state.js), and a small celebration when a list is finished.
-import { $, AR, el, norm } from './util.js';
+import { $, AR, el, norm, charImg } from './util.js';
 import { loadAdhkar } from './data.js';
 import { azToday, azSave, favList, isFav, toggleFav } from './state.js';
 import { celebrate, markPop } from './motion.js';
@@ -11,6 +11,8 @@ import { AZ_TABS, tabOf, azNow, COUNT_FIX } from './azmeta.js';
 
 let token = 0, lastArg;
 
+/** A friend for each list: the sun for the daytime lists, the moon for the night, the star for the favourites. */
+const PAL = { sabah: 'shams', masaa: 'qamar', nawm: 'qamar', istiqaz: 'shams', salah: 'nujum', fav: 'nujum' };
 const FAV = { key: 'fav', label: 'المفضلة', icon: '⭐' };
 const ALL = { key: 'all', label: 'كل الأذكار', icon: '📚' };
 const times = n => n === 1 ? 'ذكر واحد' : n === 2 ? 'ذكران' : n <= 10 ? AR(n) + ' أذكار' : AR(n) + ' ذكرًا';
@@ -42,7 +44,8 @@ function showList(box, key, entries, title, { back = false, persist = true, onUn
   const bar = el('div', 'bar'), fill = el('i'); bar.appendChild(fill);
   const prog = el('p', 'note azprog');
   const reset = el('button', 'btn', 'ابدأ من جديد'); reset.type = 'button';
-  head.append(h, bar, prog, reset);
+  const pal = charImg(PAL[key] || 'ghayma', 'azchar'); pal.width = pal.height = 72;
+  head.append(pal, h, bar, prog, reset);
 
   const ol = el('ol', 'azlist');
   const cards = entries.map((e, i) => {
