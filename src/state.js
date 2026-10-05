@@ -357,9 +357,13 @@ export function weakList() {
   return out.sort((a, b) => a.id - b.id || a.i - b.i);
 }
 
-/** Spaced review: doubles the interval up to 30 days, or resets to 1 day. Returns the new interval. */
-export function grade(id, good) {
+/** The three honest answers after reciting a surah from memory, and how much each one stretches the wait until the next review. */
+export const RATINGS = { help: 'احتجت مساعدة', good: 'جيد', mastered: 'متقن' };
+/** Spaced review. rating: 'help' (back to 1 day), 'good' (the wait doubles, up to 30 days), 'mastered' (triples). true / false still mean good / help. Returns the new interval. */
+export function grade(id, rating) {
   const r = rec(id); if (!r) return null;
-  r.i = good ? Math.min(30, Math.max(1, r.i) * 2) : 1; r.d = day(r.i); addLog('r', 1); save();
+  const k = rating === true ? 'good' : rating === false ? 'help' : rating;
+  if (!Object.hasOwn(RATINGS, k)) return null;
+  r.i = k === 'help' ? 1 : Math.min(30, Math.max(1, r.i) * (k === 'mastered' ? 3 : 2)); r.d = day(r.i); addLog('r', 1); save();
   return r.i;
 }

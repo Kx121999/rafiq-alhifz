@@ -363,3 +363,27 @@ describe('a friend for each child', () => {
     expect(again.state.friendOf()).toBe('ghayma');
   });
 });
+
+describe('the three-level self-rating', () => {
+  it('"help" goes back to one day, "good" doubles, "mastered" triples, all capped at 30', async () => {
+    today('2026-05-01');
+    const { state } = await boot();
+    state.setAyah(112, 0, true);
+    expect(state.grade(112, 'good')).toBe(2);
+    expect(state.grade(112, 'mastered')).toBe(6);
+    expect(state.grade(112, 'mastered')).toBe(18);
+    expect(state.grade(112, 'mastered')).toBe(30);
+    expect(state.rec(112).d).toBe('2026-05-31');
+    expect(state.grade(112, 'help')).toBe(1);
+    expect(state.rec(112).d).toBe('2026-05-02');
+  });
+  it('refuses a rating it does not know and leaves the schedule alone', async () => {
+    today('2026-05-01');
+    const { state } = await boot();
+    state.setAyah(112, 0, true);
+    const before = JSON.stringify(state.rec(112));
+    expect(state.grade(112, 'perfect')).toBeNull();
+    expect(state.grade(112, undefined)).toBeNull();
+    expect(JSON.stringify(state.rec(112))).toBe(before);
+  });
+});

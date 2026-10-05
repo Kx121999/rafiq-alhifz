@@ -80,7 +80,7 @@ describe('the session screen', () => {
     expect(marks).toEqual([]);
     click('أصبتُ');
     expect(marks).toEqual([[112, 0]]);
-    expect(document.querySelector('#sessBody h2').textContent).toContain('حفظتَ آية واحدة');
+    expect(document.querySelector('#sessBody h2').textContent).toContain('علّمتَ آية واحدة كمحفوظة');
   });
 
   it('"I need to repeat" marks nothing and goes back to listening', async () => {
@@ -108,5 +108,87 @@ describe('the session screen', () => {
     const s = await import('../src/session.js');
     expect(s.suggestedStart(114)).toBe(2); expect(s.suggestedStart(113)).toBe(0);
     expect(Q[113].v.length).toBe(6);
+  });
+});
+
+describe('the session state with a warm-up', () => {
+  it('starts with the review step and then follows the normal steps', () => {
+    let s = startState(112, 0, 1, 114);
+    expect(s.step).toBe('warmup'); expect(s.warm).toBe(114);
+    expect(advance(s, 'good')).toMatchObject({ step: 'warmup' });          // only "next" leaves the warm-up
+    s = advance(s, 'next'); expect(s.step).toBe('listen');
+  });
+  it('a plain session has no warm-up', () => { expect(startState(112, 0, 1).step).toBe('listen') });
+});
+
+describe('the session screen: warm-up, hint and sound', () => {
+  const click = text => { const b = [...document.querySelectorAll('#sessBody button')].find(x => x.textContent.includes(text)); expect(b, 'button ' + text).toBeTruthy(); b.click(); return b };
+  async function open(id, seedState) {
+    today('2026-05-12');
+    HTMLDialogElement.prototype.showModal = function () { this.setAttribute('open', '') };
+    HTMLDialogElement.prototype.close = function () { this.removeAttribute('open'); this.dispatchEvent(new Event('close')) };
+    document.body.innerHTML = '<dialog id="session"><div id="sessBody"></div></dialog>';
+    vi.stubGlobal('Audio', class { pause() {} addEventListener() {} removeEventListener() {} load() {} play() { return Promise.resolve() } });
+    const { Q, state } = await boot();
+    if (seedState) seedState(state);
+    const s = await import('../src/session.js');
+    const reviewed = []; s.initSession({ mark() {}, review: (rid, k) => reviewed.push([rid, k]) });
+    s.openSession(id);
+    return { Q, state, reviewed };
+  }
+
+  it('offers a warm-up for a due surah, rates it in three honest levels, and the schedule follows', async () => {
+    const { state, reviewed } = await open(112, st => { st.setAyah(114, 0, true); st.rec(114).d = '2026-05-11'; st.rec(114).i = 2 });
+    expect(document.getElementById('sessWarm')).toBeTruthy();
+    click('آية واحدة'); click('يلا نبدأ');
+    expect(document.querySelector('#sessBody h2').textContent).toContain('مراجعة سريعة');
+    for (const label of ['احتجت مساعدة', 'جيد', 'متقن']) expect([...document.querySelectorAll('#sessBody button')].some(b => b.textContent === label), label).toBe(true);
+    click('متقن');
+    expect(reviewed).toEqual([[114, 'mastered']]);
+    expect(state.rec(114).i).toBe(6);                                       // 2 x 3
+    expect(document.querySelector('#sessBody h2').textContent).toContain('استمع');
+  });
+
+  it('can skip the warm-up without touching the schedule, and no warm-up is offered when nothing is due', async () => {
+    const { state } = await open(112, st => { st.setAyah(114, 0, true); st.rec(114).d = '2026-05-11'; st.rec(114).i = 2 });
+    click('آية واحدة'); click('يلا نبدأ'); click('تخطَّ المراجعة');
+    expect(state.rec(114).i).toBe(2); expect(state.isDue(114)).toBe(true);
+    await open(112);
+    expect(document.getElementById('sessWarm')).toBeNull();
+  });
+
+  it('a hint opens one hidden word at a time and never the whole ayah', async () => {
+    const { Q } = await open(112);
+    click('آية واحدة'); click('يلا نبدأ'); click('التالي'); click('قرأتُها');
+    const words = () => [...document.querySelectorAll('.sesstx .sw')];
+    expect(words().length).toBeGreaterThan(1);
+    click('تلميح');
+    expect(words().filter(w => w.classList.contains('hinted')).length).toBe(1);
+    expect(document.querySelector('.sesstx').classList.contains('veil')).toBe(true);   // still veiled
+    for (let k = 0; k < 10; k++) { const b = [...document.querySelectorAll('#sessBody button')].find(x => x.textContent.includes('تلميح')); if (b && !b.disabled) b.click() }
+    expect(words().every(w => w.classList.contains('hinted'))).toBe(true);
+    expect([...document.querySelectorAll('#sessBody button')].find(x => x.textContent.includes('تلميح')).disabled).toBe(true);
+    expect(document.querySelector('.sesstx').textContent.trim()).toBe(Q[111].v[0]);   // the words are exactly the text of the ayah
+  });
+
+  it('the sound bus stops the previous owner when another one starts', async () => {
+    vi.resetModules();
+    const bus = await import('../src/audiobus.js');
+    const a = vi.fn(), b = vi.fn(); bus.registerAudio('a', a); bus.registerAudio('b', b);
+    bus.takeAudio('a'); expect(a).not.toHaveBeenCalled();
+    bus.takeAudio('b'); expect(a).toHaveBeenCalledTimes(1); expect(bus.audioOwner()).toBe('b');
+    bus.takeAudio('b'); expect(b).not.toHaveBeenCalled();                     // the owner may start again without stopping itself
+    bus.takeAudio('a'); expect(b).toHaveBeenCalledTimes(1);
+  });
+
+  it('opening a session silences the surah player', async () => {
+    today('2026-05-12');
+    HTMLDialogElement.prototype.showModal = function () { this.setAttribute('open', '') };
+    document.body.innerHTML = '<dialog id="session"><div id="sessBody"></div></dialog>';
+    await boot();
+    const bus = await import('../src/audiobus.js'), s = await import('../src/session.js');
+    const stopPlayer = vi.fn(); bus.registerAudio('player', stopPlayer); bus.takeAudio('player');
+    s.openSession(112);
+    expect(stopPlayer).toHaveBeenCalledTimes(1); expect(bus.audioOwner()).toBe('session');
   });
 });

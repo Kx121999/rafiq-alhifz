@@ -114,7 +114,7 @@ $('sessBtn').addEventListener('click', () => { if (view.cur) openSession(view.cu
 initSession({ mark: (id, i) => {
   const was = mem(id) === Q[id - 1].v.length;
   bump(setAyah(id, i, true)); save(); if (view.cur === id) renderSurah(false); refreshStats(); checkCompleted(id, was);
-} });
+}, review: () => { render() } });
 onPage('check', () => { view.cur = 0 });
 onPage('more', () => { view.cur = 0; renderMore() });
 initCheck();

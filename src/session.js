@@ -2,9 +2,9 @@
 // For each ayah: listen three times, read it, then recite it from memory (the text is blurred except its first word),
 // reveal it and say honestly whether it was right. After all of them, recite them together. Only ayat the child says
 // they got right are marked as memorised. The ayat are shown exactly as in quran.json; blurring is only CSS.
-import { $, AR, ayahs, el, charImg } from './util.js';
+import { $, AR, ayahs, el, charImg, icon, days } from './util.js';
 import { Q } from './data.js';
-import { rec, friendOf, activeKid } from './state.js';
+import { rec, friendOf, activeKid, grade, RATINGS, isDue } from './state.js';
 import { ayahUrl } from './player.js';
 import { sfx } from './sound.js';
 import { registerAudio, takeAudio } from './audiobus.js';
@@ -13,12 +13,13 @@ const LISTENS = 3;
 export const COUNTS = [1, 2, 3, 5];
 
 /** The session as a small state machine, kept separate from the screen so it can be tested on its own. */
-export const startState = (id, from, count) => ({ id, from, count, pos: 0, step: 'listen', retries: 0, marked: 0, done: false });
+export const startState = (id, from, count, warm = 0) => ({ id, from, count, pos: 0, step: warm ? 'warmup' : 'listen', warm, retries: 0, marked: 0, done: false });
 
 /** Moves on. action: 'next' (listen, read), 'good' / 'again' (recite, together). Returns a new state; mark is the ayah index to mark as memorised. */
 export function advance(st, action) {
   const s = { ...st, mark: null };
-  if (st.step === 'listen' && action === 'next') s.step = 'read';
+  if (st.step === 'warmup' && action === 'next') s.step = 'listen';
+  else if (st.step === 'listen' && action === 'next') s.step = 'read';
   else if (st.step === 'read' && action === 'next') s.step = 'recite';
   else if (st.step === 'recite' && action === 'good') {
     s.mark = st.from + st.pos; s.marked = st.marked + 1; s.pos = st.pos + 1;
@@ -38,8 +39,8 @@ export function suggestedStart(id) {
   return i < 0 ? 0 : i;
 }
 
-let st = null, setup = { id: 0, from: 0, count: 3 }, onMark = () => {}, player = null;
-export const initSession = opts => { onMark = (opts && opts.mark) || onMark; const d = $('session'); if (d) d.addEventListener('close', () => { stopAudio(); st = null }) };
+let st = null, setup = { id: 0, from: 0, count: 3, warm: 0 }, onMark = () => {}, onReview = () => {}, player = null;
+export const initSession = opts => { onMark = (opts && opts.mark) || onMark; onReview = (opts && opts.review) || onReview; const d = $('session'); if (d) d.addEventListener('close', () => { stopAudio(); st = null }) };
 
 registerAudio('session', () => stopAudio());
 function stopAudio() { if (player) { try { player.pause() } catch (e) {} player.onended = player.onerror = null; player = null } }
@@ -59,8 +60,15 @@ function playTimes(url, n, onCount) {
 export function openSession(id) {
   if (!Q[id - 1] || !activeKid()) return;
   const len = Q[id - 1].v.length;
-  setup = { id, from: suggestedStart(id), count: Math.min(len, activeKid().mode === 'young' ? 2 : 3) };
+  takeAudio('session');   // opening a session silences the surah player
+  setup = { id, from: suggestedStart(id), count: Math.min(len, activeKid().mode === 'young' ? 2 : 3), warm: dueId(id) };
   st = null; renderSetup(); $('session').showModal();
+}
+
+/** A surah that is due for review (another one than the one being learned, when there is one): the session can start with it as a warm-up. */
+function dueId(except) {
+  const ids = Q.map((_, k) => k + 1).filter(isDue);
+  return ids.find(x => x !== except) || ids[0] || 0;
 }
 
 function renderSetup() {
@@ -79,10 +87,17 @@ function renderSetup() {
     b.addEventListener('click', () => { setup.count = n; paintCounts() }); cnt.appendChild(b) }) };
   sel.addEventListener('change', () => { setup.from = Number(sel.value); setup.count = Math.min(setup.count, len - setup.from) || 1; paintCounts() });
   paintCounts();
-  const go = el('button', 'btn primary', 'يلا نبدأ!'); go.type = 'button'; go.addEventListener('click', () => { st = startState(id, setup.from, setup.count); sfx('tap'); renderStep() });
+  let warmBox = null;
+  if (setup.warm) {
+    warmBox = el('label', 'sesswarm'); const cb = el('input'); cb.type = 'checkbox'; cb.checked = true; cb.id = 'sessWarm';
+    warmBox.append(cb, ' ابدأ بمراجعة قصيرة لسورة ' + Q[setup.warm - 1].n + ' (موعدها حان)');
+  }
+  const go = el('button', 'btn primary', 'يلا نبدأ!'); go.type = 'button'; go.addEventListener('click', () => { st = startState(id, setup.from, setup.count, warmBox && warmBox.firstChild.checked ? setup.warm : 0); sfx('tap'); renderStep() });
   const close = el('button', 'btn', 'إغلاق'); close.type = 'button'; close.addEventListener('click', () => $('session').close());
   const acts = el('div', 'acts'); acts.append(go, close);
-  body.append(lab, sel, el('p', 'note', 'كم آية في هذه الجلسة؟'), cnt, acts);
+  body.append(lab, sel, el('p', 'note', 'كم آية في هذه الجلسة؟'), cnt);
+  if (warmBox) body.appendChild(warmBox);
+  body.appendChild(acts);
   sel.focus();
 }
 
@@ -98,8 +113,9 @@ function renderStep() {
   stopAudio();
   const c = Q[st.id - 1];
   if (st.done) return renderDone();
+  if (st.step === 'warmup') return renderWarmup(body);
   const idx = st.step === 'together' ? null : st.from + st.pos;
-  const total = st.count * 3 + (st.count > 1 ? 1 : 0), doneSteps = st.pos * 3 + ({ listen: 0, read: 1, recite: 2, together: 0 })[st.step] + (st.step === 'together' ? st.count * 3 : 0);
+  const w = st.warm ? 1 : 0, total = w + st.count * 3 + (st.count > 1 ? 1 : 0), doneSteps = (st.step === 'warmup' ? 0 : w) + st.pos * 3 + ({ warmup: 0, listen: 0, read: 1, recite: 2, together: 0 })[st.step] + (st.step === 'together' ? st.count * 3 : 0);
   const head = el('p', 'note sesshead', st.step === 'together' ? 'سورة ' + c.n + ' · الآيات ' + AR(st.from + 1) + ' إلى ' + AR(st.from + st.count) : 'سورة ' + c.n + ' · الآية ' + AR(idx + 1) + ' (' + AR(st.pos + 1) + ' من ' + AR(st.count) + ')');
   const bar = el('div', 'bar'), fill = el('i'); fill.style.width = Math.round(doneSteps / total * 100) + '%'; bar.append(fill);
   bar.setAttribute('role', 'progressbar'); bar.setAttribute('aria-valuemin', '0'); bar.setAttribute('aria-valuemax', String(total)); bar.setAttribute('aria-valuenow', String(doneSteps)); bar.setAttribute('aria-label', 'تقدّم الجلسة');
@@ -112,7 +128,7 @@ function renderStep() {
   if (st.step === 'listen') {
     step('١. استمع', 'استمع للآية ' + AR(LISTENS) + ' مرات وانظر إلى الكلمات.');
     body.appendChild(veiled(text(idx), true));
-    const play = el('button', 'btn primary', '▶ استمع'); play.type = 'button';
+    const play = el('button', 'btn primary'); play.append(icon('play'), 'استمع'); play.type = 'button';
     const next = el('button', 'btn', 'التالي'); next.type = 'button';
     play.addEventListener('click', async () => {
       play.disabled = true; msg.textContent = 'جارٍ التشغيل…';
@@ -136,10 +152,18 @@ function renderStep() {
     const ps = lines.map(k => { const p = veiled(text(k), false); box.appendChild(p); return p });
     body.appendChild(box);
     const show = el('button', 'btn primary', 'أظهر الآية'); show.type = 'button';
-    const good = el('button', 'btn primary', 'أصبتُ ✅'); good.type = 'button';
-    const again = el('button', 'btn', 'أحتاج إعادة 🔁'); again.type = 'button';
+    const good = el('button', 'btn primary'); good.append(icon('check'), 'أصبتُ'); good.type = 'button';
+    const again = el('button', 'btn'); again.append(icon('repeat'), 'أحتاج إعادة'); again.type = 'button';
     good.hidden = again.hidden = true;
-    show.addEventListener('click', () => { ps.forEach(p => p.classList.remove('veil')); show.hidden = true; good.hidden = again.hidden = false; msg.textContent = 'هل قلتها صحيحة؟ كن صادقًا مع نفسك.'; good.focus() });
+    // a hint opens the next hidden word of the ayah, one word at a time (it never shows the whole ayah)
+    const hint = el('button', 'btn ghost'); hint.append(icon('bulb'), 'تلميح'); hint.type = 'button';
+    hint.addEventListener('click', () => {
+      const next = box.querySelector('.sesstx.veil .sw:not(.hinted)');
+      if (!next) { hint.disabled = true; return }
+      next.classList.add('hinted'); msg.textContent = 'ظهرت كلمة. حاول أن تكمل الآية بعدها من حفظك.';
+      if (!box.querySelector('.sesstx.veil .sw:not(.hinted)')) hint.disabled = true;
+    });
+    show.addEventListener('click', () => { ps.forEach(p => p.classList.remove('veil')); show.hidden = hint.hidden = true; good.hidden = again.hidden = false; msg.textContent = 'هل قلتها صحيحة؟ كن صادقًا مع نفسك.'; good.focus() });
     good.addEventListener('click', () => {
       const prev = st; st = advance(st, 'good');
       if (prev.step === 'recite') { sfx('star'); onMark(st.id, prev.from + prev.pos) }
@@ -147,11 +171,29 @@ function renderStep() {
     });
     again.addEventListener('click', () => {
       st = advance(st, 'again');
-      if (together) { ps.forEach(p => p.classList.add('veil')); show.hidden = false; good.hidden = again.hidden = true; msg.textContent = 'كرّرها من حفظك مرة أخرى ثم اكشفها.'; show.focus(); return }
+      if (together) { ps.forEach(p => { p.classList.add('veil'); p.querySelectorAll('.hinted').forEach(w => w.classList.remove('hinted')) }); show.hidden = hint.hidden = false; hint.disabled = false; good.hidden = again.hidden = true; msg.textContent = 'كرّرها من حفظك مرة أخرى ثم اكشفها.'; show.focus(); return }
       renderStep();
     });
-    acts.append(show, good, again); body.append(acts, msg); show.focus();
+    acts.append(show, hint, good, again); body.append(acts, msg); show.focus();
   }
+  const quit = el('button', 'btn sessquit', 'إنهاء الجلسة'); quit.type = 'button'; quit.addEventListener('click', () => $('session').close());
+  body.appendChild(quit);
+}
+
+/** The warm-up: recite a surah that is due from memory, then say honestly how it went. This is the same self-rating as the review page. */
+function renderWarmup(body) {
+  const id = st.warm, c = Q[id - 1];
+  body.append(el('h2', 'sesstitle', '١. مراجعة سريعة'), el('p', 'sesshint', 'قبل أن نبدأ شيئًا جديدًا، سمّع من حفظك سورة ' + c.n + '، ثم قيّم نفسك بصدق. هذا تقييم ذاتي، فلا أحد يصحّح عنك.'));
+  const msg = el('p', 'note'); msg.setAttribute('role', 'status');
+  const acts = el('div', 'acts');
+  for (const [key, label] of Object.entries(RATINGS)) {
+    const b = el('button', key === 'good' ? 'btn primary' : 'btn', label); b.type = 'button';
+    b.addEventListener('click', () => { const i = grade(id, key); st = { ...st, warmRating: key, warmDays: i }; onReview(id, key); st = advance(st, 'next'); renderStep() });
+    acts.appendChild(b);
+  }
+  const skip = el('button', 'btn ghost', 'تخطَّ المراجعة اليوم'); skip.type = 'button'; skip.addEventListener('click', () => { st = advance(st, 'next'); renderStep() });
+  body.append(acts, msg, skip);
+  acts.firstChild.focus();
   const quit = el('button', 'btn sessquit', 'إنهاء الجلسة'); quit.type = 'button'; quit.addEventListener('click', () => $('session').close());
   body.appendChild(quit);
 }
@@ -160,8 +202,14 @@ function renderDone() {
   const body = $('sessBody'); body.textContent = '';
   const c = Q[st.id - 1];
   const pic = charImg(friendOf(), 'big'); pic.width = pic.height = 120; sfx('win');
-  body.append(pic, el('h2', '', st.marked ? 'أحسنت! حفظتَ ' + ayahs(st.marked) + ' 🎉' : 'انتهت الجلسة'),
-    el('p', 'note', st.marked ? 'سورة ' + c.n + ': علّمتُ لك ما أصبتَ فيه كمحفوظ، وسيأتيك موعد مراجعته.' : 'لا بأس، كرّرها كل يوم قليلًا وستحفظها بإذن الله.'));
+  body.append(pic, el('h2', '', st.marked ? 'أحسنت! أنهيتَ الجلسة وعلّمتَ ' + ayahs(st.marked) + ' كمحفوظة' : 'انتهت الجلسة'),
+    el('p', 'note', st.marked ? 'سورة ' + c.n + ': سيأتيك موعد مراجعتها، وهناك تُثبَّت.' : 'لا بأس، كرّرها كل يوم قليلًا وستحفظها بإذن الله.'));
+  // what happened, in plain words: self-assessed, never claimed as checked
+  const sum = el('ul', 'sesssum');
+  if (st.warm) sum.appendChild(el('li', '', st.warmRating ? 'مراجعة سورة ' + Q[st.warm - 1].n + ': ' + RATINGS[st.warmRating] + '، والمراجعة القادمة بعد ' + days(st.warmDays) : 'تخطّيتَ مراجعة سورة ' + Q[st.warm - 1].n + ' اليوم، وما زال موعدها قائمًا'));
+  sum.appendChild(el('li', '', st.marked ? 'علّمتَ ' + ayahs(st.marked) + ' كمحفوظة (تقييم ذاتي منك)' : 'لم تُعلَّم أي آية كمحفوظة'));
+  if (st.retries) sum.appendChild(el('li', '', 'أعدتَ ' + (st.retries === 1 ? 'مرة واحدة' : AR(st.retries) + ' مرات') + ' لتتقنها'));
+  body.appendChild(sum);
   const more = el('button', 'btn primary', 'جلسة أخرى'); more.type = 'button';
   more.addEventListener('click', () => { setup.from = Math.min(st.from + st.count, Q[st.id - 1].v.length - 1); setup.id = st.id; st = null; renderSetup() });
   const close = el('button', 'btn', 'إغلاق'); close.type = 'button'; close.addEventListener('click', () => $('session').close());

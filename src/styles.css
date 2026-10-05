@@ -539,6 +539,7 @@ body[data-theme="rose"]{--bg:#fff0f6;background:linear-gradient(180deg,#ffd9ea 0
 .sesstx{margin:8px 0;font-size:calc(1.7rem*var(--rs,1));line-height:2.2}
 .sessbox{display:flex;flex-direction:column;gap:2px;background:var(--surface);border:1px solid var(--line);border-radius:22px;padding:8px 14px}
 .sesstx.veil .sw{filter:blur(9px);opacity:.7;user-select:none}
+.sesstx.veil .sw.hinted{filter:none;opacity:1}
 .sessquit{margin-top:14px;font-size:.85rem;min-height:40px;box-shadow:none;border-style:dashed}
 
 /* ======================= family goal ======================= */
