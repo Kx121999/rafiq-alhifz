@@ -215,6 +215,43 @@ export function toggleFav(ref) {
   persist();
   return f.includes(ref);
 }
+/* Where the child stopped, bookmarks, pinned surahs and the dates medals were first earned: optional fields, per child.
+   pos: {id, i (0-based ayah), mode}; bm: ["<surah>.<ayah>"] (ayah from 1); pin: [surah ids]; bd: {medal name: ISO date}. Old data simply lacks them. */
+export const POS_MODES = ['read', 'listen', 'memorise', 'recite'];
+export const BM_REF = /^\d{1,3}\.\d{1,3}$/;
+export const MAX_BM = 60, MAX_PIN = 20;
+export const readPos = () => { const p = (activeKid() || {}).pos; return p && POS_MODES.includes(p.mode) ? { ...p } : null };
+/** Remembers the ayah and mode the child was on in a surah (a very small write, so it is only done when something changed). */
+export function setPos(id, i, mode) {
+  const k = activeKid(); if (!k || !Q[id - 1] || !Number.isInteger(i) || i < 0 || i >= Q[id - 1].v.length || !POS_MODES.includes(mode)) return false;
+  const p = k.pos; if (p && p.id === id && p.i === i && p.mode === mode) return true;
+  k.pos = { id, i, mode }; persist(); return true;
+}
+export const bookmarks = () => ((activeKid() || {}).bm || []).slice();
+export const isBookmarked = (id, i) => bookmarks().includes(id + '.' + (i + 1));
+/** Adds or removes a bookmark; returns whether the ayah is bookmarked afterwards (false too when the list is full). */
+export function toggleBookmark(id, i) {
+  const k = activeKid(), ref = id + '.' + (i + 1); if (!k || !Q[id - 1] || !(i >= 0 && i < Q[id - 1].v.length)) return false;
+  const b = k.bm || [], at = b.indexOf(ref);
+  if (at >= 0) b.splice(at, 1); else if (b.length < MAX_BM) b.push(ref);
+  if (b.length) k.bm = b; else delete k.bm;
+  persist(); return b.includes(ref);
+}
+export const pinned = () => ((activeKid() || {}).pin || []).slice();
+export function togglePin(id) {
+  const k = activeKid(); if (!k || !Q[id - 1]) return false;
+  const p = k.pin || [], at = p.indexOf(id);
+  if (at >= 0) p.splice(at, 1); else if (p.length < MAX_PIN) p.push(id);
+  if (p.length) k.pin = p; else delete k.pin;
+  persist(); return p.includes(id);
+}
+export const badgeDates = () => ({ ...((activeKid() || {}).bd || {}) });
+/** Records the day a medal was first earned (never overwritten). */
+export function setBadgeDate(name, iso) {
+  const k = activeKid(); if (!k || typeof name !== 'string' || !name || (k.bd && k.bd[name])) return false;
+  (k.bd = k.bd || {})[name] = iso; persist(); return true;
+}
+
 /** Marks a weak ayah as mastered (as opposed to un-flagging it by mistake) and counts it for the report. */
 export function masterWeak(id, i) { if (!setWeak(id, i, false)) return false; addLog('w', 1); return true }
 

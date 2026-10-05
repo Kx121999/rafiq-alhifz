@@ -1,7 +1,7 @@
 // Backup file: export every child's progress as JSON, and import one back after strict validation.
 import { day } from './util.js';
 import { Q } from './data.js';
-import { ICONS, isFriend, AZ_KEY, FAV_REF, MAX_FAV, FS_MIN, FS_MAX, snapshot } from './state.js';
+import { ICONS, isFriend, AZ_KEY, FAV_REF, MAX_FAV, FS_MIN, FS_MAX, POS_MODES, BM_REF, MAX_BM, MAX_PIN, snapshot } from './state.js';
 import { SHOP, itemOf } from './catalog.js';
 import { PRESETS } from './plan.js';
 
@@ -139,6 +139,22 @@ function cleanKid(k, idx, skip) {
   if (Array.isArray(k.fav)) {
     const fav = [...new Set(k.fav.filter(r => typeof r === 'string' && FAV_REF.test(r)))].slice(0, MAX_FAV);
     if (fav.length) kid.fav = fav;
+  }
+  // resume position, bookmarks, pinned surahs, medal dates: each must point at a real surah and ayah
+  const p0 = k.pos;
+  if (p0 && Number.isInteger(p0.id) && Q[p0.id - 1] && Number.isInteger(p0.i) && p0.i >= 0 && p0.i < Q[p0.id - 1].v.length && POS_MODES.includes(p0.mode)) kid.pos = { id: p0.id, i: p0.i, mode: p0.mode };
+  if (Array.isArray(k.bm)) {
+    const bm = [...new Set(k.bm.filter(r => { if (typeof r !== 'string' || !BM_REF.test(r)) return false; const [a, b] = r.split('.').map(Number); return Q[a - 1] && b >= 1 && b <= Q[a - 1].v.length }))].slice(0, MAX_BM);
+    if (bm.length) kid.bm = bm;
+  }
+  if (Array.isArray(k.pin)) {
+    const pin = [...new Set(k.pin.filter(n => Number.isInteger(n) && n >= 1 && n <= 114))].slice(0, MAX_PIN);
+    if (pin.length) kid.pin = pin;
+  }
+  if (k.bd && typeof k.bd === 'object') {
+    const bd = {};
+    for (const [n, d] of Object.entries(k.bd).slice(0, 60)) if (n.length <= 30 && DATE.test(d)) bd[n] = d;
+    if (Object.keys(bd).length) kid.bd = bd;
   }
   if (k.game && Number.isInteger(k.game.stars) && k.game.stars >= 0 && k.game.stars <= 1e6) {
     kid.game = { stars: k.game.stars };
