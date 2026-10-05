@@ -19,3 +19,11 @@ export const charImg = (name, cls = '') => {
 export const el = (tag, cls, text) => { const e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e };
 export const ayahs = n => n === 1 ? 'آية واحدة' : n === 2 ? 'آيتان' : n <= 10 ? AR(n) + ' آيات' : AR(n) + ' آية';
 export const nujum = n => n === 1 ? 'نجمة واحدة' : n === 2 ? 'نجمتان' : n <= 10 ? AR(n) + ' نجوم' : AR(n) + ' نجمة';
+
+/** An icon from the sprite in index.html (see scripts/sprite.mjs). Decorative: it never has a name of its own, put the label on the button. */
+const SVG_NS = 'http://www.w3.org/2000/svg';
+export const icon = (name, cls = '') => {
+  const s = document.createElementNS(SVG_NS, 'svg'), u = document.createElementNS(SVG_NS, 'use');
+  s.setAttribute('class', ('ic ' + cls).trim()); s.setAttribute('aria-hidden', 'true'); s.setAttribute('focusable', 'false');
+  u.setAttribute('href', '#i-' + name); s.appendChild(u); return s;
+};

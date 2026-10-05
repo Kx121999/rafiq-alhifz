@@ -39,49 +39,56 @@ describe('who gets the tour', () => {
   });
 });
 
-describe('the tour itself', () => {
-  it('walks through four cards and saves the child\'s name, friend and mode', async () => {
+describe('the first-run set-up', () => {
+  it('takes three steps (name, mode, daily goal) and ends by asking to start a session', async () => {
     const { state, tour, onDone } = await setup();
     tour.openTour();
     expect(document.getElementById('tour').hasAttribute('open')).toBe(true);
     const titles = [];
-    for (let k = 0; k < 3; k++) { titles.push(document.getElementById('tourT').textContent); btn('التالي').click() }
+    for (let k = 0; k < 2; k++) { titles.push(document.getElementById('tourT').textContent); btn('التالي').click() }
     titles.push(document.getElementById('tourT').textContent);
-    expect(new Set(titles).size).toBe(4);
-    expect(btn('يلا نبدأ')).toBeTruthy();                       // the last card has the finish button
+    expect(new Set(titles).size).toBe(3);
+    expect(btn('ابدأ أول جلسة')).toBeTruthy();                   // the last step has the finish button
+    state.S.goal = 5;
+  });
+
+  it('saves the name, mode and goal, and reports that a session should start', async () => {
+    const { state, tour, onDone } = await setup();
+    tour.openTour();
     const name = document.getElementById('tourName'); name.value = 'ليلى'; name.dispatchEvent(new Event('input'));
-    [...document.querySelectorAll('#tourBody [role=group]')][0].querySelectorAll('button')[1].click();   // second friend: Nujum
-    [...document.querySelectorAll('#tourBody [role=group]')][1].querySelectorAll('button')[0].click();   // first mode: young
-    btn('يلا نبدأ').click();
-    expect(state.activeKid()).toMatchObject({ name: 'ليلى', friend: 'nujum', mode: 'young' });
+    btn('التالي').click();
+    document.querySelectorAll('#tourBody [role=group] button')[0].click();                // first mode: young
+    btn('التالي').click();
+    document.querySelector('#tourBody [aria-label="زيادة الهدف"]').click();
+    btn('ابدأ أول جلسة').click();
+    expect(state.activeKid()).toMatchObject({ name: 'ليلى', mode: 'young' });
+    expect(state.S.goal).toBe(4);                                 // young starts at 3, one tap up
     expect(flag()).toBe('1');
-    expect(onDone).toHaveBeenCalledTimes(1);
+    expect(onDone).toHaveBeenCalledWith({ start: true });
     expect(document.getElementById('tour').hasAttribute('open')).toBe(false);
   });
 
   it('keeps the existing name when the box is left empty', async () => {
     const { state, tour } = await setup();
-    tour.openTour();
-    for (let k = 0; k < 3; k++) btn('التالي').click();
-    btn('يلا نبدأ').click();
+    tour.openTour(); btn('التالي').click(); btn('التالي').click(); btn('ابدأ أول جلسة').click();
     expect(state.activeKid().name).toBe('طفلي');
   });
 
-  it('skipping or pressing Escape changes nothing but is remembered', async () => {
-    const { state, tour } = await setup();
-    tour.openTour(); btn('تخطّي').click();
+  it('"later" or Escape changes nothing, is remembered, and does not start a session', async () => {
+    const { state, tour, onDone } = await setup();
+    tour.openTour(); btn('لاحقًا').click();
     expect(state.activeKid()).toMatchObject({ name: 'طفلي', mode: 'reader' });
-    expect(flag()).toBe('1');
+    expect(flag()).toBe('1'); expect(onDone).toHaveBeenLastCalledWith({ start: false });
     localStorage.removeItem('hifz-tour-v1');
     tour.openTour(); document.getElementById('tour').dispatchEvent(new Event('close'));   // Escape closes a dialog like this
     expect(flag()).toBe('1');
   });
 
-  it('can be opened again from the about page button and starts from the first card', async () => {
+  it('can be opened again from a button and starts from the first step', async () => {
     const { tour } = await setup({ 'hifz-tour-v1': '1' });
     document.getElementById('tourBtn').click();
     expect(document.getElementById('tour').hasAttribute('open')).toBe(true);
-    expect(document.getElementById('tourT').textContent).toContain('رفيق');
+    expect(document.getElementById('tourT').textContent).toContain('اسم');
     expect(tour.needsTour()).toBe(false);
   });
 
@@ -89,7 +96,6 @@ describe('the tour itself', () => {
     const { state, tour } = await setup();
     state.updateKid(state.activeKid().id, { name: '<b>x</b>', icon: '🌟', mode: 'young' });
     tour.openTour();
-    for (let k = 0; k < 3; k++) btn('التالي').click();
     expect(document.getElementById('tourName').value).toBe('<b>x</b>');
     expect(document.querySelector('#tourBody b')).toBeNull();
   });

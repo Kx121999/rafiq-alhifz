@@ -1,9 +1,10 @@
 import './styles.css';
+import './shell.css';
 import { $, AR, days } from './util.js';
 import { Q, loadQuran } from './data.js';
 import { S, save, rec, mem, isDue, bump, setAyah, grade, setLast, activeKid, isWeak, setWeak, weakList, azToday, surahSnapshot, restoreSurah } from './state.js';
 import { initGuard, offerUndo, clearUndo } from './guard.js';
-import { renderSummary, renderList, setFilter } from './home.js';
+import { renderList, setFilter } from './home.js';
 import { view, renderSurah, toggleTafsir } from './surah.js';
 import { go, onPage, onShown, startRouter, route } from './router.js';
 import { pageIn, revealAyah, celebrate, markPop, markWave, motionReady, initCharacters } from './motion.js';
@@ -13,7 +14,8 @@ import { initSearch, openSearch } from './search.js';
 import { renderReport } from './report.js';
 import { shareReport } from './reportcard.js';
 import { initTour, needsTour, openTour } from './tour.js';
-import { renderToday } from './dashboard.js';
+import { renderDashboard, sessionTarget } from './dashboard.js';
+import { renderMore } from './more.js';
 import { renderAdhkar, refreshAdhkar } from './adhkar.js';
 import { initReading, setFocusRead } from './reading.js';
 import { renderShop, onShopChange } from './shop.js';
@@ -30,11 +32,11 @@ import { renderReview, renderWeak, onReviewGraded, clearReviewNote, dueList } fr
 import { renderPlan, onPlanChanged } from './plan.js';
 import { renderGames, onGameStars, resetGame } from './games.js';
 import { renderAchievements, renderCertificate } from './achievements.js';
-import { initKids, onKidsChange, renderRewards, renderKidBar, applyMode, announceBadges } from './kids.js';
+import { initKids, onKidsChange, renderKidBar, applyMode, announceBadges } from './kids.js';
 
 function render() {
   if (!Q.length) return;
-  applyMode(); renderSummary(); renderToday(); renderRewards(); renderList(); renderReview(); renderWeak(); renderPlan(); updateDue(); renderAchievements();
+  applyMode(); renderDashboard(); renderList(); renderReview(); renderWeak(); renderPlan(); updateDue(); renderAchievements();
   if (!$('page-games').hidden) renderGames();
   refreshAdhkar(); checkChallenge(); refreshCompanion(); recordRamadan();
   for (const [id, fn] of [['shop', renderShop], ['challenge', renderChallenge], ['share', renderShare], ['family', renderFamily], ['ramadan', renderRamadan]]) if (!$('page-' + id).hidden) fn();
@@ -44,7 +46,7 @@ function updateDue() {
   const n = dueList().length + weakList().length, c = $('dueCount');
   c.textContent = AR(n); c.hidden = !n; c.setAttribute('aria-label', AR(n) + ' للمراجعة');
 }
-const refreshStats = () => { checkChallenge(); renderSummary(); renderToday(); renderRewards(); updateDue(); announceBadges() };
+const refreshStats = () => { checkChallenge(); renderDashboard(); updateDue(); announceBadges() };
 
 /** Celebrates when a surah goes from incomplete to fully memorised. */
 function checkCompleted(id, wasComplete) {
@@ -96,6 +98,7 @@ initSession({ mark: (id, i) => {
   bump(setAyah(id, i, true)); save(); if (view.cur === id) renderSurah(false); refreshStats(); checkCompleted(id, was);
 } });
 onPage('check', () => { view.cur = 0 });
+onPage('more', () => { view.cur = 0; renderMore() });
 initCheck();
 $('printFamily').addEventListener('click', () => window.print());
 onPage('games', () => { view.cur = 0; resetGame(); render(); renderGames() });
@@ -105,15 +108,15 @@ onPage('certificate', arg => {
   if (!renderCertificate(+arg)) return '/achievements';
   document.title = 'شهادة سورة ' + Q[+arg - 1].n + ' · رفيق الحفظ';
 });
-onGameStars(() => { checkChallenge(); renderRewards(); renderAchievements(); announceBadges() });
+onGameStars(() => { checkChallenge(); renderAchievements(); announceBadges() });
 $('printCert').addEventListener('click', () => window.print());
 $('printReport').addEventListener('click', () => window.print());
 $('shareReport').addEventListener('click', async () => {
   const r = await shareReport();
   $('shareReportMsg').textContent = ({ shared: 'تمت المشاركة.', saved: 'تم حفظ صورة التقرير على جهازك.', cancelled: '', unsupported: 'تعذّر رسم الصورة في هذا المتصفح. استخدم «طباعة التقرير» واحفظه PDF.' })[r];
 });
-onReviewGraded(() => { renderSummary(); renderToday(); renderRewards(); updateDue() });
-onPlanChanged(() => { renderSummary(); renderToday() });
+onReviewGraded(() => { renderDashboard(); updateDue() });
+onPlanChanged(() => { renderDashboard() });
 for (const p of ['dashboard', 'mushaf']) onPage(p, () => { view.cur = 0; render() });
 
 /* ---------- index ---------- */
@@ -123,8 +126,6 @@ $('chips').addEventListener('click', e => {
   const b = e.target.closest('.chip'); if (!b) return; setFilter(b.dataset.f);
   document.querySelectorAll('.chip').forEach(c => c.setAttribute('aria-pressed', c === b)); renderList();
 });
-$('gMinus').addEventListener('click', () => { S.goal = Math.max(1, S.goal - 1); save(); renderSummary() });
-$('gPlus').addEventListener('click', () => { S.goal = Math.min(50, S.goal + 1); save(); renderSummary() });
 
 /* ---------- surah ---------- */
 $('veilBtn').addEventListener('click', () => { view.veil = !view.veil; $('ayat').querySelectorAll('.shown').forEach(x => x.classList.remove('shown')); renderSurah(false) });
@@ -166,9 +167,17 @@ function onGrade(good) {
 $('revGood').addEventListener('click', () => onGrade(true));
 $('revBad').addEventListener('click', () => onGrade(false));
 
+/* ---------- landing ---------- */
+/** The landing page's main button: a new child sets up and starts a session, a returning one goes to the dashboard. */
+$('startBtn').addEventListener('click', () => { if (needsTour()) openTour(); else go('/dashboard') });
+$('howBtn').addEventListener('click', () => { const h = $('how'); h.scrollIntoView({ behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' }); h.querySelector('h2').focus({ preventScroll: true }) });
+
 /* ---------- boot ---------- */
-initGuard(); initCharacters(); initKids(); initReading(); initCompanion(); onKidsChange(render); initTour({ onDone: () => { renderKidBar(); render() } }); initPlayer(); initPwa(); initSearch();
+initGuard(); initCharacters(); initKids(); initReading(); initCompanion(); onKidsChange(render); initTour({ onDone: r => { renderKidBar(); render(); if (r && r.start) { go('/dashboard'); openSession(sessionTarget().id) } } }); initPlayer(); initPwa(); initSearch();
 setReminderContext(() => ({ reviewDue: Q.length ? dueList().length + weakList().length : 0, adhkarDone: id => azToday(id).d === 1 }));
 startRouter();
-loadQuran().then(() => { render(); initReminders(); announceBadges(); motionReady(); route(); if (needsTour()) openTour() })
+// someone who is already using the app (progress, or the installed app) lands on the dashboard, not on the landing page
+const atHome = () => ['', '#', '#/'].includes(location.hash);
+const launchHome = () => atHome() && (Object.keys(S.s).length > 0 || matchMedia('(display-mode: standalone)').matches);
+loadQuran().then(() => { if (launchHome()) location.replace('#/dashboard'); render(); initReminders(); announceBadges(); motionReady(); route() })
   .catch(() => { $('list').innerHTML = '<li class="empty">تعذّر تحميل نص المصحف. أعد فتح الصفحة للمحاولة مرة أخرى.</li>' });

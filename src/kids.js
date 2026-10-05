@@ -40,31 +40,36 @@ function totals() {
   return { ay, done, streak, games: gameStars(), az: azStats(), weeks: weeksDone(), fam: famWeeks(), ram: ramBest() };
 }
 const BADGES = [
-  { icon: '🌱', name: 'البداية', ok: t => t.ay >= 1 },
-  { icon: '🌟', name: 'عشر آيات', ok: t => t.ay >= 10 },
-  { icon: '🏅', name: 'سورة كاملة', ok: t => t.done >= 1 },
-  { icon: '🏆', name: 'خمس سور', ok: t => t.done >= 5 },
-  { icon: '🔥', name: 'أسبوع متواصل', ok: t => t.streak >= 7 },
-  { icon: '👑', name: 'مئة آية', ok: t => t.ay >= 100 },
-  { icon: '🎮', name: 'لاعب نشيط', ok: t => t.games >= 10 },
-  { icon: '🎯', name: 'بطل الألعاب', ok: t => t.games >= 50 },
-  { icon: '🌅', name: 'أذكار الصباح', ok: t => t.az.sabah },
-  { icon: '🌙', name: 'أذكار المساء', ok: t => t.az.masaa },
-  { icon: '😴', name: 'أذكار النوم', ok: t => t.az.nawm },
-  { icon: '📿', name: 'ملتزم بالأذكار', ok: t => t.az.days >= 7 },
-  { icon: '🏆', name: 'بطل الأسبوع', ok: t => t.weeks >= 1 },
-  { icon: '👑', name: 'ملك التحديات', ok: t => t.weeks >= 4 },
-  { icon: '🤝', name: 'أسرة متعاونة', ok: t => t.fam >= 1 },
-  { icon: '🌙', name: 'رمضان معنا', ok: t => t.ram >= 10 },
-  { icon: '🏮', name: 'بطل رمضان', ok: t => t.ram >= 25 },
+  { icon: '🌱', name: 'البداية', need: 'علّم أول آية تحفظها', ok: t => t.ay >= 1 },
+  { icon: '🌟', name: 'عشر آيات', need: 'احفظ عشر آيات', ok: t => t.ay >= 10 },
+  { icon: '🏅', name: 'سورة كاملة', need: 'أكمل حفظ سورة كاملة', ok: t => t.done >= 1 },
+  { icon: '🏆', name: 'خمس سور', need: 'أكمل حفظ خمس سور', ok: t => t.done >= 5 },
+  { icon: '🔥', name: 'أسبوع متواصل', need: 'تابع الحفظ سبعة أيام متتالية', ok: t => t.streak >= 7 },
+  { icon: '👑', name: 'مئة آية', need: 'احفظ مئة آية', ok: t => t.ay >= 100 },
+  { icon: '🎮', name: 'لاعب نشيط', need: 'اجمع عشر نجوم من الألعاب', ok: t => t.games >= 10 },
+  { icon: '🎯', name: 'بطل الألعاب', need: 'اجمع خمسين نجمة من الألعاب', ok: t => t.games >= 50 },
+  { icon: '🌅', name: 'أذكار الصباح', need: 'أنهِ أذكار الصباح مرة', ok: t => t.az.sabah },
+  { icon: '🌙', name: 'أذكار المساء', need: 'أنهِ أذكار المساء مرة', ok: t => t.az.masaa },
+  { icon: '😴', name: 'أذكار النوم', need: 'أنهِ أذكار النوم مرة', ok: t => t.az.nawm },
+  { icon: '📿', name: 'ملتزم بالأذكار', need: 'أنهِ الأذكار في سبعة أيام', ok: t => t.az.days >= 7 },
+  { icon: '🏆', name: 'بطل الأسبوع', need: 'أتمّ تحدّي أسبوع', ok: t => t.weeks >= 1 },
+  { icon: '👑', name: 'ملك التحديات', need: 'أتمّ تحدّي أربعة أسابيع', ok: t => t.weeks >= 4 },
+  { icon: '🤝', name: 'أسرة متعاونة', need: 'أتمّوا تحدّي العائلة مرة', ok: t => t.fam >= 1 },
+  { icon: '🌙', name: 'رمضان معنا', need: 'أكمل عشرة أيام في رمضان', ok: t => t.ram >= 10 },
+  { icon: '🏮', name: 'بطل رمضان', need: 'أكمل خمسة وعشرين يومًا في رمضان', ok: t => t.ram >= 25 },
 ];
 
 /** What the child has earned so far, for the share card. */
 export const kidTotals = totals;
+/** What the child has earned and what is closest: the last medal in the list that is unlocked, and the first one that is not (with what it asks for). */
+export function badgeStatus() {
+  const t = totals(), got = BADGES.filter(b => b.ok(t));
+  return { got, last: got[got.length - 1] || null, next: BADGES.find(b => !b.ok(t)) || null };
+}
 export const unlockedBadges = () => { const t = totals(); return BADGES.filter(b => b.ok(t)) };
 
-export function renderRewards(id = 'rewards') {
-  const box = $(id); box.textContent = '';
+export function renderRewards(id = 'achRewards') {
+  const box = $(id); if (!box) return; box.textContent = '';
   const t = totals();
   const stars = el('p', 'stars'); stars.append(el('span', 'big-star', '⭐'), el('b', '', AR(t.ay)), ' نجمة');
   const row = el('ul', 'badges');

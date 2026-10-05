@@ -56,15 +56,22 @@ async function scenario(name, fn) {
 const ok = (cond, msg) => { if (!cond) throw new Error(msg) };
 const noErrors = errors => ok(!errors.length, 'page errors: ' + errors.join(' | '));
 
-/* 1. a brand-new family: the welcome tour, then the home page with the install button */
-await scenario('first visit: tour, then home with the install button', async () => {
+/* 1. a brand-new family: the landing page, then three set-up steps that end in a real session */
+await scenario('first visit: landing, set-up in three steps, then a session opens', async () => {
   const { ctx, page, errors } = await open('#/');
-  await page.waitForSelector('#tour[open]', { timeout: 15000 });
-  await clickText(page, 'تخطّي', '#tourBody button'); await wait(400);
-  ok(await page.evaluate(() => !document.getElementById('tour').open), 'the tour did not close');
+  await page.waitForSelector('#startBtn', { timeout: 15000 }); await wait(500);
+  ok(await page.evaluate(() => document.body.dataset.view === 'landing' && !document.getElementById('tour').open), 'the landing page should show alone, with no dialog');
   ok(await page.evaluate(() => { const b = document.getElementById('installBtn'); return !b.hidden && b.getBoundingClientRect().width > 0 }), 'install button not visible');
+  await page.evaluate(() => document.getElementById('startBtn').click());
+  await page.waitForSelector('#tour[open]', { timeout: 15000 });
+  await page.type('#tourName', 'ليلى');
+  await clickText(page, 'التالي', '#tourBody button'); await clickText(page, 'التالي', '#tourBody button');
+  await clickText(page, 'ابدأ أول جلسة', '#tourBody button');
+  await page.waitForSelector('#session[open]', { timeout: 15000 });
+  ok(await page.evaluate(() => location.hash === '#/dashboard' && document.body.dataset.view === 'app'), 'the app did not open behind the session');
+  const d = await saved(page); ok(d.kids[0].name === 'ليلى', 'the name was not saved');
   await page.reload({ waitUntil: 'load' }); await wait(1200);
-  ok(await page.evaluate(() => !document.getElementById('tour').open), 'the tour came back after a reload');
+  ok(await page.evaluate(() => !document.getElementById('tour').open), 'the set-up came back after a reload');
   noErrors(errors); await ctx.close();
 });
 
@@ -79,7 +86,7 @@ await scenario('memorise two ayat, reload, progress is kept', async () => {
   await page.reload({ waitUntil: 'load' }); await page.waitForSelector('#ayat .ck', { timeout: 20000 }); await wait(600);
   ok(await page.evaluate(() => [...document.querySelectorAll('#ayat .ck')].slice(0, 2).every(b => b.getAttribute('aria-pressed') === 'true')), 'ayat not marked after reload');
   await page.goto(BASE + '#/dashboard'); await wait(900);
-  ok((await page.$eval('#sAyat', e => e.textContent)).trim() === '٢', 'dashboard does not show 2 ayat');
+  ok((await page.$eval('#dbMeta', e => e.textContent)).includes('٢ آية محفوظة'), 'dashboard does not show 2 ayat');
   noErrors(errors); await ctx.close();
 });
 
@@ -137,7 +144,7 @@ await scenario('old saved progress is migrated', async () => {
   const legacy = JSON.stringify({ s: { 112: { m: '1111', d: ymd(2), i: 1 }, 1: { m: '1111111', d: ymd(3), i: 2 } }, goal: 5, day: ymd(), n: 0, streak: 2, last: ymd() });
   const { ctx, page, errors } = await open('#/dashboard', { seed: { 'hifz-tour-v1': '1', 'hifz-progress-v1': legacy } });
   await wait(600);
-  ok((await page.$eval('#sAyat', e => e.textContent)).trim() === '١١', 'the old progress (11 ayat) was not found');
+  ok((await page.$eval('#dbMeta', e => e.textContent)).includes('١١ آية محفوظة'), 'the old progress (11 ayat) was not found');
   const d = await saved(page); ok(d.kids.length === 1 && d.kids[0].S.s[1], 'no profile was created from the old data');
   noErrors(errors); await ctx.close();
 });
