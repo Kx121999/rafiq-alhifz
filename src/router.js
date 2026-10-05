@@ -1,9 +1,9 @@
 // Hash router: #/ #/dashboard #/mushaf #/surah/<n> #/about. Works on static hosting with no server rules.
 import { $ } from './util.js';
 
-const TITLES = { home: '', dashboard: 'لوحتي', mushaf: 'المصحف', search: 'بحث', review: 'المراجعة', plan: 'الخطة', games: 'ألعاب', adhkar: 'الأذكار', shop: 'متجر النجوم', check: 'فحص الجهاز', challenge: 'تحدّي الأسبوع', share: 'بطاقة الإنجاز', family: 'تقرير العائلة', achievements: 'إنجازاتي', certificate: 'شهادة', report: 'التقرير الأسبوعي', surah: 'السورة', about: 'عن المنصة' };
+const TITLES = { home: '', dashboard: 'لوحتي', mushaf: 'المصحف', search: 'بحث', review: 'المراجعة', plan: 'الخطة', games: 'ألعاب', adhkar: 'الأذكار', shop: 'متجر النجوم', check: 'فحص الجهاز', ramadan: 'رمضان معنا', challenge: 'تحدّي الأسبوع', share: 'بطاقة الإنجاز', family: 'تقرير العائلة', achievements: 'إنجازاتي', certificate: 'شهادة', report: 'التقرير الأسبوعي', surah: 'السورة', about: 'عن المنصة' };
 /** Pages that are not a tab light up the tab they belong to. */
-const NAV_OF = { surah: 'mushaf', search: 'mushaf', certificate: 'achievements', plan: 'dashboard', report: 'dashboard', shop: 'games', challenge: 'dashboard', share: 'achievements', family: 'dashboard', check: 'dashboard' };
+const NAV_OF = { surah: 'mushaf', search: 'mushaf', certificate: 'achievements', plan: 'dashboard', report: 'dashboard', shop: 'games', challenge: 'dashboard', share: 'achievements', family: 'dashboard', check: 'dashboard', ramadan: 'dashboard' };
 const handlers = {};
 let shown = () => {};
 /** Called with the page name after a page has been shown (used for entrance animation). */
@@ -29,6 +29,7 @@ export function route() {
   window.scrollTo(0, 0);
   $('page-' + page).focus({ preventScroll: true });
   shown(page);
+  document.body.classList.add('ready');   // until the first page is on screen the footer stays hidden, so it does not jump down when the page appears
 }
 
 export const startRouter = () => { window.addEventListener('hashchange', route); route() };

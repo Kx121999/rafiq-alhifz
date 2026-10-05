@@ -128,6 +128,11 @@ function cleanKid(k, idx, skip) {
   if (rest) kid.rest = rest;
   if (wk) kid.wk = wk;
   if (fam) kid.fam = fam;
+  if (k.ram && typeof k.ram === 'object') {
+    const ram = {};
+    for (const [y, n] of Object.entries(k.ram).slice(0, 20)) if (/^1[4-5]\d\d$/.test(y) && Number.isInteger(n) && n >= 1 && n <= 30) ram[y] = n;
+    if (Object.keys(ram).length) kid.ram = ram;
+  }
   // a bought friend can only be used if it is owned
   if (kid.friend && SHOP.some(i => i.id === kid.friend && i.type === 'friend') && !(shop && shop.own.includes(kid.friend))) delete kid.friend;
   return kid;

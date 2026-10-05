@@ -44,6 +44,8 @@ jobs:
       - run: npm ci
       - run: npm run build
       - run: npm run a11y
+      # real-browser journeys: first visit, memorise, adhkar, shop, backup round trip, old data, no storage
+      - run: npm run e2e
 
   deploy:
     needs: [build, a11y]

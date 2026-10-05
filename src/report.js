@@ -7,6 +7,8 @@ import { planStats } from './plan.js';
 import { dueList } from './review.js';
 
 const MAX_OFFSET = 12;
+/** The week the report page is showing (0 = this week), for sharing the same one as a picture. */
+export let reportOffset = 0;
 
 /** The 7 ISO dates of a week, oldest first. offset 0 = the 7 days ending today, 1 = the 7 days before that. */
 export function weekDays(offset = 0) {
@@ -26,7 +28,7 @@ const fmt = (iso, opts) => new Date(iso + 'T12:00:00').toLocaleDateString('ar-EG
 export function renderReport(offset = 0) {
   const box = $('reportBox'); box.textContent = '';
   const k = activeKid(); if (!k || !Q.length) return;
-  offset = Math.max(0, Math.min(MAX_OFFSET, Math.floor(offset) || 0));
+  offset = Math.max(0, Math.min(MAX_OFFSET, Math.floor(offset) || 0)); reportOffset = offset;
   const dates = weekDays(offset), log = activityLog(), sum = summarize(log, dates);
 
   box.appendChild(el('p', 'rep-brand', 'رفيق الحفظ · التقرير الأسبوعي'));

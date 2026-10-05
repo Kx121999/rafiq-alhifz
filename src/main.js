@@ -10,6 +10,7 @@ import { initPlayer, loadSurah, playFrom, stopPlayer } from './player.js';
 import { initPwa } from './pwa.js';
 import { initSearch, openSearch } from './search.js';
 import { renderReport } from './report.js';
+import { shareReport } from './reportcard.js';
 import { initTour, needsTour, openTour } from './tour.js';
 import { renderToday } from './dashboard.js';
 import { renderAdhkar, refreshAdhkar } from './adhkar.js';
@@ -22,6 +23,7 @@ import { initCheck } from './diagnose.js';
 import { initSession, openSession } from './session.js';
 import { initCompanion, companionPage, refreshCompanion } from './companion.js';
 import { renderOffline } from './offlineui.js';
+import { renderRamadan, recordRamadan } from './ramadan.js';
 import { initReminders, setReminderContext } from './remind.js';
 import { renderReview, renderWeak, onReviewGraded, clearReviewNote, dueList } from './review.js';
 import { renderPlan, onPlanChanged } from './plan.js';
@@ -33,8 +35,8 @@ function render() {
   if (!Q.length) return;
   applyMode(); renderSummary(); renderToday(); renderRewards(); renderList(); renderReview(); renderWeak(); renderPlan(); updateDue(); renderAchievements();
   if (!$('page-games').hidden) renderGames();
-  refreshAdhkar(); checkChallenge(); refreshCompanion();
-  for (const [id, fn] of [['shop', renderShop], ['challenge', renderChallenge], ['share', renderShare], ['family', renderFamily]]) if (!$('page-' + id).hidden) fn();
+  refreshAdhkar(); checkChallenge(); refreshCompanion(); recordRamadan();
+  for (const [id, fn] of [['shop', renderShop], ['challenge', renderChallenge], ['share', renderShare], ['family', renderFamily], ['ramadan', renderRamadan]]) if (!$('page-' + id).hidden) fn();
   if (view.cur) renderSurah(false);
 }
 function updateDue() {
@@ -83,6 +85,8 @@ onPage('challenge', () => { view.cur = 0; checkChallenge(); renderChallenge() })
 onPage('share', () => { view.cur = 0; renderShare() });
 onPage('family', () => { view.cur = 0; if (Q.length) renderFamily() });
 onShopChange(() => render());
+onPage('ramadan', () => { view.cur = 0; recordRamadan(); renderRamadan() });
+document.addEventListener('hifz-ramadan', () => render());
 document.addEventListener('hifz-reciter', () => { if (view.cur) renderOffline(view.cur) });
 $('sessBtn').addEventListener('click', () => { if (view.cur) openSession(view.cur) });
 initSession({ mark: (id, i) => {
@@ -102,6 +106,10 @@ onPage('certificate', arg => {
 onGameStars(() => { checkChallenge(); renderRewards(); renderAchievements(); announceBadges() });
 $('printCert').addEventListener('click', () => window.print());
 $('printReport').addEventListener('click', () => window.print());
+$('shareReport').addEventListener('click', async () => {
+  const r = await shareReport();
+  $('shareReportMsg').textContent = ({ shared: 'تمت المشاركة.', saved: 'تم حفظ صورة التقرير على جهازك.', cancelled: '', unsupported: 'تعذّر رسم الصورة في هذا المتصفح. استخدم «طباعة التقرير» واحفظه PDF.' })[r];
+});
 onReviewGraded(() => { renderSummary(); renderToday(); renderRewards(); updateDue() });
 onPlanChanged(() => { renderSummary(); renderToday() });
 for (const p of ['dashboard', 'mushaf']) onPage(p, () => { view.cur = 0; render() });

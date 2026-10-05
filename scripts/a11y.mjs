@@ -55,6 +55,8 @@ const STATES = [
   ['session: listen', '#/surah/112', async p => { await p.waitForSelector('#sessBtn', { timeout: 20000 }); await p.evaluate(() => document.getElementById('sessBtn').click()); await wait(300); await p.evaluate(() => [...document.querySelectorAll('#sessBody button')].find(b => b.textContent.includes('يلا نبدأ')).click()); await wait(300) }],
   ['session: recite', '#/surah/112', async p => { await p.waitForSelector('#sessBtn', { timeout: 20000 }); await p.evaluate(() => document.getElementById('sessBtn').click()); await wait(300); const go = t => p.evaluate(x => [...document.querySelectorAll('#sessBody button')].find(b => b.textContent.includes(x)).click(), t); await go('يلا نبدأ'); await go('التالي'); await go('قرأتُها'); await wait(300) }],
   ['session: reveal', '#/surah/112', async p => { await p.waitForSelector('#sessBtn', { timeout: 20000 }); await p.evaluate(() => document.getElementById('sessBtn').click()); await wait(300); const go = t => p.evaluate(x => [...document.querySelectorAll('#sessBody button')].find(b => b.textContent.includes(x)).click(), t); await go('يلا نبدأ'); await go('التالي'); await go('قرأتُها'); await go('أظهر الآية'); await wait(300) }],
+  ['ramadan', '#/ramadan', p => p.waitForSelector('.ramcard', { timeout: 20000 })],
+  ['ramadan: moon sighting buttons', '#/ramadan', async p => { await p.waitForSelector('.ramadj .chip', { timeout: 20000 }); await p.evaluate(() => document.querySelectorAll('.ramadj .chip')[2].click()); await wait(300) }],
   ['device check', '#/check'],
   ['device check: results', '#/check', async p => { await p.evaluate(() => document.getElementById('chkRun').click()); await p.waitForFunction(() => document.querySelectorAll('.chkrow').length > 8, { timeout: 30000 }); await wait(300) }],
   ['shop', '#/shop', p => p.waitForSelector('.shopitem', { timeout: 20000 })],
@@ -122,7 +124,7 @@ const wideJobs = [1280, 820].flatMap(width => WIDE.map(([label, hash]) => [width
 for (let i = 0; i < wideJobs.length; i += 6) await Promise.all(wideJobs.slice(i, i + 6).map(([width, s]) => audit('light', s, 1, width)));
 
 // WCAG 1.4.10 reflow: nothing may force sideways scrolling at 320 CSS px
-const REFLOW = ['#/', '#/dashboard', '#/mushaf', '#/search/' + encodeURIComponent('الرحمن'), '#/review', '#/plan', '#/games', '#/achievements', '#/certificate/114', '#/report', '#/about', '#/surah/112', '#/adhkar/sabah', '#/adhkar/all', '#/shop', '#/challenge', '#/share', '#/family', '#/check'];
+const REFLOW = ['#/', '#/dashboard', '#/mushaf', '#/search/' + encodeURIComponent('الرحمن'), '#/review', '#/plan', '#/games', '#/achievements', '#/certificate/114', '#/report', '#/about', '#/surah/112', '#/adhkar/sabah', '#/adhkar/all', '#/shop', '#/challenge', '#/share', '#/family', '#/check', '#/ramadan'];
 for (const hash of REFLOW) for (const width of [320, 768, 1180, 1280]) {
   let ctx, o;
   for (let attempt = 1; attempt <= 2 && !o; attempt++) {   // a page can detach on a busy machine: look again once

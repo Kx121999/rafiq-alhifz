@@ -133,6 +133,14 @@ export function markFamilyWeek(ws) {
   persist(); return true;
 }
 
+/* Ramadan: the most days of activity the child had in one Ramadan, per Hijri year. Optional field ram {year: days}. Used for the medals. */
+export const ramBest = k => Math.max(0, ...Object.values(((k || activeKid() || {}).ram) || {}));
+export function setRamadanDays(year, n) {
+  const k = activeKid(); if (!k || !Number.isInteger(year) || !(n > 0)) return;
+  const r = k.ram || (k.ram = {}); if ((r[year] || 0) >= n) return;
+  r[year] = Math.min(30, n); persist();
+}
+
 /* Activity log for the weekly report: per day {a: ayat memorised, r: surah reviews, w: weak ayat mastered, g: game stars}.
    Daily totals only (not every tap), kept for LOG_DAYS days, as an optional field log on the child. */
 const LOG_DAYS = 90;

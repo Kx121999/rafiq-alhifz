@@ -14,9 +14,9 @@
 <link rel="manifest" href="/manifest.webmanifest">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Amiri+Quran&family=IBM+Plex+Sans+Arabic:wght@400;500;600&family=Reem+Kufi:wght@500;700&family=Baloo+Bhaijaan+2:wght@500;600;700;800&display=swap">
+<!-- the two fonts every page needs are fetched early; the others load when their text appears -->
+<link rel="preload" as="font" type="font/woff2" crossorigin href="/fonts/ibm-plex-sans-arabic-400-arabic.woff2">
+<link rel="preload" as="font" type="font/woff2" crossorigin href="/fonts/baloo-bhaijaan-2-800-arabic.woff2">
 </head>
 <body>
 <div class="sky" aria-hidden="true"><i class="cloud c1"></i><i class="cloud c2"></i><i class="cloud c3"></i><i class="twinkle t1">✦</i><i class="twinkle t2">✦</i><i class="twinkle t3">✦</i><i class="twinkle t4">✦</i></div>
@@ -45,7 +45,7 @@
   </nav>
 
   <!-- الرئيسية -->
-  <main class="page" id="page-home" data-page="home" tabindex="-1" hidden>
+  <main class="page" id="page-home" data-page="home" tabindex="-1">
     <section class="hero">
       <div class="cast"><img class="char" src="/chars/nujum.svg" alt="" width="84" height="84"><img class="char lead" src="/mascot.svg" alt="" width="150" height="150"><img class="char" src="/chars/shams.svg" alt="" width="84" height="84"></div>
       <h1>احفظ القرآن خطوة بخطوة</h1>
@@ -67,6 +67,7 @@
       <li><i aria-hidden="true">🎮</i><b>ألعاب تثبّت الحفظ</b><span>أكمل الآية ورتّب الآيات والكلمة الناقصة، بنجوم خاصة بالألعاب.</span></li>
     </ul>
   </main>
+  <script>if (location.hash && location.hash !== '#/' && location.hash !== '#') document.getElementById('page-home').hidden = true</script>
 
   <!-- لوحتي -->
   <main class="page" id="page-dashboard" data-page="dashboard" tabindex="-1" hidden>
@@ -159,8 +160,10 @@
     <div class="noprint certbar">
       <a class="btn" href="#/dashboard">→ رجوع</a>
       <span class="weektabs" id="repWeeks"><a class="btn" href="#/report" data-off="0">هذا الأسبوع</a> <a class="btn" href="#/report/1" data-off="1">الأسبوع الماضي</a></span>
+      <button type="button" class="btn" id="shareReport">📤 شارك كصورة</button>
       <button type="button" class="btn primary" id="printReport">طباعة التقرير</button>
     </div>
+    <p class="note noprint" id="shareReportMsg" role="status"></p>
     <article class="report" id="reportBox" aria-label="التقرير الأسبوعي"></article>
   </main>
 
@@ -180,6 +183,12 @@
     <div class="azbar"><span class="fsctl" role="group" aria-label="حجم الخط"><button type="button" class="btn fsbtn" data-fs="-1" aria-label="تصغير الخط">أ−</button><span class="fsval" aria-hidden="true"></span><button type="button" class="btn fsbtn" data-fs="1" aria-label="تكبير الخط">أ+</button></span><button type="button" class="btn" id="azFocus" aria-pressed="false">قراءة مركّزة</button></div>
     <div id="azBox" class="azbox" aria-busy="true"></div>
     <p class="sr" id="azLive" role="status"></p>
+  </main>
+
+  <!-- رمضان -->
+  <main class="page" id="page-ramadan" data-page="ramadan" tabindex="-1" hidden>
+    <header class="banner b-violet"><div><h1 class="ptitle">رمضان معنا</h1><p>نشاط واحد كل يوم، وأيامك تُملأ وحدها</p></div><img class="char" src="/chars/fanous.svg" alt="" width="84" height="84"></header>
+    <div id="ramBox" class="chbox"></div>
   </main>
 
   <!-- فحص الجهاز -->
@@ -256,6 +265,7 @@
       <h2>المصادر</h2>
       <p>التلاوات الصوتية من موقع everyayah.com، ملف لكل آية، وتُحمَّل منه مباشرة أثناء الاستماع. الموقع لا يستضيف أي ملف صوتي.</p>
       <p>نص المصحف بالرسم العثماني من موسوعة القرآن الكريم (quranenc.com) عبر حزمة quran-json. التفسير: «التفسير الميسّر» عبر مشروع tafsir_api المفتوح. لا تُعدَّل هذه النصوص ولا يُولَّد أي نص ديني جديد.</p>
+      <p>الخطوط: Amiri Quran وBaloo Bhaijaan 2 وIBM Plex Sans Arabic وReem Kufi، برخصة SIL Open Font License الحرة، ومخزَّنة داخل الموقع فلا يتصل بأي جهة خارجية لتحميلها.</p>
       <h2>الأذكار</h2>
       <p>نصوص الأذكار من كتاب «حصن المسلم» لسعيد بن علي القحطاني، من ملف JSON مفتوح على GitHub (مشروع rn0x/Adhkar-json)، وتُعرض كما هي بلا أي تعديل. الآيات الواردة فيها يتحقق الموقع عند كل بناء أنها مطابقة لنص المصحف عندنا. عدّاد كل ذكر لكل طفل ولكل يوم، ويبقى على الجهاز فقط.</p>
       <h2>كيف تعمل المراجعة؟</h2>
@@ -268,6 +278,8 @@
       <p><a class="btn" href="#/check">افحص هذا الجهاز</a></p>
       <h2>جولة تعريفية</h2>
       <p><button type="button" class="btn" id="tourBtn">جولة تعريفية مع رفيق</button></p>
+      <h2>التصميم</h2>
+      <p>تم تصميم الموقع عن طريق كريم عاطف. لا تنسوني في دعواكم.</p>
       <h2>خصوصيتك</h2>
       <p>لا حسابات ولا خوادم. تقدّم كل طفل محفوظ على هذا الجهاز وهذا المتصفح فقط ولا يُرسل إلى أي مكان.</p>
     </section>
@@ -278,9 +290,10 @@
     <div class="sf-brand"><img src="/mascot.svg" alt="" width="44" height="44"><div><b>رفيق الحفظ</b><span>نحفظ القرآن معًا، بالمرح والاستمرار.</span></div></div>
     <div class="sf-main">
       <nav class="sf-links" aria-label="روابط سريعة">
-        <a href="#/dashboard">لوحتي</a><a href="#/mushaf">المصحف</a><a href="#/review">المراجعة</a><a href="#/adhkar">الأذكار</a><a href="#/games">ألعاب</a><a href="#/achievements">إنجازاتي</a><a href="#/plan">الخطة</a><a href="#/search">بحث</a><a href="#/about">عن المنصة</a>
+        <a href="#/dashboard">لوحتي</a><a href="#/mushaf">المصحف</a><a href="#/review">المراجعة</a><a href="#/adhkar">الأذكار</a><a href="#/games">ألعاب</a><a href="#/achievements">إنجازاتي</a><a href="#/plan">الخطة</a><a href="#/ramadan">رمضان</a><a href="#/search">بحث</a><a href="#/about">عن المنصة</a>
       </nav>
       <p class="sf-src">نص المصحف بالرسم العثماني من موسوعة القرآن الكريم (quranenc.com). التفسير: «التفسير الميسّر» عبر مشروع tafsir_api المفتوح. التلاوات: everyayah.com. لا حسابات ولا خوادم، وتقدّمك محفوظ على جهازك.</p>
+      <p class="sf-credit">تم تصميم الموقع عن طريق كريم عاطف · لا تنسوني في دعواكم 🤍</p>
     </div>
   </footer>
 </div>

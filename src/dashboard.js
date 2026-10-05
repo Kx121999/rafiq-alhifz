@@ -2,6 +2,7 @@ import { $, AR, ayahs, el, charImg } from './util.js';
 import { Q } from './data.js';
 import { mem, isDue, kidPlan, lastSurah, weakList, azToday, friendOf } from './state.js';
 import { azNow, tabOf } from './azmeta.js';
+import { ramadanLine } from './ramadan.js';
 import { planStats } from './plan.js';
 
 const link = (href, text, cls = 'btn') => { const a = el('a', cls, text); a.href = href; return a };
@@ -12,6 +13,7 @@ export function renderToday() {
   if (!Q.length) return;
   const due = [], doing = [];
   Q.forEach((c, k) => { const id = k + 1, m = mem(id); if (isDue(id)) due.push(id); else if (m > 0 && m < c.v.length) doing.push(id) });
+  const ram = ramadanLine(); if (ram) box.appendChild(ram);
   const hd = el('div', 'todayhead'); hd.append(el('h2', '', 'اليوم'), charImg(friendOf(), 'mini')); box.appendChild(hd);
 
   const last = lastSurah(), p = kidPlan(), st = p && planStats(p);

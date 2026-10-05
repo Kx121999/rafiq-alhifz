@@ -27,7 +27,12 @@ let ready = false, last = { page: '', t: 0 }, lastNavX = null;
 /** Data pages stay still until quran.json has rendered them, so the entrance plays on real content. */
 export const motionReady = () => { ready = true };
 
+let openingHome = true;
 export function pageIn(name) {
+  // the home page is already on screen when the site opens (it is in the HTML), and the router shows it twice while the Quran
+  // loads: animating it in would make the page flash and its first big picture appear late. Only the first visit is left still.
+  if (name !== 'home') openingHome = false;
+  if (openingHome && name === 'home') return;
   if (calm() || (!ready && !STATIC.has(name))) return;
   const now = performance.now();
   if (last.page === name && now - last.t < 1500) return;
