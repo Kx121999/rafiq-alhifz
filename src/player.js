@@ -31,6 +31,11 @@ const pad = (n, w) => String(n).padStart(w, '0');
 const srcOf = (surah, ayah) => BASE + pref.reciter + '/' + pad(surah, 3) + pad(ayah, 3) + '.mp3';
 /** The recitation file of one ayah with the chosen reciter (used by the device check to test sound). */
 export const ayahUrl = srcOf;
+/** The same file for any reciter, and whether a surah starts with the separate basmala recording (all but Al-Fatiha and At-Tawbah). */
+export const urlFor = (reciter, surah, ayah) => BASE + reciter + '/' + pad(surah, 3) + pad(ayah, 3) + '.mp3';
+export const needsBasmala = surah => surah !== 1 && surah !== 9;
+export const currentReciter = () => pref.reciter;
+export const reciterLabel = id => (RECITERS.find(r => r.id === id) || { name: id }).name;
 
 const audio = new Audio();
 audio.preload = 'auto';
@@ -131,7 +136,7 @@ export function initPlayer() {
   const fields = el('div', 'pl-fields');
   fields.append(
     select('القارئ', RECITERS, pref.reciter, r => r.name, v => {
-      pref.reciter = v; write(KEY.reciter, v);
+      pref.reciter = v; write(KEY.reciter, v); document.dispatchEvent(new Event('hifz-reciter'));
       const was = !audio.paused; st.key = ''; warm.removeAttribute('src');
       if (st.surah && was) playCurrent(); else { audio.pause(); paint() }
     }),

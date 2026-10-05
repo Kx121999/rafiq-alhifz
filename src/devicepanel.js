@@ -2,6 +2,7 @@
 import { el } from './util.js';
 import { soundOn, setSound, sfx } from './sound.js';
 import { companionOn, setCompanion } from './companion.js';
+import { downloadsList } from './offlineui.js';
 import { SLOTS, loadRemind, saveRemind, supported, permission, askPermission, notify, tick } from './remind.js';
 
 export function deviceSection() {
@@ -21,6 +22,11 @@ export function deviceSection() {
   fr.addEventListener('click', () => { setCompanion(!companionOn()); paintFriend() });
   paintFriend();
   card.append(el('p', 'note', 'صديقك الكرتوني يظهر في ركن كل صفحة ويقول جملة قصيرة مفيدة.'), fr);
+
+  /* downloaded recitations */
+  const dl = el('div', 'dlwrap'); card.append(el('h3', 'sub', 'التلاوات المحمّلة'), dl);
+  const paintDl = () => { dl.textContent = ''; dl.appendChild(downloadsList(paintDl) || el('p', 'note', 'لم تنزّل أي تلاوة بعد. من صفحة أي سورة اضغط «نزّل السورة» لتسمعها بلا إنترنت.')) };
+  paintDl();
 
   /* reminders */
   const msg = el('p', 'note'); msg.setAttribute('role', 'status');

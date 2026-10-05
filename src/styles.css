@@ -675,3 +675,12 @@ body[data-theme="rose"]{--bg:#fff0f6;background:linear-gradient(180deg,#ffd9ea 0
 /* the row of friends in the footer */
 .sf-cast{display:flex;gap:2px;grid-column:1 / -1;justify-content:center;opacity:.95}
 .sf-cast img{width:44px;height:44px}
+
+/* ======================= downloaded recitations ======================= */
+.offline{background:var(--surface);border:2px solid var(--line);border-radius:var(--r);box-shadow:0 4px 0 var(--line);padding:14px 18px;display:flex;flex-direction:column;gap:8px}
+.offline h2{margin:0;font-family:var(--display);font-weight:700;font-size:1.25rem}
+.offline p{margin:0}
+.offline .acts{display:flex;gap:8px;flex-wrap:wrap}
+.dllist{list-style:none;margin:0 0 8px;padding:0;display:flex;flex-direction:column;gap:6px}
+.dllist li{display:flex;align-items:center;justify-content:space-between;gap:8px;background:var(--bg);border:2px solid var(--line);border-radius:16px;padding:6px 12px;font-size:.92rem}
+.dllist .btn{min-height:40px;padding:4px 14px}

@@ -21,6 +21,7 @@ import { renderFamily } from './family.js';
 import { initCheck } from './diagnose.js';
 import { initSession, openSession } from './session.js';
 import { initCompanion, companionPage, refreshCompanion } from './companion.js';
+import { renderOffline } from './offlineui.js';
 import { initReminders, setReminderContext } from './remind.js';
 import { renderReview, renderWeak, onReviewGraded, clearReviewNote, dueList } from './review.js';
 import { renderPlan, onPlanChanged } from './plan.js';
@@ -69,7 +70,7 @@ onPage('search', arg => { view.cur = 0; openSearch(arg) });
 onPage('surah', (arg, ayah) => {
   const id = +arg; if (!(id >= 1 && id <= 114)) return false;
   if (!Q.length) { view.cur = 0; return }   // quran.json still loading: boot re-routes once it arrives
-  view.cur = id; view.veil = isDue(id); setLast(id); renderSurah(true); loadSurah(id);
+  view.cur = id; view.veil = isDue(id); setLast(id); renderSurah(true); loadSurah(id); renderOffline(id);
   pendingAyah = +ayah >= 1 && +ayah <= Q[id - 1].v.length ? +ayah : 0;
   document.title = 'سورة ' + Q[id - 1].n + ' · رفيق الحفظ';
 });
@@ -82,6 +83,7 @@ onPage('challenge', () => { view.cur = 0; checkChallenge(); renderChallenge() })
 onPage('share', () => { view.cur = 0; renderShare() });
 onPage('family', () => { view.cur = 0; if (Q.length) renderFamily() });
 onShopChange(() => render());
+document.addEventListener('hifz-reciter', () => { if (view.cur) renderOffline(view.cur) });
 $('sessBtn').addEventListener('click', () => { if (view.cur) openSession(view.cur) });
 initSession({ mark: (id, i) => {
   const was = mem(id) === Q[id - 1].v.length;
