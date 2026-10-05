@@ -29,6 +29,8 @@ const pref = {
 
 const pad = (n, w) => String(n).padStart(w, '0');
 const srcOf = (surah, ayah) => BASE + pref.reciter + '/' + pad(surah, 3) + pad(ayah, 3) + '.mp3';
+/** The recitation file of one ayah with the chosen reciter (used by the device check to test sound). */
+export const ayahUrl = srcOf;
 
 const audio = new Audio();
 audio.preload = 'auto';

@@ -17,11 +17,12 @@ async function setupGames() {
 describe('new games: every question has exactly one right answer', () => {
   it('"which surah" only uses an ayah that exists in a single surah', async () => {
     const { games } = await setupGames();
+    const where = new Map();                                                    // normalised ayah -> surahs it is in (built once)
+    QURAN.forEach((c, i) => c.v.forEach(t => { const k = norm(t); where.set(k, [...new Set([...(where.get(k) || []), i + 1])]) }));
     for (let k = 0; k < 40; k++) {
       const q = games.buildWhich(null); expect(q).toBeTruthy();
       expect(new Set(q.options).size).toBe(4); expect(q.options).toContain(q.correct);
-      const holders = QURAN.map((c, i) => c.v.some(t => norm(t) === norm(q.prompt)) ? i + 1 : 0).filter(Boolean);
-      expect(holders).toEqual([q.a.id]);                                       // the ayah is in one surah only
+      expect(where.get(norm(q.prompt))).toEqual([q.a.id]);                      // the ayah is in one surah only
       expect(q.correct).toBe('سورة ' + QURAN[q.a.id - 1].n);
     }
   });

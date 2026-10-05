@@ -26,6 +26,8 @@ function precacheManifest() {
 // Relative base so the built site works from any subfolder (e.g. GitHub Pages).
 export default defineConfig({
   base: './',
+  // which commit this build is made from, shown on the device check page so a problem report can name the exact version
+  define: { __BUILD__: JSON.stringify((process.env.GITHUB_SHA || 'dev').slice(0, 7)) },
   plugins: [precacheManifest()],
   test: { environment: 'jsdom', include: ['tests/**/*.test.js'], setupFiles: ['tests/setup.js'] },
 });

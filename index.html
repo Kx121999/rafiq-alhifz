@@ -182,6 +182,17 @@
     <p class="sr" id="azLive" role="status"></p>
   </main>
 
+  <!-- فحص الجهاز -->
+  <main class="page" id="page-check" data-page="check" tabindex="-1" hidden>
+    <header class="banner b-mint"><div><h1 class="ptitle">فحص هذا الجهاز</h1><p>هل كل شيء يعمل على تليفونك؟</p></div><img class="char" src="/chars/sabr.svg" alt="" width="84" height="84"></header>
+    <section class="prose">
+      <p>يفحص هذا الاختبار ما يحتاجه الموقع في جهازك: التثبيت، العمل بدون إنترنت، حفظ التقدّم، الإشعارات، المشاركة والصوت. لا يُرسل شيء إلى أي مكان، والنتيجة تظهر هنا فقط، ويمكنك نسخها وإرسالها لمن يساعدك.</p>
+      <div class="acts"><button type="button" class="btn primary" id="chkRun">ابدأ الفحص</button><button type="button" class="btn" id="chkAudio">اختبر الصوت</button><button type="button" class="btn" id="chkCopy" hidden>انسخ التقرير</button></div>
+    </section>
+    <ul class="chkrows" id="chkRows"></ul>
+    <p class="note" id="chkMsg" role="status"></p>
+  </main>
+
   <!-- المتجر -->
   <main class="page" id="page-shop" data-page="shop" tabindex="-1" hidden>
     <header class="banner b-sun"><div><h1 class="ptitle">متجر النجوم</h1><p>اصرف نجوم الألعاب على أشياء جميلة</p></div><img class="char" src="/chars/qamar.svg" alt="" width="84" height="84"></header>
@@ -249,6 +260,8 @@
       <p>عند حفظ أول آية من سورة تُجدول مراجعتها بعد يوم. كلما أتقنتَ المراجعة تضاعفت المدة (يومان، أربعة، ثمانية…) حتى ٣٠ يومًا، وإن احتجت إعادة عادت إلى يوم واحد.</p>
       <h2>تثبيت التطبيق والعمل بدون إنترنت</h2>
       <p>بعد فتح الموقع مرة واحدة يعمل المصحف والتفسير وتقدّمك بدون إنترنت. على أندرويد وكروم يظهر زر «ثبّت التطبيق» في الصفحة الرئيسية. على أيفون: زر المشاركة في سفاري ثم «إضافة إلى الشاشة الرئيسية». الصوت وحده يحتاج إنترنت.</p>
+      <h2>فحص الجهاز</h2>
+      <p><a class="btn" href="#/check">افحص هذا الجهاز</a></p>
       <h2>جولة تعريفية</h2>
       <p><button type="button" class="btn" id="tourBtn">جولة تعريفية مع رفيق</button></p>
       <h2>خصوصيتك</h2>

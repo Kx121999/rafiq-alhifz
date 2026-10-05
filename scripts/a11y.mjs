@@ -46,6 +46,8 @@ const STATES = [
   ['adhkar: focus reading + bigger text', '#/adhkar/sabah', async p => { await p.waitForSelector('.azcard', { timeout: 20000 }); await p.evaluate(() => { document.querySelector('[data-fs="1"]').click(); document.querySelector('[data-fs="1"]').click(); document.getElementById('azFocus').click() }); await wait(300) }],
   ['adhkar: all categories', '#/adhkar/all', p => p.waitForSelector('.azcat', { timeout: 20000 })],
   ['adhkar: one category', '#/adhkar/c7', p => p.waitForSelector('.azcard', { timeout: 20000 })],
+  ['device check', '#/check'],
+  ['device check: results', '#/check', async p => { await p.evaluate(() => document.getElementById('chkRun').click()); await p.waitForFunction(() => document.querySelectorAll('.chkrow').length > 8, { timeout: 30000 }); await wait(300) }],
   ['shop', '#/shop', p => p.waitForSelector('.shopitem', { timeout: 20000 })],
   ['shop: bought and in use', '#/shop', async p => { await p.waitForSelector('.shopitem', { timeout: 20000 }); await wait(200) }],
   ['challenge', '#/challenge', p => p.waitForSelector('.chcard', { timeout: 20000 })],
@@ -107,7 +109,7 @@ const wideJobs = [1280, 820].flatMap(width => WIDE.map(([label, hash]) => [width
 for (let i = 0; i < wideJobs.length; i += 6) await Promise.all(wideJobs.slice(i, i + 6).map(([width, s]) => audit('light', s, 1, width)));
 
 // WCAG 1.4.10 reflow: nothing may force sideways scrolling at 320 CSS px
-const REFLOW = ['#/', '#/dashboard', '#/mushaf', '#/search/' + encodeURIComponent('الرحمن'), '#/review', '#/plan', '#/games', '#/achievements', '#/certificate/114', '#/report', '#/about', '#/surah/112', '#/adhkar/sabah', '#/adhkar/all', '#/shop', '#/challenge', '#/share', '#/family'];
+const REFLOW = ['#/', '#/dashboard', '#/mushaf', '#/search/' + encodeURIComponent('الرحمن'), '#/review', '#/plan', '#/games', '#/achievements', '#/certificate/114', '#/report', '#/about', '#/surah/112', '#/adhkar/sabah', '#/adhkar/all', '#/shop', '#/challenge', '#/share', '#/family', '#/check'];
 for (const hash of REFLOW) for (const width of [320, 768, 1180, 1280]) {
   const { ctx, page } = await open('dark', hash, width, 640);
   const o = await page.evaluate(() => ({ sw: document.documentElement.scrollWidth, iw: document.documentElement.clientWidth }));

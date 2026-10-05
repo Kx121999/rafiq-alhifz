@@ -18,6 +18,7 @@ import { renderShop, onShopChange } from './shop.js';
 import { renderChallenge, checkChallenge } from './challenge.js';
 import { renderShare } from './share.js';
 import { renderFamily } from './family.js';
+import { initCheck } from './diagnose.js';
 import { initReminders, setReminderContext } from './remind.js';
 import { renderReview, renderWeak, onReviewGraded, clearReviewNote, dueList } from './review.js';
 import { renderPlan, onPlanChanged } from './plan.js';
@@ -79,6 +80,8 @@ onPage('challenge', () => { view.cur = 0; checkChallenge(); renderChallenge() })
 onPage('share', () => { view.cur = 0; renderShare() });
 onPage('family', () => { view.cur = 0; if (Q.length) renderFamily() });
 onShopChange(() => render());
+onPage('check', () => { view.cur = 0 });
+initCheck();
 $('printFamily').addEventListener('click', () => window.print());
 onPage('games', () => { view.cur = 0; resetGame(); render(); renderGames() });
 onPage('achievements', () => { view.cur = 0; render() });
