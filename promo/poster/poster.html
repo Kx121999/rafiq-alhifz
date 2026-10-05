@@ -53,6 +53,32 @@
   .cta .btn{display:inline-block;font-family:"Baloo Bhaijaan 2",sans-serif;font-weight:800;font-size:68px;line-height:1.2;color:#fff;background:#087456;padding:8px 70px 14px;border-radius:70px;border:8px solid #fff;
     box-shadow:0 12px 0 #055a43,0 22px 30px rgba(0,0,0,.18)}
   .cta p{margin-top:16px;font-weight:600;font-size:28px;color:#17402f;text-shadow:0 2px 0 rgba(255,255,255,.7)}
+
+  /* ---- square (1:1) ---- */
+  html.square,html.square body{height:1000px}
+  .square #poster{height:1000px}
+  .square .rays{height:1000px}
+  .square .brand{top:28px}.square .brand img{width:88px;height:88px}.square .brand b{font-size:74px}
+  .square h1{top:124px;font-size:90px;-webkit-text-stroke:11px #fff}
+  .square .sub{top:338px;font-size:30px;left:80px;right:80px}
+  .square .sticker{width:456px;font-size:29px;padding:8px 18px}.square .sticker i{font-size:38px}
+  .square .s1{top:452px;right:28px;left:auto}.square .s3{top:452px;left:28px;right:auto}.square .s2{top:532px;right:28px;left:auto}.square .s4{top:532px;left:28px;right:auto}
+  .square .f-rafiq,.square .f-sabr{display:none}
+  .square .f-nujum{width:150px!important;height:150px!important;top:20px!important}.square .f-shams{width:160px!important;height:160px!important;top:6px!important}
+  .square .kid{bottom:150px}
+  .square .flower{display:none}
+  .square .hill.h1{bottom:-640px}.square .hill.h2{bottom:-540px}.square .hill.h3{bottom:-580px}
+  .square .cta{bottom:22px}.square .cta .btn{font-size:54px;padding:4px 56px 10px}.square .cta p{font-size:23px;margin-top:10px}
+
+  /* ---- story (9:16) ---- */
+  html.story,html.story body{height:1778px}
+  .story #poster{height:1778px}
+  .story .rays{height:1778px}
+  .story .brand{top:90px}.story h1{top:240px}.story .sub{top:540px}
+  .story .s1{top:700px}.story .s2{top:700px}.story .s3{top:850px}.story .s4{top:850px}
+  .story .f-rafiq{top:760px!important;left:330px!important;width:340px!important;height:340px!important}
+  .story .f-sabr{top:1560px!important}
+  .story .cta{bottom:60px}
 </style>
 </head>
 <body>
@@ -76,10 +102,10 @@
   <div class="hill h1"></div>
 
   <!-- friends of Rafiq -->
-  <img class="friend" src="../../public/chars/nujum.svg" alt="" style="width:210px;height:210px;top:6px;left:-18px">
-  <img class="friend" src="../../public/chars/shams.svg" alt="" style="width:230px;height:230px;top:-24px;right:-34px">
-  <img class="friend" src="../../public/mascot.svg" alt="" style="width:300px;height:300px;top:570px;left:350px">
-  <img class="friend" src="../../public/chars/sabr.svg" alt="" style="width:190px;height:190px;top:1196px;right:-6px">
+  <img src="../../public/chars/nujum.svg" alt="" class="friend f-nujum" style="width:210px;height:210px;top:6px;left:-18px">
+  <img src="../../public/chars/shams.svg" alt="" class="friend f-shams" style="width:230px;height:230px;top:-24px;right:-34px">
+  <img src="../../public/mascot.svg" alt="" class="friend f-rafiq" style="width:300px;height:300px;top:570px;left:350px">
+  <img src="../../public/chars/sabr.svg" alt="" class="friend f-sabr" style="width:190px;height:190px;top:1196px;right:-6px">
 
   <div id="kids"></div>
 
@@ -88,7 +114,7 @@
   <div class="sticker s1"><i>⭐</i>نجوم وأوسمة</div>
   <div class="sticker s2"><i>🎮</i>ألعاب تثبّت الحفظ</div>
   <div class="sticker s3"><i>🔁</i>مراجعة في موعدها</div>
-  <div class="sticker s4"><i>🔊</i>تلاوات بأصوات القرّاء</div>
+  <div class="sticker s4"><i>📿</i>أذكار الصباح والمساء</div>
 
   <div class="cta"><span class="btn">ابدأ الحفظ اليوم</span><p>لكل طفل ملفه الخاص · بدون حسابات · يعمل بدون إنترنت</p></div>
 </div>
@@ -135,6 +161,9 @@ const kids = [
   { left: 490, w: 256, o: { skin: '#f6d3b0', shirt: '#7bd36b', band: '#fff', pants: '#3b7a46', head: 'hijab', hc: '#9b7bff', hc2: '#7f5df0', pose: 'book' } },
   { left: 724, w: 262, o: { skin: '#a8714a', shirt: '#ff7a59', band: '#ffd54a', pants: '#a8402b', head: 'kufi', pose: 'star' } },
 ];
+const F = new URLSearchParams(location.search).get('format') || 'a4';
+document.documentElement.className = F;
+if (F === 'square') kids.forEach((k, i) => { k.w = 196; k.left = 22 + i * 244 });
 document.getElementById('kids').innerHTML = kids.map(k => `<div class="kid" style="left:${k.left}px;width:${k.w}px;height:${k.w * 1.5}px">${kid(k.o)}</div>`).join('');
 </script>
 </body>
