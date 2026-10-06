@@ -37,7 +37,7 @@ export function renderFamily() {
     const card = el('section', 'famgoal' + (famDone(ws) || goal.reached ? ' won' : ''));
     const bar = el('div', 'bar'), fill = el('i'); fill.style.width = Math.round(goal.total / goal.target * 100) + '%'; bar.appendChild(fill);
     bar.setAttribute('role', 'progressbar'); bar.setAttribute('aria-valuemin', '0'); bar.setAttribute('aria-valuemax', String(goal.target)); bar.setAttribute('aria-valuenow', String(goal.total)); bar.setAttribute('aria-label', 'هدف الأسرة');
-    card.append(el('h2', '', '🤝 هدف الأسرة هذا الأسبوع'),
+    card.append(el('h2', '', 'هدف الأسرة هذا الأسبوع'),
       el('p', 'famgoaltext', 'احفظوا معًا ' + AR(goal.target) + ' آية جديدة'),
       bar,
       el('p', 'note', famDone(ws) || goal.reached ? 'حقّقتم الهدف معًا، أحسنتم! نال كل طفل وسام «أسرة متعاونة».' : AR(goal.total) + ' من ' + AR(goal.target) + ' آية. كل آية جديدة من أي طفل تُحسب، فتعاونوا! (' + AR(FAMILY_PER_KID.reader) + ' لكل قارئ و' + AR(FAMILY_PER_KID.young) + ' لكل صغير.)'));

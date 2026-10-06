@@ -6,7 +6,8 @@ import { loadAdhkar } from './data.js';
 import { ayahUrl } from './player.js';
 
 const BUILD = typeof __BUILD__ !== 'undefined' ? __BUILD__ : 'dev';
-const MARK = { ok: '✅', warn: '⚠️', bad: '❌' };
+const MARK = { ok: 'سليم', warn: 'تنبيه', bad: 'مشكلة' };       // words, for the copied report
+const GLYPH = { ok: '✓', warn: '!', bad: '✕' };               // plain marks on the screen (the colour is never the only sign)
 
 /** Runs every check. env can be replaced in tests; each check is wrapped so one failing never stops the others. */
 export async function runChecks(env = {}) {
@@ -87,7 +88,7 @@ export async function runChecks(env = {}) {
 }
 
 export function reportText(rows, ua = '') {
-  return ['فحص جهاز: رفيق الحفظ', ...rows.map(r => MARK[r.status] + ' ' + r.label + ': ' + r.detail), ua ? 'المتصفح: ' + ua : ''].filter(Boolean).join('\n');
+  return ['فحص جهاز: رفيق الحفظ', ...rows.map(r => MARK[r.status] + ' · ' + r.label + ': ' + r.detail), ua ? 'المتصفح: ' + ua : ''].filter(Boolean).join('\n');
 }
 
 /** Plays the first ayah of Al-Fatiha for a moment and says whether sound came out. */
@@ -109,7 +110,7 @@ export function initCheck() {
   const paint = rows => {
     rowsBox.textContent = '';
     rows.forEach(r => {
-      const li = el('li', 'chkrow ' + r.status), m = el('span', 'chkmark', MARK[r.status]); m.setAttribute('aria-hidden', 'true');
+      const li = el('li', 'chkrow ' + r.status), m = el('span', 'chkmark', GLYPH[r.status]); m.setAttribute('aria-hidden', 'true');
       const t = el('div'); t.append(el('b', '', r.label), el('span', '', r.detail));
       li.append(m, el('span', 'sr', r.status === 'ok' ? 'سليم: ' : r.status === 'warn' ? 'تنبيه: ' : 'مشكلة: '), t); rowsBox.appendChild(li);
     });
@@ -118,11 +119,11 @@ export function initCheck() {
     run.disabled = true; msg.textContent = 'جارٍ الفحص…';
     last = await runChecks(); paint(last); run.disabled = false; copy.hidden = false;
     const bad = last.filter(r => r.status === 'bad').length, warn = last.filter(r => r.status === 'warn').length;
-    msg.textContent = bad ? 'وُجدت ' + AR(bad) + ' مشكلة. اقرأ التفاصيل أعلاه.' : warn ? 'لا مشاكل، وهناك ' + AR(warn) + ' تنبيه للتحسين.' : 'كل شيء سليم ✅';
+    msg.textContent = bad ? 'وُجدت ' + AR(bad) + ' مشكلة. اقرأ التفاصيل أعلاه.' : warn ? 'لا مشاكل، وهناك ' + AR(warn) + ' تنبيه للتحسين.' : 'كل شيء سليم';
   });
   $('chkAudio').addEventListener('click', async () => {
     msg.textContent = 'جارٍ اختبار الصوت…';
-    const r = await testAudio(); msg.textContent = (r.ok ? '✅ ' : '❌ ') + r.why;
+    const r = await testAudio(); msg.textContent = (r.ok ? 'سليم: ' : 'مشكلة: ') + r.why;
     last = last.filter(x => x.id !== 'audio'); last.push({ id: 'audio', label: 'تشغيل التلاوة', status: r.ok ? 'ok' : 'bad', detail: r.why }); paint(last); copy.hidden = false;
   });
   copy.addEventListener('click', async () => {

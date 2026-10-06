@@ -5,15 +5,6 @@ import { mem, isDue, readPos, bookmarks, pinned } from './state.js';
 let filter = 'all';
 export const setFilter = f => { filter = f };
 
-/** What Rafiq says to the child, depending on how the day is going. */
-export function moodText(ayat, goal, doneToday, dueCount, weakCount) {
-  if (doneToday >= goal) return 'ما شاء الله! خلّصتَ وردك اليوم 🎉';
-  if (dueCount) return 'عندك ' + (dueCount === 1 ? 'سورة' : AR(dueCount) + ' سور') + ' تنتظر المراجعة 🔁';
-  if (weakCount) return 'تعال نثبّت الآيات اللي تحتاج تثبيتًا 💪';
-  if (doneToday > 0) return 'أحسنت! باقي ' + AR(goal - doneToday) + ' للورد 🌟';
-  return ayat ? 'جاهز لورد اليوم؟ يلا! 😄' : 'يلا نبدأ أول آية معًا! 🌱';
-}
-
 const MODE_NAME = { read: 'قراءة', listen: 'استماع', memorise: 'حفظ', recite: 'تسميع' };
 
 /** The top of the mushaf page: where the child stopped, bookmarks and pinned surahs. Nothing is shown for a child who has none of them. */

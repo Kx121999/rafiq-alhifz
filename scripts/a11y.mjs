@@ -36,6 +36,7 @@ const click = (text, sel = 'button, a') => async p => {
 };
 /** In the demo data a surah is due, so a session starts with a warm-up review; the states that follow the later steps skip it. */
 const skipWarm = p => p.evaluate(() => { const b = [...document.querySelectorAll('#sessBody button')].find(x => x.textContent.includes('تخطَّ المراجعة')); if (b) b.click() });
+const playGame = name => async p => { await p.waitForSelector('.gamecard', { timeout: 20000 }); await p.evaluate(n => [...document.querySelectorAll('.gamecard')].find(c => c.textContent.includes(n)).querySelector('button').click(), name); await wait(300) };
 const openParent = async p => {
   await p.evaluate(() => document.getElementById('parentBtn').click()); await wait(200);
   const q = await p.$eval('#gateQ', e => e.textContent), n = q.match(/[٠-٩]+/g).map(s => +s.replace(/[٠-٩]/g, d => '٠١٢٣٤٥٦٧٨٩'.indexOf(d)));
@@ -43,8 +44,8 @@ const openParent = async p => {
 };
 const STATES = [
   ['home', '#/'], ['dashboard', '#/dashboard'], ['mushaf', '#/mushaf'], ['search results', '#/search/' + encodeURIComponent('الرحمن')], ['search empty', '#/search'],
-  ['review', '#/review'], ['plan view', '#/plan'], ['plan form', '#/plan', click('تغيير الخطة')],
-  ['games menu', '#/games'], ['game: complete', '#/games', click('أكمل', '.gamecard')], ['game: order', '#/games', click('رتّب', '.gamecard')],
+  ['review', '#/review'], ['plan view', '#/plan'], ['plan form', '#/plan', async p => { await p.evaluate(() => { window.confirm = () => true }); await click('تغيير الخطة')(p) }],
+  ['games menu', '#/games'], ['game: complete', '#/games', playGame('أكمل الآية')], ['game: order', '#/games', playGame('رتّب الآيات')],
   ['adhkar: morning', '#/adhkar/sabah', p => p.waitForSelector('.azcard', { timeout: 20000 })],
   ['adhkar: a counted dhikr', '#/adhkar/sabah', async p => { await p.waitForSelector('.azcard', { timeout: 20000 }); await p.evaluate(() => { document.querySelectorAll('.azbtn')[0].click(); document.querySelectorAll('.azbtn')[1].click() }); await wait(300) }],
   ['adhkar: favourites (empty)', '#/adhkar/fav', p => p.waitForSelector('.azempty', { timeout: 20000 })],
@@ -72,7 +73,7 @@ const STATES = [
   ['theme lilac: adhkar', '#/adhkar/sabah', async p => { await p.waitForSelector('.azcard', { timeout: 20000 }); await p.evaluate(() => { document.body.dataset.theme = 'rose' }) }],
   ['game: which surah', '#/games', click('من أي سورة', '.gamecard')], ['game: next ayah', '#/games', click('ما الآية التالية', '.gamecard')], ['game: count', '#/games', click('كم آية', '.gamecard')],
   ['achievements', '#/achievements'], ['certificate', '#/certificate/114'], ['report', '#/report'], ['about', '#/about'],
-  ['surah (reader)', '#/surah/112'], ['surah (recite)', '#/surah/114', p => p.evaluate(() => document.querySelector('.mode[data-mode="recite"]').click())], ['surah (listen)', '#/surah/112', p => p.evaluate(() => document.querySelector('.mode[data-mode="listen"]').click())], ['surah (memorise)', '#/surah/112', p => p.evaluate(() => document.querySelector('.mode[data-mode="memorise"]').click())], ['surah (focus)', '#/surah/112', p => p.evaluate(() => document.getElementById('focusBtn').click())], ['more', '#/more'],
+  ['surah (reader)', '#/surah/112'], ['surah (recite)', '#/surah/114', p => p.evaluate(() => document.querySelector('.mode[data-mode="recite"]').click())], ['surah (listen)', '#/surah/112', p => p.evaluate(() => document.querySelector('.mode[data-mode="listen"]').click())], ['surah (memorise)', '#/surah/112', p => p.evaluate(() => document.querySelector('.mode[data-mode="memorise"]').click())], ['surah (focus)', '#/surah/112', p => p.evaluate(() => document.getElementById('focusBtn').click())], ['more', '#/more'], ['medals', '#/medals'], ['shop (in achievements)', '#/shop'], ['plan: custom surahs', '#/plan', async p => { await p.evaluate(() => { window.confirm = () => true }); await click('تغيير الخطة')(p); await click('سور أختارها')(p); await wait(300) }], ['games: trial', '#/games', async p => { await p.evaluate(() => { const b = [...document.querySelectorAll('.gamecard button')].find(x => x.textContent.includes('العب')); b && b.click() }); await wait(300) }],
   ['surah (young child)', '#/surah/114', null, 'k2'], ['surah + tafsir', '#/surah/112', async p => { await p.waitForSelector('.ay .tf', { timeout: 20000 }); await p.evaluate(() => document.querySelector('.ay .tf').click()); await wait(800) }],
   ['player settings', '#/surah/112', p => p.evaluate(() => { document.getElementById('plToggle').click(); document.querySelector('#player details').open = true })],
   ['parent gate', '#/dashboard', p => p.evaluate(() => document.getElementById('parentBtn').click())], ['parents: children', '#/dashboard', openParent], ['parents: tracking', '#/dashboard', async p => { await openParent(p); await p.evaluate(() => document.querySelector('[data-tab="track"]').click()); await wait(300) }], ['parents: settings', '#/dashboard', async p => { await openParent(p); await p.evaluate(() => document.querySelector('[data-tab="settings"]').click()); await wait(300) }], ['parents: downloads', '#/dashboard', async p => { await openParent(p); await p.evaluate(() => document.querySelector('[data-tab="downloads"]').click()); await wait(300) }], ['parents: data', '#/dashboard', async p => { await openParent(p); await p.evaluate(() => document.querySelector('[data-tab="data"]').click()); await wait(300) }],

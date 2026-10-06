@@ -68,6 +68,6 @@ export function backupSection(onChange) {
     drop.addEventListener('click', () => { dropRestorePoint(); box.remove() });
     const a = el('div', 'acts'); a.append(back, drop); box.appendChild(a); card.appendChild(box);
   }
-  if (!storageState.ok) card.appendChild(el('p', 'note', '⚠️ الحفظ على هذا الجهاز لا يعمل الآن، فالتصدير هو الطريقة الوحيدة لحفظ تقدّمك.'));
+  if (!storageState.ok) card.appendChild(el('p', 'note', 'الحفظ على هذا الجهاز لا يعمل الآن، فالتصدير هو الطريقة الوحيدة لحفظ تقدّمك.'));
   return card;
 }

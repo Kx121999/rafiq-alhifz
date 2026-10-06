@@ -61,7 +61,7 @@ describe('device check', () => {
     const d = await setup();
     const text = d.reportText(await d.runChecks(goodEnv()), 'TestBrowser/1');
     expect(text.split('\n')[0]).toBe('فحص جهاز: رفيق الحفظ');
-    expect(text).toContain('✅ العمل بدون إنترنت'); expect(text).toContain('المتصفح: TestBrowser/1');
+    expect(text).toContain('سليم · العمل بدون إنترنت'); expect(text).toContain('المتصفح: TestBrowser/1');
   });
 });
 

@@ -1,5 +1,5 @@
 // The screens for downloading recitations: a box under the surah (download, progress, remove) and the list in the parent corner.
-import { $, AR, el } from './util.js';
+import { $, AR, el, icon } from './util.js';
 import { Q } from './data.js';
 import { currentReciter, reciterLabel } from './player.js';
 import { supported, estimateBytes, isBig, mb, downloadedInfo, downloadSurah, removeSurah, removeAll, listDownloads, totalBytes } from './offline.js';
@@ -19,7 +19,7 @@ export function renderOffline(id) {
   if (!supported() || !Q.length || !id) { box.hidden = true; return }
   box.hidden = false;
   const reciter = currentReciter(), who = reciterLabel(reciter), c = Q[id - 1];
-  box.appendChild(el('h2', '', '🎧 الاستماع بدون إنترنت'));
+  { const h = el('h2'); h.append(icon('headphones'), 'الاستماع بدون إنترنت'); box.appendChild(h) }
   const msg = el('p', 'note'); msg.setAttribute('role', 'status');
   const acts = el('div', 'acts');
 
@@ -34,7 +34,7 @@ export function renderOffline(id) {
 
   const info = downloadedInfo(id, reciter);
   if (info) {
-    box.appendChild(el('p', 'good', '✅ سورة ' + c.n + ' بصوت ' + who + ' محمّلة (' + AR(mb(info.bytes)) + ' م.ب.) وتعمل بدون إنترنت.'));
+    box.appendChild(el('p', 'good', 'سورة ' + c.n + ' بصوت ' + who + ' محمّلة (' + AR(mb(info.bytes)) + ' م.ب.) وتعمل بدون إنترنت.'));
     const del = el('button', 'btn', 'احذف التنزيل'); del.type = 'button';
     del.addEventListener('click', async () => { await removeSurah(id, reciter); renderOffline(id); const m = $('offline').querySelector('[role=status]'); if (m) m.textContent = 'تم حذف التنزيل.' });
     acts.appendChild(del); box.append(acts, msg); return;
@@ -42,7 +42,7 @@ export function renderOffline(id) {
 
   const bytes = estimateBytes(id, reciter);
   box.appendChild(el('p', 'note', 'نزّل سورة ' + c.n + ' بصوت ' + who + ' لتسمعها في أي مكان بلا إنترنت. الحجم حوالي ' + AR(mb(bytes)) + ' م.ب.'));
-  const go = el('button', 'btn primary', '⬇ نزّل السورة'); go.type = 'button';
+  const go = el('button', 'btn primary'); go.append(icon('download'), 'نزّل السورة'); go.type = 'button';
   go.addEventListener('click', async () => {
     if (isBig(bytes) && !confirm('هذه سورة كبيرة (حوالي ' + AR(mb(bytes)) + ' م.ب.). يفضّل التنزيل على شبكة واي فاي. هل تكمل؟')) return;
     job = { id, reciter, ctrl: new AbortController(), done: 0, total: 1, paint: null };
@@ -51,7 +51,7 @@ export function renderOffline(id) {
     job = null;
     const shown = $('offline') && !$('offline').hidden;
     if (shown) renderOffline(id);
-    if (r.ok) announce('تم تنزيل سورة ' + c.n + ' 🎧');
+    if (r.ok) announce('تم تنزيل سورة ' + c.n);
     else { const m = $('offline') && $('offline').querySelector('[role=status]'); if (m) m.textContent = WHY[r.error] || WHY.network }
   });
   acts.appendChild(go);

@@ -2,7 +2,7 @@
 // fills in by itself from what the child did each day (a new ayah, a review, adhkar or a game), and medals reward steadiness.
 // The calendar is calculated, so a country that sights the moon can differ by a day: a parent can shift it by one day.
 // Nothing here is religious text; it is a calendar and a habit tracker.
-import { $, AR, day, el, shiftDay, charImg } from './util.js';
+import { $, AR, day, el, shiftDay, charImg, icon } from './util.js';
 import { activeKid, setRamadanDays } from './state.js';
 
 const SHIFT_KEY = 'hifz-hijri-shift-v1';
@@ -83,10 +83,10 @@ export function renderRamadan() {
   const fmtDate = iso => new Date(iso + 'T12:00:00').toLocaleDateString('ar-EG', { day: 'numeric', month: 'long' });
 
   const card = el('section', 'ramcard');
-  const ic = el('span', 'chicon', '🌙'); ic.setAttribute('aria-hidden', 'true');
+  const ic = el('span', 'chicon'); ic.appendChild(icon('moon')); ic.setAttribute('aria-hidden', 'true');
   card.append(ic, el('h2', '', w.phase === 'during' ? 'اليوم ' + AR(w.dayNo) + ' من رمضان' : w.phase === 'before' ? 'رمضان بعد ' + (w.daysUntil === 1 ? 'يوم واحد' : w.daysUntil === 2 ? 'يومين' : AR(w.daysUntil) + (w.daysUntil <= 10 ? ' أيام' : ' يومًا')) : 'انتهى رمضان'));
   card.appendChild(el('p', 'note', 'اليوم: ' + hijriText(todayH) + '. رمضان ' + AR(w.year).replace(/٬/g, '') + ' هـ من ' + fmtDate(w.start) + ' إلى ' + fmtDate(w.end) + ' (بحسب التقويم المحسوب).'));
-  if (w.phase === 'after') card.appendChild(el('p', 'good', 'كل عام وأنتم بخير! 🌙'));
+  if (w.phase === 'after') card.appendChild(el('p', 'good', 'كل عام وأنتم بخير!'));
   box.appendChild(card);
 
   if (w.phase !== 'before') {
@@ -98,7 +98,7 @@ export function renderRamadan() {
       const word = p.state === 'done' ? 'أنجزتَ نشاطًا' : p.state === 'missed' ? 'لم يُسجَّل نشاط' : p.state === 'today' ? 'اليوم' : 'لم يحن بعد';
       li.setAttribute('aria-label', 'اليوم ' + AR(p.no) + ': ' + word); if (p.state === 'done') li.appendChild(el('span', 'ramtick', '✓')); grid.appendChild(li);
     });
-    sec.append(grid, el('p', 'chweeks', '🌙 أنجزتَ ' + AR(t.active) + ' من ' + AR(w.days.length) + ' يومًا.'));
+    sec.append(grid, el('p', 'chweeks', 'أنجزتَ ' + AR(t.active) + ' من ' + AR(w.days.length) + ' يومًا.'));
     sec.appendChild(el('p', 'note', 'الأوسمة: «رمضان معنا» عند ' + AR(10) + ' أيام، و«بطل رمضان» عند ' + AR(25) + ' يومًا.'));
     box.appendChild(sec);
   } else {
@@ -122,7 +122,7 @@ export function ramadanLine() {
   const k = activeKid(), w = ramadanWindow(); if (!k || !showBanner(w)) return null;
   const a = el('a', 'rambanner'); a.href = '#/ramadan';
   a.append(charImg('fanous', 'mini'));
-  const t = el('span', ''), b = el('b', '', w.phase === 'during' ? 'رمضان كريم 🌙 اليوم ' + AR(w.dayNo) + ' من ' + AR(w.days.length) : w.phase === 'before' ? 'يقترب رمضان 🌙 بعد ' + AR(w.daysUntil) + (w.daysUntil === 1 ? ' يوم' : w.daysUntil <= 10 ? ' أيام' : ' يومًا') : 'كل عام وأنتم بخير 🌙');
+  const t = el('span', ''), b = el('b', '', w.phase === 'during' ? 'رمضان كريم، اليوم ' + AR(w.dayNo) + ' من ' + AR(w.days.length) : w.phase === 'before' ? 'يقترب رمضان، بعد ' + AR(w.daysUntil) + (w.daysUntil === 1 ? ' يوم' : w.daysUntil <= 10 ? ' أيام' : ' يومًا') : 'كل عام وأنتم بخير');
   t.append(b, el('small', '', w.phase === 'before' ? 'استعدّ لتحدّي رمضان' : 'افتح تحدّي رمضان'));
   a.appendChild(t); return a;
 }

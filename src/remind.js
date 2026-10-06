@@ -9,10 +9,10 @@ const WINDOW_MIN = 180;      // a reminder is still shown up to three hours afte
 const TIME = /^([01]\d|2[0-3]):[0-5]\d$/;
 
 export const SLOTS = [
-  { id: 'sabah', label: 'أذكار الصباح', def: '06:30', url: '#/adhkar/sabah', body: () => 'حان وقت أذكار الصباح 🌅' },
-  { id: 'masaa', label: 'أذكار المساء', def: '17:00', url: '#/adhkar/masaa', body: () => 'حان وقت أذكار المساء 🌙' },
-  { id: 'nawm', label: 'أذكار النوم', def: '21:30', url: '#/adhkar/nawm', body: () => 'حان وقت أذكار النوم 😴' },
-  { id: 'review', label: 'مراجعة اليوم', def: '18:00', url: '#/review', body: () => 'عندك مراجعة اليوم 🔁' },
+  { id: 'sabah', label: 'أذكار الصباح', def: '06:30', url: '#/adhkar/sabah', body: () => 'حان وقت أذكار الصباح' },
+  { id: 'masaa', label: 'أذكار المساء', def: '17:00', url: '#/adhkar/masaa', body: () => 'حان وقت أذكار المساء' },
+  { id: 'nawm', label: 'أذكار النوم', def: '21:30', url: '#/adhkar/nawm', body: () => 'حان وقت أذكار النوم' },
+  { id: 'review', label: 'مراجعة اليوم', def: '18:00', url: '#/review', body: () => 'عندك مراجعة اليوم' },
 ];
 
 const fresh = () => ({ on: false, slots: Object.fromEntries(SLOTS.map(s => [s.id, { on: true, t: s.def }])), fired: {} });

@@ -106,8 +106,8 @@ await scenario('adhkar: a counted dhikr is kept after a reload', async () => {
 await scenario('games start, and a shop purchase changes the friend', async () => {
   const k = kid({ game: { stars: 60 }, S: { s: { 112: { m: '1111', d: ymd(2), i: 1 }, 114: { m: '111111', d: ymd(2), i: 1 } }, goal: 5, day: ymd(), n: 0, streak: 0, last: '' } });
   const { ctx, page, errors } = await open('#/games', { seed: { 'hifz-tour-v1': '1', 'hifz-kids-v1': store([k]) } });
-  await page.waitForSelector('.gamecard:not([disabled])', { timeout: 20000 });
-  await clickText(page, 'من أي سورة', '.gamecard'); await wait(400);
+  await page.waitForSelector('.gamecard:not(.locked)', { timeout: 20000 });
+  await page.evaluate(() => [...document.querySelectorAll('.gamecard')].find(c => c.textContent.includes('من أي سورة')).querySelector('button').click()); await wait(400);
   ok(await page.evaluate(() => document.querySelectorAll('#gameBox .opt').length === 4), 'the question has no four options');
   await page.evaluate(() => document.querySelector('#gameBox .opt').click()); await wait(300);
   ok(await page.evaluate(() => [...document.querySelectorAll('#gameBox button')].some(b => b.textContent.includes('التالي'))), 'no next button after answering');

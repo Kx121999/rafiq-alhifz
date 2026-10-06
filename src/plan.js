@@ -75,7 +75,7 @@ export function planStats(p) {
   const daily = left === 0 ? 0 : mLeft > 0 ? Math.ceil(left / mLeft) : left;
   const next = ids.find(id => mem(id) < Q[id - 1].v.length) || 0;
   const pace = p.a || Math.max(1, Math.ceil(total / Math.max(1, memDays(p.start, end, mask))));   // the pace the plan was made for
-  return { pr, total, left, done: total - left, end, daysLeft, daily, next, overdue: left > 0 && daysLeft === 0, memDaysLeft: mLeft, kindToday: kindOn(p), pace, behind: left > 0 && daily > pace, ids };
+  return { pr, total, left, done: total - left, end, daysLeft, daily, next, overdue: left > 0 && daysLeft === 0, memDaysLeft: mLeft, kindToday: kindOn(p), pace, behind: left > 0 && daily >= pace + Math.max(2, Math.ceil(pace * 0.2)), ids };
 }
 
 /** Spreads a late plan over more weeks, at the pace it was made for. Never touches progress and never raises today's amount. Returns {plan, added} or null. */
