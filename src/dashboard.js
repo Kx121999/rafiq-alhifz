@@ -7,7 +7,7 @@ import { azNow, tabOf } from './azmeta.js';
 import { ramadanLine } from './ramadan.js';
 import { planStats } from './plan.js';
 import { openSession, suggestedStart } from './session.js';
-import { badgeStatus } from './kids.js';
+import { badgeStatus } from './medals.js';
 
 const link = (href, text, cls = 'btn', ic) => { const a = el('a', cls); a.href = href; if (ic) a.append(icon(ic)); a.append(text); return a };
 const btn = (text, cls, fn) => { const b = el('button', cls, text); b.type = 'button'; b.addEventListener('click', fn); return b };

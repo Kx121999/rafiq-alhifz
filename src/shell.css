@@ -338,3 +338,65 @@ body.focusread #page-surah .tx{font-size:calc(2rem*var(--rs,1))}
 .pickrow small{color:var(--muted);margin-inline-start:auto}
 .planlate{padding:14px 16px;border:1px solid var(--reward);border-radius:var(--r-sm);background:var(--gold-soft);display:flex;flex-direction:column;gap:8px}
 .planlate p{margin:0}
+
+/* adhkar */
+.azacts{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.azacts .btn .ic,.azfav .ic,.aztab .ic{width:1.1em;height:1.1em;flex:none}
+.azacts .btn{display:inline-flex;align-items:center;gap:6px}
+.aztab{display:inline-flex;align-items:center;gap:6px}
+.azfav{display:inline-flex;align-items:center;gap:6px}
+.azfav[aria-pressed="true"] .ic{fill:var(--reward);stroke:var(--gold)}
+.azok{display:inline-grid;place-items:center;width:1.3em;height:1.3em;border-radius:50%;background:var(--accent);color:var(--on-accent)}
+.azok .ic{width:.9em;height:.9em;stroke-width:3}
+
+/* achievements, medals, shop */
+.achtabs{display:flex;flex-wrap:wrap;gap:8px}
+.achtabs .chip{display:inline-flex;align-items:center;gap:6px;min-height:44px;text-decoration:none;color:var(--fg)}
+.achtabs .chip .ic{width:1.1em;height:1.1em}
+.achtabs .chip[aria-current="page"]{background:var(--accent);border-color:var(--accent);color:var(--on-accent)}
+.achsum{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.achtile{display:flex;flex-direction:column;gap:2px;padding:14px 16px;background:var(--surface);border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--sh)}
+.achtile b{font-family:var(--display);font-weight:800;font-size:1.5rem;line-height:1.2;font-variant-numeric:tabular-nums}
+.achtile span{color:var(--muted);font-size:.9rem}
+.achgames{grid-column:1 / -1;display:flex;align-items:center;gap:8px;margin:0}
+.achgames .ic{width:1.2rem;height:1.2rem;flex:none;color:var(--accent)}
+.medallist{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:10px;width:100%}
+.medalrow{display:flex;align-items:center;gap:14px;padding:10px 12px;border:1px solid var(--line);border-radius:var(--r-sm);background:var(--bg)}
+.medalrow.on{background:var(--gold-soft);border-color:var(--reward)}
+.medal{display:grid;place-items:center;flex:none;width:52px;height:52px;border-radius:50%;border:2px solid var(--line-strong);background:var(--surface);color:var(--muted)}
+.medal .ic{width:1.6rem;height:1.6rem}
+.medal.on{border-color:var(--reward);background:var(--surface);color:var(--gold)}
+.mtext{display:flex;flex-direction:column;gap:3px;min-width:0;flex:1}
+.mtext small{color:var(--muted);line-height:1.5}
+.mbar{display:block;height:8px;border-radius:99px;background:var(--line);overflow:hidden}
+.mbar i{display:block;height:100%;background:var(--accent);border-radius:99px}
+.mprog{font-variant-numeric:tabular-nums}
+.medalgrid{display:flex;flex-direction:column;gap:14px}
+.shopbal{display:flex;align-items:center;gap:8px;margin:0;font-size:1.1rem}
+.shopbal .ic{width:1.4rem;height:1.4rem;color:var(--accent)}
+.shopbal b{font-family:var(--display);font-size:1.5rem}
+@media (max-width:520px){.achsum{grid-template-columns:1fr 1fr 1fr}.achtile{padding:10px}.achtile b{font-size:1.2rem}}
+@media (min-width:1024px){.nav a{min-height:40px}.nav{gap:6px}.nav .navhead{margin-top:8px}}
+
+/* games: a balanced grid, locked ones say how to open them */
+.gamesintro{margin:0}
+.gamelist{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
+@media (max-width:900px){.gamelist{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (max-width:520px){.gamelist{grid-template-columns:1fr}}
+.gamecard{display:flex;flex-direction:column;align-items:flex-start;gap:8px;padding:16px;background:var(--surface);border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--sh);text-align:start}
+.gamecard .gtop{display:flex;align-items:center;gap:10px}
+.gamecard .gicon{display:grid;place-items:center;width:44px;height:44px;border-radius:14px;background:var(--accent-soft);color:var(--accent-ink);font-size:1rem}
+.gamecard .gicon .ic{width:1.5rem;height:1.5rem}
+.gamecard b{font-family:var(--display);font-weight:700;font-size:1.15rem}
+.gamecard .btn{margin-top:auto}
+.gamecard.locked{background:var(--bg);box-shadow:none}
+.gamecard.locked .gicon{background:var(--line);color:var(--muted)}
+.lockwhy{display:flex;align-items:flex-start;gap:6px;color:var(--fg)}
+.lockwhy .ic{width:1.1em;height:1.1em;flex:none;margin-top:.2em}
+.gamecard .acts{display:flex;flex-wrap:wrap;gap:8px;margin-top:auto}
+.trialnote{display:flex;align-items:center;gap:8px;margin:0;padding:8px 12px;border-radius:var(--r-sm);background:var(--gold-soft);border:1px solid var(--reward)}
+.trialnote .ic{width:1.1em;height:1.1em;flex:none}
+.gstars{display:inline-flex;align-items:center;gap:4px;font-weight:700}
+.gstars .ic{width:1.1em;height:1.1em}
+.ghead .btn{display:inline-flex;align-items:center;gap:6px}
+.ghead .btn .ic{width:1.1em;height:1.1em}

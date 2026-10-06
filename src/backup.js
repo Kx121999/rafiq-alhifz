@@ -153,7 +153,7 @@ function cleanKid(k, idx, skip) {
   }
   if (k.bd && typeof k.bd === 'object') {
     const bd = {};
-    for (const [n, d] of Object.entries(k.bd).slice(0, 60)) if (n.length <= 30 && DATE.test(d)) bd[n] = d;
+    for (const [n, d] of Object.entries(k.bd).slice(0, 60)) if (n.length <= 30 && (DATE.test(d) || d === '0')) bd[n] = d;
     if (Object.keys(bd).length) kid.bd = bd;
   }
   if (k.game && Number.isInteger(k.game.stars) && k.game.stars >= 0 && k.game.stars <= 1e6) {

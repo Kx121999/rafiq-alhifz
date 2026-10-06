@@ -4,7 +4,7 @@
 import { $, AR, day, el, charSrc } from './util.js';
 import { Q } from './data.js';
 import { activeKid, friendOf } from './state.js';
-import { kidTotals, unlockedBadges } from './kids.js';
+import { kidTotals, unlockedBadges } from './medals.js';
 
 const W = 1080, H = 1350;
 const EMOJI = '"Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji",sans-serif';

@@ -1,7 +1,8 @@
 // The adhkar page: tabs for morning, evening, sleep, waking and after prayer, plus every other category of Hisn al-Muslim.
 // The texts come from public/adhkar.json exactly as they are and are only ever shown with textContent. A tap counter
 // per dhikr, saved per child and per day (see azSave in state.js), and a small celebration when a list is finished.
-import { $, AR, el, norm, charImg } from './util.js';
+import { $, AR, el, norm, icon } from './util.js';
+import { offerUndo } from './guard.js';
 import { loadAdhkar } from './data.js';
 import { azToday, azSave, favList, isFav, toggleFav } from './state.js';
 import { celebrate, markPop } from './motion.js';
@@ -11,19 +12,16 @@ import { AZ_TABS, tabOf, azNow, COUNT_FIX } from './azmeta.js';
 
 let token = 0, lastArg;
 
-/** A friend for each list: the sun for the daytime lists, the moon for the night, the star for the favourites. */
-const PAL = { sabah: 'shams', masaa: 'qamar', nawm: 'qamar', istiqaz: 'shams', salah: 'nujum', fav: 'nujum' };
-const FAV = { key: 'fav', label: 'المفضلة', icon: '⭐' };
-const ALL = { key: 'all', label: 'كل الأذكار', icon: '📚' };
+const FAV = { key: 'fav', label: 'المفضلة', icon: 'star' };
+const ALL = { key: 'all', label: 'كل الأذكار', icon: 'list' };
 const times = n => n === 1 ? 'ذكر واحد' : n === 2 ? 'ذكران' : n <= 10 ? AR(n) + ' أذكار' : AR(n) + ' ذكرًا';
 
 function tabsBar(active) {
   const nav = $('azTabs'); nav.textContent = '';
   [...AZ_TABS, FAV, ALL].forEach(t => {
     const a = el('a', 'chip aztab'); a.href = '#/adhkar/' + t.key;
-    const icon = el('span', '', t.icon); icon.setAttribute('aria-hidden', 'true');
-    a.append(icon, el('span', '', t.label));
-    if (t.key !== 'all' && t.key !== 'fav' && azToday(t.key).d) { const ok = el('span', 'azok', '✓'); ok.setAttribute('aria-hidden', 'true'); a.append(ok, el('span', 'sr', 'تمّ اليوم')) }
+    a.append(icon(t.icon), el('span', '', t.label));
+    if (t.key !== 'all' && t.key !== 'fav' && azToday(t.key).d) { const ok = el('span', 'azok'); ok.setAttribute('aria-hidden', 'true'); ok.appendChild(icon('check')); a.append(ok, el('span', 'sr', 'تمّ اليوم')) }
     if (t.key === active) a.setAttribute('aria-current', 'page');
     nav.appendChild(a);
   });
@@ -43,9 +41,13 @@ function showList(box, key, entries, title, { back = false, persist = true, onUn
   const h = el('h2', '', title);
   const bar = el('div', 'bar'), fill = el('i'); bar.appendChild(fill);
   const prog = el('p', 'note azprog');
-  const reset = el('button', 'btn', 'ابدأ من جديد'); reset.type = 'button';
-  const pal = charImg(PAL[key] || 'ghayma', 'azchar'); pal.width = pal.height = 72;
-  head.append(pal, h, bar, prog, reset);
+  const reset = el('button', 'btn ghost', 'ابدأ من جديد'); reset.type = 'button';
+  const cont = el('button', 'btn primary'); cont.type = 'button'; cont.id = 'azContinue';
+  const undo = el('button', 'btn'); undo.type = 'button'; undo.id = 'azUndo'; undo.append(icon('undo'), 'تراجع عن آخر ضغطة'); undo.disabled = true;
+  const tools = el('div', 'acts azacts'); tools.append(cont, undo, reset);
+  head.append(h, bar, prog, tools);
+  const history = [];   // [{i, prev}] of this visit: "undo" walks back through the last taps one by one
+  const remember = i => { history.push({ i, prev: counts[i] }); if (history.length > 100) history.shift(); undo.disabled = false };
 
   const ol = el('ol', 'azlist');
   const cards = entries.map((e, i) => {
@@ -69,21 +71,23 @@ function showList(box, key, entries, title, { back = false, persist = true, onUn
   const paint = i => {
     const e = entries[i], c = cards[i], done = counts[i] >= e.n;
     c.li.classList.toggle('done', done);
-    c.btn.textContent = e.n === 1 ? (done ? '✓ تمّ' : 'قرأتُها') : AR(counts[i]) + ' / ' + AR(e.n);
+    c.btn.textContent = e.n === 1 ? (done ? 'تمّ' : 'قرأتُها') : AR(counts[i]) + ' من ' + AR(e.n);
     c.btn.setAttribute('aria-label', 'الذكر ' + AR(i + 1) + ': ' + (e.n === 1 ? (done ? 'تمّ، اضغط للتراجع' : 'اضغط إذا قرأته') : AR(counts[i]) + ' من ' + AR(e.n) + '، اضغط للعدّ'));
     c.btn.setAttribute('aria-pressed', done);
     c.more.hidden = done; c.redo.hidden = !counts[i];
   };
   const paintFav = i => {
     const on = isFav(entries[i].ref), f = cards[i].fav;
-    f.textContent = on ? '★ في المفضلة' : '☆ أضف للمفضلة'; f.setAttribute('aria-pressed', on);
+    f.replaceChildren(icon('star'), on ? 'في المفضلة' : 'أضف للمفضلة'); f.setAttribute('aria-pressed', on);
     f.setAttribute('aria-label', (on ? 'إزالة الذكر ' : 'إضافة الذكر ') + AR(i + 1) + (on ? ' من المفضلة' : ' إلى المفضلة'));
   };
   const summary = () => {
     const d = doneN();
     fill.style.width = Math.round((d / entries.length) * 100) + '%';
-    prog.textContent = d === entries.length ? 'أتممتَ القائمة كلها ✓' : 'أتممتَ ' + AR(d) + ' من ' + AR(entries.length);
-    reset.hidden = !counts.some(n => n > 0);
+    prog.textContent = d === entries.length ? 'أتممتَ القائمة كلها' : 'أتممتَ ' + AR(d) + ' من ' + AR(entries.length);
+    const started = counts.some(n => n > 0);
+    reset.hidden = !started; cont.hidden = d === entries.length;
+    cont.textContent = started ? 'تابع الباقي (' + AR(entries.length - d) + ')' : 'ابدأ';
   };
   const commit = (i, popped) => {
     paint(i); summary();
@@ -98,12 +102,14 @@ function showList(box, key, entries, title, { back = false, persist = true, onUn
   cards.forEach((c, i) => {
     const n = entries[i].n;
     c.btn.addEventListener('click', () => {
-      if (n === 1) counts[i] = counts[i] ? 0 : 1; else if (counts[i] < n) counts[i]++; else return;
+      if (n !== 1 && counts[i] >= n) return;
+      remember(i);
+      if (n === 1) counts[i] = counts[i] ? 0 : 1; else counts[i]++;
       if (counts[i] < n) sfx('tap');   // finishing a dhikr plays the star sound instead
       commit(i, counts[i] >= n);
     });
-    c.more.addEventListener('click', () => { counts[i] = n; commit(i, true) });
-    c.redo.addEventListener('click', () => { counts[i] = 0; commit(i, false) });
+    c.more.addEventListener('click', () => { remember(i); counts[i] = n; commit(i, true) });
+    c.redo.addEventListener('click', () => { remember(i); counts[i] = 0; commit(i, false) });
     c.fav.addEventListener('click', () => {
       const on = toggleFav(entries[i].ref);
       if (live) live.textContent = on ? 'أُضيف إلى المفضلة' : 'أُزيل من المفضلة';
@@ -112,7 +118,25 @@ function showList(box, key, entries, title, { back = false, persist = true, onUn
     });
     paint(i); paintFav(i);
   });
-  reset.addEventListener('click', () => { counts.fill(0); cards.forEach((c, i) => paint(i)); summary(); if (persist) azSave(key, counts, false); const was = finished; finished = false; if (persist && was) tabsBar(tabOf(key) ? key : null) });
+  undo.addEventListener('click', () => {
+    const last = history.pop(); if (!last) return;
+    counts[last.i] = last.prev; undo.disabled = !history.length; commit(last.i, false);
+    cards[last.i].btn.focus();
+  });
+  // "continue": straight to the first dhikr that is not finished
+  cont.addEventListener('click', () => {
+    const at = entries.findIndex((e, i) => counts[i] < e.n); if (at < 0) return;
+    cards[at].li.scrollIntoView({ block: 'center', behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' });
+    cards[at].btn.focus({ preventScroll: true });
+  });
+  const restore = snap => { counts.splice(0, counts.length, ...snap); cards.forEach((c, i) => paint(i)); summary(); if (persist) azSave(key, counts, doneN() === entries.length); finished = doneN() === entries.length; if (persist) tabsBar(tabOf(key) ? key : null) };
+  reset.addEventListener('click', () => {
+    if (!confirm('البدء من جديد يمسح عدّ اليوم لهذه القائمة. هل تريد المتابعة؟')) return;
+    const snap = counts.slice(); history.length = 0; undo.disabled = true;
+    counts.fill(0); cards.forEach((c, i) => paint(i)); summary(); if (persist) azSave(key, counts, false);
+    const was = finished; finished = false; if (persist && was) tabsBar(tabOf(key) ? key : null);
+    offerUndo('بدأتَ القائمة من جديد.', () => restore(snap));
+  });
   summary();
   box.append(head, ol);
 }
@@ -143,7 +167,7 @@ function showFavs(box, data) {
     return a ? entryOf(cat, a) : null;
   }).filter(Boolean);
   if (!entries.length) {
-    const p = el('p', 'empty', 'لم تضف أذكارًا إلى المفضلة بعد. اضغط «☆ أضف للمفضلة» تحت أي ذكر ليظهر هنا.');
+    const p = el('p', 'empty', 'لم تضف أذكارًا إلى المفضلة بعد. اضغط «أضف للمفضلة» تحت أي ذكر ليظهر هنا.');
     const a = el('a', 'btn primary', 'تصفّح كل الأذكار'); a.href = '#/adhkar/all';
     const wrap = el('div', 'azempty'); wrap.append(p, a); box.appendChild(wrap); return;
   }

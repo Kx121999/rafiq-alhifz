@@ -1,6 +1,6 @@
 // The star shop: a child spends game stars on cartoon friends, pastel page colours and name frames.
 // Game stars are earned in the games and the weekly challenge; the memorisation stars and medals are never spent.
-import { $, AR, el, nujum, charImg } from './util.js';
+import { $, AR, el, nujum, charImg, icon } from './util.js';
 import { SHOP } from './catalog.js';
 import { activeKid, starBalance, owns, buyItem, useItem, friendOf, shopTheme, shopFrame } from './state.js';
 import { announce } from './motion.js';
@@ -26,8 +26,8 @@ export function renderShop() {
   const root = $('shopBox'); root.textContent = '';
   const k = activeKid(); if (!k) return;
   const bal = starBalance();
-  const head = el('p', 'shopbal'); head.append(el('span', 'big-star', '🎮'), el('b', '', AR(bal)), ' نجمة ألعاب في رصيدك');
-  root.append(head, el('p', 'note', 'تكسب نجوم الألعاب من ألعاب رفيق ومن تحدّي الأسبوع. الشراء من نجوم الألعاب فقط، ونجوم الحفظ والأوسمة لا تُصرف أبدًا.'));
+  const head = el('p', 'shopbal'); head.append(icon('gamepad'), el('b', '', AR(bal)), ' نجمة ألعاب في رصيدك');
+  root.append(head, el('p', 'note', 'هذه نجوم داخل التطبيق فقط، ولا تُشترى بالمال ولا تُحوَّل إلى مال. تكسبها من ألعاب رفيق ومن تحدّي الأسبوع، ونجوم الحفظ والأوسمة لا تُصرف أبدًا.'));
   const msg = el('p', 'note'); msg.setAttribute('role', 'status'); root.appendChild(msg);
 
   GROUPS.forEach(g => {
@@ -37,12 +37,12 @@ export function renderShop() {
       const li = el('li', 'shopitem'), own = owns(it.id);
       const on = it.type === 'friend' ? friendOf() === it.id : it.type === 'theme' ? shopTheme() === it.id : shopFrame(k) === it.id;
       const btn = el('button', 'btn' + (own ? '' : ' primary')); btn.type = 'button';
-      if (own) { btn.textContent = on ? 'قيد الاستخدام ✓' : 'استخدمه'; btn.setAttribute('aria-pressed', on) }
-      else { btn.textContent = 'اشترِ بـ ' + AR(it.price) + ' ⭐'; btn.disabled = bal < it.price; if (btn.disabled) btn.setAttribute('aria-label', it.name + ': ينقصك ' + nujum(it.price - bal)) }
+      if (own) { btn.textContent = on ? 'قيد الاستخدام' : 'استخدمه'; btn.setAttribute('aria-pressed', on) }
+      else { btn.textContent = 'اشترِ بـ ' + AR(it.price) + ' نجمة'; btn.disabled = bal < it.price; if (btn.disabled) btn.setAttribute('aria-label', it.name + ': ينقصك ' + nujum(it.price - bal)) }
       btn.addEventListener('click', () => {
         if (!own) {
           if (buyItem(it.id) !== 'ok') return;
-          sfx('win'); announce('اشتريتَ ' + it.name + '! 🎉'); useItem(it.id);   // a new thing is put to use right away
+          sfx('win'); announce('اشتريتَ ' + it.name + '!'); useItem(it.id);   // a new thing is put to use right away
           msg.textContent = 'اشتريتَ ' + it.name + ' وهو الآن قيد الاستخدام.';
         } else useItem(it.id);
         onChange(); renderShop();

@@ -132,7 +132,7 @@ describe('the adhkar page', () => {
     expect(document.querySelectorAll('.azcard')).toHaveLength(3);
     expect(document.querySelector('#azBox b')).toBeNull();                       // text is never turned into HTML
     expect(document.querySelectorAll('.azt')[2].textContent).toBe('<b>x</b>');
-    expect(buttons().map(b => b.textContent)).toEqual(['قرأتُها', '٠ / ٣', '٠ / ١٠']);
+    expect(buttons().map(b => b.textContent)).toEqual(['قرأتُها', '٠ من ٣', '٠ من ١٠']);
   });
 
   it('counts taps up to the target, saves them, and finishes the list', async () => {
@@ -140,7 +140,7 @@ describe('the adhkar page', () => {
     const b = buttons();
     b[0].click();
     for (let k = 0; k < 5; k++) b[1].click();                                    // more taps than needed stop at 3
-    expect(b[1].textContent).toBe('٣ / ٣');
+    expect(b[1].textContent).toBe('٣ من ٣');
     expect(state.azToday('c1')).toMatchObject({ c: [1, 3, 0], d: 0 });
     const done = [...document.querySelectorAll('.azmini')].find(x => x.textContent === 'أتممتُها'); done.click();   // «أتممتُها» exists only for the 10x dhikr
     expect(state.azToday('c1')).toMatchObject({ c: [1, 3, 10], d: 1 });
@@ -157,11 +157,58 @@ describe('the adhkar page', () => {
     expect(state.azToday('c1').c).toEqual([]);                                    // everything back to zero: nothing stored
   });
 
+  it('undoes the last tap, one at a time, and the counter and the saved progress follow', async () => {
+    const { state } = await open('c1');
+    const undo = () => document.getElementById('azUndo');
+    expect(undo().disabled).toBe(true);                                           // nothing to undo yet
+    buttons()[1].click(); buttons()[1].click(); buttons()[0].click();
+    expect(undo().disabled).toBe(false);
+    undo().click();                                                               // takes back the single dhikr
+    expect(buttons()[0].textContent).toBe('قرأتُها'); expect(buttons()[1].textContent).toBe('٢ من ٣');
+    undo().click(); expect(buttons()[1].textContent).toBe('١ من ٣');
+    expect(state.azToday('c1').c[1]).toBe(1);
+    undo().click(); expect(buttons()[1].textContent).toBe('٠ من ٣'); expect(undo().disabled).toBe(true);
+    expect(state.azToday('c1').c).toEqual([]);                                    // back to nothing stored
+  });
+
+  it('can take back finishing a whole dhikr with "I finished it"', async () => {
+    const { state } = await open('c1');
+    buttons()[2].click();
+    [...document.querySelectorAll('.azmini')].find(x => x.textContent === 'أتممتُها').click();
+    expect(buttons()[2].getAttribute('aria-pressed')).toBe('true');
+    document.getElementById('azUndo').click();
+    expect(buttons()[2].textContent).toBe('١ من ١٠'); expect(state.azToday('c1').c[2]).toBe(1);
+  });
+
+  it('"continue" is the main action: it says how many remain and goes to the first unfinished dhikr', async () => {
+    await open('c1');
+    const cont = document.getElementById('azContinue');
+    expect(cont.classList.contains('primary')).toBe(true); expect(cont.textContent).toBe('ابدأ');
+    const cards = [...document.querySelectorAll('.azcard')]; cards.forEach(c => { c.scrollIntoView = vi.fn() });
+    buttons()[0].click();                                                          // first one finished
+    expect(cont.textContent).toContain('تابع الباقي'); expect(cont.textContent).toContain('٢');
+    cont.click();
+    expect(cards[1].scrollIntoView).toHaveBeenCalled(); expect(cards[0].scrollIntoView).not.toHaveBeenCalled();
+    expect(document.activeElement).toBe(buttons()[1]);
+  });
+
+  it('"start over" asks first and does nothing if the answer is no', async () => {
+    const { state } = await open('c1');
+    buttons()[1].click();
+    vi.stubGlobal('confirm', vi.fn(() => false));
+    const reset = [...document.querySelectorAll('#azBox button')].find(b => b.textContent === 'ابدأ من جديد');
+    reset.click();
+    expect(confirm).toHaveBeenCalled(); expect(state.azToday('c1').c[1]).toBe(1);
+    vi.stubGlobal('confirm', vi.fn(() => true)); reset.click();
+    expect(state.azToday('c1').c).toEqual([]);
+    vi.unstubAllGlobals();
+  });
+
   it('restores saved progress when the page is opened again', async () => {
     const { state, mod } = await open('c1');
     buttons()[1].click(); buttons()[1].click();
     await mod.renderAdhkar('c1');
-    expect(buttons()[1].textContent).toBe('٢ / ٣');
+    expect(buttons()[1].textContent).toBe('٢ من ٣');
     expect(state.azToday('c1').c[1]).toBe(2);
   });
 
@@ -215,7 +262,7 @@ describe('the adhkar page', () => {
     state.azSave('nawm', n, true);
     await mod.renderAdhkar('nawm');
     const tab = [...document.querySelectorAll('.aztab')].find(a => a.getAttribute('href') === '#/adhkar/nawm');
-    expect(tab.textContent).toContain('✓');
+    expect(tab.querySelector('.azok')).toBeTruthy();
     expect(tab.getAttribute('aria-current')).toBe('page');
   });
 });

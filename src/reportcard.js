@@ -2,7 +2,7 @@
 // It is drawn on the device from the same numbers as the printed report; nothing is uploaded.
 import { AR, day } from './util.js';
 import { activeKid, activityLog } from './state.js';
-import { kidTotals } from './kids.js';
+import { kidTotals } from './medals.js';
 import { weekDays, summarize, reportOffset } from './report.js';
 
 const W = 1080, H = 1350, GREEN = '#0e6b50', GOLD = '#a97a1c', INK = '#12261f', MUTED = '#5b6f67';

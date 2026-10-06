@@ -3,11 +3,11 @@
 
 /** key: the tab and the progress key; cat: the category id in adhkar.json (sabah and masaa share category 1, which is one list in the source). */
 export const AZ_TABS = [
-  { key: 'sabah', label: 'الصباح', title: 'أذكار الصباح', icon: '🌅', cat: 1 },
-  { key: 'masaa', label: 'المساء', title: 'أذكار المساء', icon: '🌙', cat: 1 },
-  { key: 'nawm', label: 'النوم', title: 'أذكار النوم', icon: '😴', cat: 2 },
-  { key: 'istiqaz', label: 'الاستيقاظ', title: 'أذكار الاستيقاظ', icon: '☀️', cat: 3 },
-  { key: 'salah', label: 'بعد الصلاة', title: 'أذكار بعد الصلاة', icon: '🕌', cat: 27 },
+  { key: 'sabah', label: 'الصباح', title: 'أذكار الصباح', icon: 'sunrise', cat: 1 },
+  { key: 'masaa', label: 'المساء', title: 'أذكار المساء', icon: 'moon', cat: 1 },
+  { key: 'nawm', label: 'النوم', title: 'أذكار النوم', icon: 'bed', cat: 2 },
+  { key: 'istiqaz', label: 'الاستيقاظ', title: 'أذكار الاستيقاظ', icon: 'sun', cat: 3 },
+  { key: 'salah', label: 'بعد الصلاة', title: 'أذكار بعد الصلاة', icon: 'beads', cat: 27 },
 ];
 export const tabOf = key => AZ_TABS.find(t => t.key === key);
 

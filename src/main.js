@@ -31,8 +31,9 @@ import { initReminders, setReminderContext } from './remind.js';
 import { renderReview, renderWeak, onReviewGraded, clearReviewNote, dueList, ratingButtons, ratingNote } from './review.js';
 import { renderPlan, onPlanChanged } from './plan.js';
 import { renderGames, onGameStars, resetGame } from './games.js';
-import { renderAchievements, renderCertificate } from './achievements.js';
-import { initKids, onKidsChange, renderKidBar, applyMode, announceBadges } from './kids.js';
+import { renderAchievements, renderMedalsPage, renderAchTabs, renderCertificate } from './achievements.js';
+import { initKids, onKidsChange, renderKidBar, applyMode } from './kids.js';
+import { announceBadges } from './medals.js';
 import { initParents, showParents } from './parents.js';
 
 function render() {
@@ -40,7 +41,7 @@ function render() {
   applyMode(); renderDashboard(); renderList(); renderMushafTop(); renderReview(); renderWeak(); renderPlan(); updateDue(); renderAchievements();
   if (!$('page-games').hidden) renderGames();
   refreshAdhkar(); checkChallenge(); refreshCompanion(); recordRamadan();
-  for (const [id, fn] of [['shop', renderShop], ['challenge', renderChallenge], ['share', renderShare], ['family', renderFamily], ['ramadan', renderRamadan]]) if (!$('page-' + id).hidden) fn();
+  for (const [id, fn] of [['medals', renderMedalsPage], ['shop', renderShop], ['challenge', renderChallenge], ['share', renderShare], ['family', renderFamily], ['ramadan', renderRamadan]]) if (!$('page-' + id).hidden) fn();
   if (view.cur) renderSurah(false);
 }
 function updateDue() {
@@ -103,7 +104,8 @@ for (const p of ['home', 'about']) onPage(p, () => { view.cur = 0 });
 onPage('review', () => { view.cur = 0; clearReviewNote(); render() });
 onPage('plan', () => { view.cur = 0; render() });
 onPage('adhkar', arg => { view.cur = 0; renderAdhkar(arg) });
-onPage('shop', () => { view.cur = 0; renderShop() });
+onPage('shop', () => { view.cur = 0; renderAchTabs(); renderShop() });
+onPage('medals', () => { view.cur = 0; renderMedalsPage() });
 onPage('challenge', () => { view.cur = 0; checkChallenge(); renderChallenge() });
 onPage('share', () => { view.cur = 0; renderShare() });
 onPage('family', () => { view.cur = 0; if (Q.length) renderFamily() });
@@ -161,13 +163,14 @@ function undoSurah(id, snap, delta) { restoreSurah(id, snap); bump(-delta); save
 $('allBtn').addEventListener('click', () => {
   const id = view.cur, c = Q[id - 1], tot = c.v.length, was = mem(id) === tot, on = !was;
   // a change to the whole surah at once is asked about first, and can be taken back
-  const ask = on ? 'هل حفظتَ كل آيات سورة ' + c.n + ' (' + AR(tot) + ' آية)؟ ستُعلَّم كلها محفوظة.' : 'إلغاء حفظ سورة ' + c.n + ' كلها؟ سيُمسح تعليم ' + AR(mem(id)) + ' آية.';
+  const ask = on ? 'هل حفظتَ كل آيات سورة ' + c.n + ' (' + AR(tot) + ' آية)؟ ستُعلَّم كلها محفوظة كتسجيل لحفظ سابق، ولا تُحتسب في ورد اليوم ولا في تحدّي الأسبوع.' : 'إلغاء حفظ سورة ' + c.n + ' كلها؟ سيُمسح تعليم ' + AR(mem(id)) + ' آية.';
   if (!confirm(ask)) return;
   const snap = surahSnapshot(id); let d = 0;
   for (let i = 0; i < tot; i++) d += setAyah(id, i, on);
-  bump(d); save(); renderSurah(false); refreshStats(); checkCompleted(id, was);
+  // recording memorisation that already existed is not new work today: no daily count, no streak, no weekly challenge
+  save(); renderSurah(false); refreshStats(); checkCompleted(id, was);
   if (on) markWave(document.querySelectorAll('#ayat .ck'));
-  if (d) offerUndo(on ? 'عُلّمت سورة ' + c.n + ' كاملة.' : 'أُلغي حفظ سورة ' + c.n + '.', () => undoSurah(id, snap, d));
+  if (d) offerUndo(on ? 'عُلّمت سورة ' + c.n + ' كاملة.' : 'أُلغي حفظ سورة ' + c.n + '.', () => undoSurah(id, snap, 0));
 });
 $('ayat').addEventListener('click', e => {
   const li = e.target.closest('.ay'); if (!li) return;

@@ -1,6 +1,6 @@
 // Six memorisation games. Every question is built from ayat the child marked as memorised;
 // wrong options are real words or endings taken from other ayat in quran.json. Nothing is generated.
-import { $, AR, ayahs, el, norm, nujum, charImg } from './util.js';
+import { $, AR, ayahs, el, norm, nujum, icon } from './util.js';
 import { Q } from './data.js';
 import { S, activeKid, addGameStars } from './state.js';
 import { correct, wrong } from './motion.js';
@@ -13,10 +13,16 @@ const shuffle = a => { const r = a.slice(); for (let i = r.length - 1; i > 0; i-
 const randomAyah = () => { const id = 1 + Math.floor(Math.random() * 114), c = Q[id - 1], i = Math.floor(Math.random() * c.v.length); return { id, i, t: c.v[i] } };
 const young = () => (activeKid() || {}).mode === 'young';
 
+/** A trial uses a few short surahs, taken from the mushaf text itself, as if they were memorised. Nothing from a trial is saved or counted. */
+const TRIAL_IDS = [108, 109, 110, 111, 112, 113, 114];
+const trialSource = () => Object.fromEntries(TRIAL_IDS.map(id => [id, { m: '1'.repeat(Q[id - 1].v.length) }]));
+let G = null;
+const source = () => (G && G.trial ? trialSource() : S.s);
+
 /** Every ayah the active child has marked as memorised. */
 export function memorisedPool() {
   const out = [];
-  for (const [key, r] of Object.entries(S.s)) {
+  for (const [key, r] of Object.entries(source())) {
     const id = +key;
     for (let i = 0; i < r.m.length; i++) if (r.m[i] === '1') out.push({ id, i, t: Q[id - 1].v[i] });
   }
@@ -26,7 +32,7 @@ export function memorisedPool() {
 /** Windows of three consecutive memorised ayat within one surah (for the ordering game). */
 export function runs() {
   const out = [];
-  for (const [key, r] of Object.entries(S.s)) {
+  for (const [key, r] of Object.entries(source())) {
     const id = +key;
     for (let i = 0; i + 2 < r.m.length; i++) if (r.m[i] === '1' && r.m[i + 1] === '1' && r.m[i + 2] === '1') out.push({ id, i });
   }
@@ -44,7 +50,7 @@ const whichPool = () => memorisedPool().filter(a => { const n = words(a.t).lengt
 /** Memorised ayat whose next ayah (same surah) is memorised too, and where neither text repeats inside the surah, so there is one right answer. */
 export function nextPairs() {
   const out = [];
-  for (const [key, r] of Object.entries(S.s)) {
+  for (const [key, r] of Object.entries(source())) {
     const id = +key, v = Q[id - 1].v, count = new Map();
     v.forEach(t => { const k = norm(t); count.set(k, (count.get(k) || 0) + 1) });
     for (let i = 0; i + 1 < r.m.length; i++) {
@@ -58,12 +64,12 @@ export function nextPairs() {
 }
 
 const GAMES = {
-  complete: { name: 'أكمل الآية', icon: '🧩', desc: 'تظهر بداية آية حفظتَها، اختر تتمتها الصحيحة.', ok: () => eligible(3, 16).length > 0, need: 'علّم بعض الآيات (٣ كلمات فأكثر) كمحفوظة أولًا.' },
-  order: { name: 'رتّب الآيات', icon: '🔢', desc: 'ثلاث آيات متتالية حفظتَها مخلوطة، اضغطها بالترتيب الصحيح.', ok: () => runs().length > 0, need: 'علّم ثلاث آيات متتالية على الأقل من سورة واحدة كمحفوظة.' },
-  which: { name: 'من أي سورة؟', icon: '🧭', desc: 'تظهر آية حفظتَها، اختر اسم السورة التي هي منها.', ok: () => whichPool().length > 0, need: 'علّم بعض الآيات (٣ كلمات فأكثر) كمحفوظة أولًا.' },
-  next: { name: 'ما الآية التالية؟', icon: '➡️', desc: 'آية حفظتَها، اختر الآية التي تأتي بعدها.', ok: () => nextPairs().length > 0, need: 'علّم آيتين متتاليتين على الأقل من سورة واحدة كمحفوظتين.' },
-  count: { name: 'كم آية في السورة؟', icon: '🧮', desc: 'سورة بدأتَ حفظها، اختر عدد آياتها.', ok: () => Object.keys(S.s).length > 0, need: 'ابدأ حفظ سورة أولًا.' },
-  missing: { name: 'الكلمة الناقصة', icon: '❓', desc: 'آية حفظتَها وفيها كلمة ناقصة، اختر الكلمة الصحيحة.', ok: () => eligible(2, 30).length > 0, need: 'علّم بعض الآيات (كلمتين فأكثر) كمحفوظة أولًا.' },
+  complete: { name: 'أكمل الآية', icon: 'puzzle', desc: 'تظهر بداية آية حفظتَها، اختر تتمتها الصحيحة.', ok: () => eligible(3, 16).length > 0, need: 'علّم بعض الآيات (٣ كلمات فأكثر) كمحفوظة أولًا.' },
+  order: { name: 'رتّب الآيات', icon: 'list', desc: 'ثلاث آيات متتالية حفظتَها مخلوطة، اضغطها بالترتيب الصحيح.', ok: () => runs().length > 0, need: 'علّم ثلاث آيات متتالية على الأقل من سورة واحدة كمحفوظة.' },
+  which: { name: 'من أي سورة؟', icon: 'compass', desc: 'تظهر آية حفظتَها، اختر اسم السورة التي هي منها.', ok: () => whichPool().length > 0, need: 'علّم بعض الآيات (٣ كلمات فأكثر) كمحفوظة أولًا.' },
+  next: { name: 'ما الآية التالية؟', icon: 'forward', desc: 'آية حفظتَها، اختر الآية التي تأتي بعدها.', ok: () => nextPairs().length > 0, need: 'علّم آيتين متتاليتين على الأقل من سورة واحدة كمحفوظتين.' },
+  count: { name: 'كم آية في السورة؟', icon: 'chart', desc: 'سورة بدأتَ حفظها، اختر عدد آياتها.', ok: () => Object.keys(source()).length > 0, need: 'ابدأ حفظ سورة أولًا.' },
+  missing: { name: 'الكلمة الناقصة', icon: 'help', desc: 'آية حفظتَها وفيها كلمة ناقصة، اختر الكلمة الصحيحة.', ok: () => eligible(2, 30).length > 0, need: 'علّم بعض الآيات (كلمتين فأكثر) كمحفوظة أولًا.' },
 };
 
 function eligible(min, max) {
@@ -129,7 +135,7 @@ export function buildNext(prev) {
 
 /** "How many ayat?": a surah the child started; the wrong options are nearby numbers. */
 export function buildCount(prev) {
-  const ids = Object.keys(S.s).map(Number); if (!ids.length) return null;
+  const ids = Object.keys(source()).map(Number); if (!ids.length) return null;
   let id = pick(ids); for (let t = 0; t < 5 && ids.length > 1 && prev && id === prev.id; t++) id = pick(ids);
   const n = Q[id - 1].v.length, correct = AR(n);
   const near = [];
@@ -140,7 +146,6 @@ export function buildCount(prev) {
 }
 
 /* ---------- play ---------- */
-let G = null;
 let onStars = () => {};
 export const onGameStars = fn => { onStars = fn };
 
@@ -148,18 +153,32 @@ export function renderGames() {
   const box = $('gameBox'); box.textContent = '';
   if (!Q.length) return;
   if (G) return G.type === 'order' ? orderRound() : choiceRound();
-  const intro = el('div', 'hint'); intro.append(charImg('nujum'), el('p', 'note', 'العب بالآيات التي علّمتَها كمحفوظة. نجوم الألعاب منفصلة عن نجوم الحفظ.')); box.appendChild(intro);
-  const list = el('div', 'gamelist');
+  box.appendChild(el('p', 'note gamesintro', 'العب بالآيات التي علّمتَها كمحفوظة. نجوم الألعاب منفصلة عن نجوم الحفظ، ولا تُحتسب في تقدّم حفظك.'));
+  const list = el('ul', 'gamelist');
   Object.entries(GAMES).forEach(([type, g]) => {
-    const ok = g.ok(), b = el('button', 'gamecard'); b.type = 'button'; b.disabled = !ok;
-    b.append(el('span', 'gicon', g.icon), el('b', '', g.name), el('span', 'note', ok ? g.desc : g.need));
-    b.addEventListener('click', () => start(type));
-    list.appendChild(b);
+    const ok = g.ok(), li = el('li', 'gamecard' + (ok ? '' : ' locked'));
+    const top = el('span', 'gtop'); top.append(el('span', 'gicon', ''), el('b', '', g.name)); top.firstChild.appendChild(icon(g.icon));
+    li.appendChild(top);
+    if (ok) {
+      li.appendChild(el('span', 'note', g.desc));
+      const b = el('button', 'btn primary', 'العب'); b.type = 'button'; b.addEventListener('click', () => start(type)); li.appendChild(b);
+    } else {
+      // locked: say exactly what unlocks it, and give two ways forward (go and do it, or try it without counting)
+      const why = el('span', 'note lockwhy'); why.append(icon('lock'), 'تُفتح حين: ' + g.need.replace(/ أولًا\.$/, '').replace(/\.$/, ''));
+      li.append(el('span', 'note', g.desc), why);
+      const acts = el('span', 'acts');
+      const go = el('a', 'btn', 'ابدأ الحفظ'); go.href = '#/dashboard';
+      const trial = el('button', 'btn ghost', 'جرّبها تجربة'); trial.type = 'button';
+      trial.setAttribute('aria-label', 'جرّب لعبة ' + g.name + ' تجربة لا تُحتسب نجومها');
+      trial.addEventListener('click', () => start(type, true));
+      acts.append(go, trial); li.appendChild(acts);
+    }
+    list.appendChild(li);
   });
   box.appendChild(list);
 }
 
-function start(type) { G = { type, round: 0, stars: 0, total: type === 'order' ? PUZZLES : ROUNDS, cur: null, prev: null }; next() }
+function start(type, trial = false) { G = { type, trial, round: 0, stars: 0, total: type === 'order' ? PUZZLES : ROUNDS, cur: null, prev: null }; next() }
 function leave() { G = null; renderGames() }
 
 function next() {
@@ -173,9 +192,11 @@ function next() {
 
 function head(box) {
   const bar = el('div', 'ghead');
-  const back = el('button', 'btn', '→ الألعاب'); back.type = 'button'; back.addEventListener('click', leave);
-  bar.append(back, el('span', 'note', GAMES[G.type].name + ' · ' + AR(G.round) + ' من ' + AR(G.total)), el('span', 'gstars', '🎮 ' + AR(G.stars)));
+  const back = el('button', 'btn'); back.type = 'button'; back.append(icon('back'), 'الألعاب'); back.addEventListener('click', leave);
+  const stars = el('span', 'gstars'); stars.append(icon('star'), AR(G.stars));
+  bar.append(back, el('span', 'note', GAMES[G.type].name + ' · ' + AR(G.round) + ' من ' + AR(G.total)), stars);
   box.appendChild(bar);
+  if (G.trial) { const t = el('p', 'trialnote'); t.append(icon('info'), 'تجربة: بآيات من قصار السور، ولا تُحتسب نجومها.'); box.appendChild(t) }
 }
 
 function nextBtn(box, last) {
@@ -191,7 +212,7 @@ function choiceRound() {
     const b = el('button', 'btn opt', o); b.type = 'button';
     b.addEventListener('click', () => {
       opts.querySelectorAll('button').forEach(x => { x.disabled = true; if (x.textContent === q.correct) x.classList.add('right') });
-      if (o === q.correct) { G.stars++; fb.textContent = 'أحسنت! ⭐'; correct(b) } else { b.classList.add('wrong'); wrong(b); fb.textContent = 'ليست هذه. الصحيح مُلوَّن بالأخضر.' }
+      if (o === q.correct) { G.stars++; fb.textContent = 'أحسنت!'; correct(b) } else { b.classList.add('wrong'); wrong(b); fb.textContent = 'ليست هذه. الصحيح مُلوَّن بالأخضر.' }
       const full = el('p', 'quizfull', q.full); box.insertBefore(full, fb);
       nextBtn(box, G.round === G.total);
     });
@@ -219,7 +240,7 @@ function orderRound() {
       if (it.n !== q.got) { q.mistakes++; fb.textContent = 'ليست هذه الآية التالية، جرّب غيرها.'; wrong(b); return }
       q.got++; b.disabled = true; b.classList.add('right'); correct(b); b.firstChild.textContent = AR(q.got); fb.textContent = '';
       if (q.got === 3) {
-        const s = q.mistakes === 0 ? 2 : 1; G.stars += s; fb.textContent = 'أحسنت! +' + AR(s) + ' ⭐';
+        const s = q.mistakes === 0 ? 2 : 1; G.stars += s; fb.textContent = 'أحسنت! +' + nujum(s);
         nextBtn(box, G.round === G.total);
       }
     });
@@ -230,12 +251,13 @@ function orderRound() {
 
 function finish() {
   const box = $('gameBox'); box.textContent = '';
-  const n = G.stars; addGameStars(n); onStars();
-  box.append(el('h2', '', n ? 'أحسنت! حصلتَ على ' + nujum(n) + ' في الألعاب 🎮' : 'انتهت الجولة'),
-    el('p', 'note', n ? '' : 'لا بأس، راجع آياتك ثم جرّب مرة أخرى.'));
+  const n = G.stars, trial = G.trial;
+  if (!trial) { addGameStars(n); onStars() }   // a trial never counts
+  box.append(el('h2', '', trial ? 'انتهت التجربة' : n ? 'أحسنت! حصلتَ على ' + nujum(n) + ' في الألعاب' : 'انتهت الجولة'),
+    el('p', 'note', trial ? 'هذه تجربة بآيات من قصار السور، ولم تُضَف أي نجوم. حين تعلّم آياتك كمحفوظة تفتح لك اللعبة بآياتك أنت.' : n ? '' : 'لا بأس، راجع آياتك ثم جرّب مرة أخرى.'));
   const again = el('button', 'btn primary', 'العب مرة أخرى'), back = el('button', 'btn', 'الألعاب');
   again.type = back.type = 'button';
-  const type = G.type; again.addEventListener('click', () => start(type)); back.addEventListener('click', leave);
+  const type = G.type; again.addEventListener('click', () => start(type, trial)); back.addEventListener('click', leave);
   const acts = el('div', 'acts'); acts.append(again, back); box.appendChild(acts);
   G = null;
 }
