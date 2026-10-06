@@ -5,13 +5,14 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "npm run check && vite build",
+    "build": "npm run check && vite build && node scripts/check-data.mjs dist",
     "preview": "vite preview",
     "check": "node scripts/check-data.mjs",
     "test": "vitest run",
     "test:watch": "vitest",
     "a11y": "node scripts/a11y.mjs",
-    "e2e": "node scripts/e2e.mjs"
+    "e2e": "node scripts/e2e.mjs",
+    "targets": "node scripts/targets.mjs"
   },
   "devDependencies": {
     "axe-core": "^4.13.0",

@@ -46,6 +46,8 @@ jobs:
       - run: npm run a11y
       # real-browser journeys: first visit, memorise, adhkar, shop, backup round trip, old data, no storage
       - run: npm run e2e
+      # touch targets (44 px) and no sideways scrolling at phone, tablet and desktop widths
+      - run: node scripts/targets.mjs 360,390,768,1024,1440
 
   deploy:
     needs: [build, a11y]

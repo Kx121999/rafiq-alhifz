@@ -42,7 +42,9 @@ export function highlight(text, words) {
 }
 
 /* ---------- page ---------- */
-let shown = PAGE, current = null;
+let shown = PAGE, current = null, failed = false;
+/** Called when the mushaf text could not be loaded, so the search page says so instead of waiting forever. */
+export function searchUnavailable() { failed = true; if ($('sInfo')) renderSearch() }
 const HINTS = ['الرحمن', 'الصبر', 'النور', 'الجنة'];
 
 function resultItem(h, words) {
@@ -56,13 +58,15 @@ function resultItem(h, words) {
     if (p.hit) tx.appendChild(el('mark', '', p.w)); else tx.append(p.w);
   });
   li.append(head, tx);
+  const ctx = (k, label) => { const t = Q[h.id - 1].v[h.i + k]; if (t) { const p = el('p', 'hitctx'); p.append(el('b', '', label + ' '), t); li.appendChild(p) } };
+  ctx(-1, 'قبلها:'); ctx(1, 'بعدها:');
   return li;
 }
 
 export function renderSearch() {
   const info = $('sInfo'), list = $('sList'), more = $('sMore');
   list.textContent = ''; more.hidden = true;
-  if (!Q.length) return;
+  if (!Q.length) { info.textContent = failed ? 'تعذّر تحميل المصحف، فلا يمكن البحث الآن. أعد فتح الصفحة وأنت متصل بالإنترنت.' : 'جارٍ تحميل المصحف…'; $('sHints').hidden = true; return }
   const q = $('sq').value;
   current = search(q);
   const { n } = parseQuery(q);
@@ -80,6 +84,13 @@ export function initSearch() {
   const input = $('sq'); let timer = 0;
   const run = () => { shown = PAGE; renderSearch(); try { history.replaceState(null, '', input.value.trim() ? '#/search/' + encodeURIComponent(input.value.trim()) : '#/search') } catch (e) {} };
   input.addEventListener('input', () => { clearTimeout(timer); timer = setTimeout(run, 150) });
+  // keyboard: Enter searches now and moves to the first result; the down arrow does the same; Escape clears the box
+  input.addEventListener('keydown', e => {
+    if (e.key === 'Enter' || e.key === 'ArrowDown') {
+      e.preventDefault(); clearTimeout(timer); run();
+      const first = document.querySelector('#sList .hitref'); if (first) first.focus();
+    } else if (e.key === 'Escape' && input.value) { input.value = ''; run() }
+  });
   $('sMore').addEventListener('click', () => { shown += PAGE; renderSearch() });
   HINTS.forEach(h => { const b = el('button', 'chip', h); b.type = 'button'; b.addEventListener('click', () => { input.value = h; run(); input.focus() }); $('sHints').appendChild(b) });
 }

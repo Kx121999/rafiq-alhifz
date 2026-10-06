@@ -376,7 +376,7 @@ body.focusread #page-surah .tx{font-size:calc(2rem*var(--rs,1))}
 .shopbal .ic{width:1.4rem;height:1.4rem;color:var(--accent)}
 .shopbal b{font-family:var(--display);font-size:1.5rem}
 @media (max-width:520px){.achsum{grid-template-columns:1fr 1fr 1fr}.achtile{padding:10px}.achtile b{font-size:1.2rem}}
-@media (min-width:1024px){.nav a{min-height:40px}.nav{gap:6px}.nav .navhead{margin-top:8px}}
+@media (min-width:1024px){.nav a{min-height:44px}.nav{gap:2px}.nav .navhead{margin-top:6px;margin-bottom:0}.navmain,.nav .navtools{gap:0}}
 
 /* games: a balanced grid, locked ones say how to open them */
 .gamesintro{margin:0}
@@ -400,3 +400,17 @@ body.focusread #page-surah .tx{font-size:calc(2rem*var(--rs,1))}
 .gstars .ic{width:1.1em;height:1.1em}
 .ghead .btn{display:inline-flex;align-items:center;gap:6px}
 .ghead .btn .ic{width:1.1em;height:1.1em}
+
+/* search results: the ayah in its surroundings */
+.hit{display:flex;flex-direction:column;gap:6px}
+.hitctx{margin:0;color:var(--muted);font-family:var(--quran);font-size:calc(1.05rem*var(--rs,1));line-height:2;display:-webkit-box;-webkit-line-clamp:1;-webkit-box-orient:vertical;overflow:hidden}
+.hitctx b{font-family:var(--ui);font-size:.8rem;font-weight:700}
+.hitref{display:inline-flex;align-items:center;min-height:44px}
+
+/* touch targets: at least 44px */
+.appfoot a{min-height:44px;padding-inline:6px}
+.topbar .brand,.lhead .brand{min-height:44px}
+.sf-links a{min-height:44px}
+.arow .pl,.arow .bm,.arow .wk,.arow .tf{min-height:44px}
+.arow .bm{min-width:44px;justify-content:center}
+.sf-links a{min-width:44px;justify-content:center;padding-inline:8px}

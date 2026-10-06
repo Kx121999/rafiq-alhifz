@@ -3,7 +3,9 @@
 import { readFileSync } from 'node:fs';
 import { createHash } from 'node:crypto';
 
-const load = f => JSON.parse(readFileSync(new URL('../public/' + f, import.meta.url), 'utf8'));
+// node scripts/check-data.mjs [dir]: checks public/ by default; after the build the same check runs on dist/, so what is published is what was verified
+const dir = process.argv[2] || 'public';
+const load = f => JSON.parse(readFileSync(new URL('../' + dir + '/' + f, import.meta.url), 'utf8'));
 const Q = load('quran.json'), T = load('tafsir.json');
 const errors = [];
 
@@ -22,6 +24,17 @@ Q.forEach((s, i) => {
   if (t.length !== s.v.length) errors.push(`surah ${i + 1}: ${s.v.length} ayat but ${t.length} tafsir entries`);
 });
 
+// SHA-256 of JSON.stringify(parsed file): any edit to any ayah or tafsir entry, anywhere, changes it. These files are never edited by hand.
+const QURAN_FINGERPRINT = 'f64ebd6d34a53fa9ea99ba7a2395d1cb2b57a80dd9cd52eb8135c574705a5fe3';
+const TAFSIR_FINGERPRINT = '726615b78cbc960cd731da67f9cef449a576c12816bf5bdc06ee343dd904d354';
+const sha = o => createHash('sha256').update(JSON.stringify(o)).digest('hex');
+if (sha(Q) !== QURAN_FINGERPRINT) errors.push('quran.json: the text differs from the verified source (fingerprint ' + sha(Q).slice(0, 12) + '…). Nothing in it may be edited by hand.');
+if (sha(T) !== TAFSIR_FINGERPRINT) errors.push('tafsir.json: the text differs from the verified source (fingerprint ' + sha(T).slice(0, 12) + '…). Nothing in it may be edited by hand.');
+// a few facts that are known independently of the file (a surah\'s ayat count, the basmala of Al-Fatiha, the first words of Al-Ikhlas)
+const COUNTS = { 1: 7, 2: 286, 9: 129, 18: 110, 36: 83, 55: 78, 67: 30, 78: 40, 112: 4, 113: 5, 114: 6 };
+for (const [id, n] of Object.entries(COUNTS)) if (Q[id - 1] && Q[id - 1].v.length !== n) errors.push('surah ' + id + ': ' + Q[id - 1].v.length + ' ayat, expected ' + n);
+const plain = t => t.replace(/[\u0610-\u061A\u064B-\u065F\u0670\u06D6-\u06DC\u06DF-\u06E8\u06EA-\u06ED\u0640]/g, '').replace(/[\u0671\u0623\u0625\u0622]/g, '\u0627');
+if (Q[111] && !plain(Q[111].v[0]).startsWith('قل هو')) errors.push('surah 112 ayah 1 does not start with the expected words');
 if (ayat !== 6236) errors.push(`total ayat ${ayat}, expected 6236`);
 if (tafsir !== 6236) errors.push(`total tafsir entries ${tafsir}, expected 6236`);
 
