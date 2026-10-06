@@ -3,7 +3,7 @@ import { day } from './util.js';
 import { Q } from './data.js';
 import { ICONS, isFriend, AZ_KEY, FAV_REF, MAX_FAV, FS_MIN, FS_MAX, POS_MODES, BM_REF, MAX_BM, MAX_PIN, snapshot } from './state.js';
 import { SHOP, itemOf } from './catalog.js';
-import { PRESETS } from './plan.js';
+import { cleanPlan } from './plan.js';
 
 const APP = 'rafiq-alhifz', VERSION = 1, MAX_BYTES = 2e6, MAX_KIDS = 30;
 const LAST_EXPORT = 'hifz-lastexport';
@@ -127,8 +127,8 @@ function cleanKid(k, idx, skip) {
     mode: k.mode === 'young' ? 'young' : 'reader',
     S: cleanProgress(k.S, skip),
   };
-  const p = k.plan;
-  if (p && Object.hasOwn(PRESETS, p.id) && DATE.test(p.start) && Number.isInteger(p.weeks) && p.weeks >= 1 && p.weeks <= 104) kid.plan = { id: p.id, weeks: p.weeks, start: p.start };
+  const plan = cleanPlan(k.plan);
+  if (plan) kid.plan = plan;
   if (Number.isInteger(k.last) && k.last >= 1 && k.last <= 114) kid.last = k.last;
   if (isFriend(k.friend)) kid.friend = k.friend;
   const log = cleanLog(k.log);

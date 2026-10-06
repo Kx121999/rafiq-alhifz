@@ -28,7 +28,7 @@ import { initCompanion, companionPage, refreshCompanion } from './companion.js';
 import { renderOffline } from './offlineui.js';
 import { renderRamadan, recordRamadan } from './ramadan.js';
 import { initReminders, setReminderContext } from './remind.js';
-import { renderReview, renderWeak, onReviewGraded, clearReviewNote, dueList } from './review.js';
+import { renderReview, renderWeak, onReviewGraded, clearReviewNote, dueList, ratingButtons, ratingNote } from './review.js';
 import { renderPlan, onPlanChanged } from './plan.js';
 import { renderGames, onGameStars, resetGame } from './games.js';
 import { renderAchievements, renderCertificate } from './achievements.js';
@@ -186,13 +186,12 @@ $('ayat').addEventListener('click', e => {
 $('ayat').addEventListener('keydown', e => {
   if ((e.key === 'Enter' || e.key === ' ') && e.target.classList.contains('tx') && view.veil) { e.preventDefault(); const li = e.target.closest('.ay'); if (li.classList.toggle('shown')) revealAyah(li) }
 });
-function onGrade(good) {
-  const i = grade(view.cur, good); if (i == null) return;
+function onGrade(key) {
+  const i = grade(view.cur, key); if (i == null) return;
   renderSurah(false); refreshStats();
-  $('revText').textContent = (good ? 'أحسنت. ' : 'لا بأس، كرّرها اليوم. ') + 'المراجعة القادمة بعد ' + days(i) + '.';
+  $('revText').textContent = ratingNote(key, i);
 }
-$('revGood').addEventListener('click', () => onGrade(true));
-$('revBad').addEventListener('click', () => onGrade(false));
+$('revActs').appendChild(ratingButtons(onGrade));
 
 /* ---------- landing ---------- */
 /** The landing page's main button: a new child sets up and starts a session, a returning one goes to the dashboard. */

@@ -37,18 +37,21 @@ export function sessionTarget() {
 function sessionCard(box, ctx) {
   box.textContent = '';
   const { ay, doneToday, dueCount, weak } = ctx, t = sessionTarget(), c = Q[t.id - 1], from = suggestedStart(t.id);
-  const goalDone = doneToday >= S.goal;
-  const eyebrow = el('span', 'eyebrow'); eyebrow.append(icon('sparkle'), ay ? (goalDone ? 'اكتمل هدف اليوم' : 'جلسة اليوم') : 'ابدأ من هنا');
+  const goalDone = doneToday >= S.goal, p = kidPlan(), st = p && planStats(p), kind = st && st.left > 0 ? st.kindToday : 'm';
+  const eyebrow = el('span', 'eyebrow'); eyebrow.append(icon('sparkle'), kind === 'x' ? 'يوم راحة في خطتك' : kind === 'r' ? 'يوم مراجعة في خطتك' : ay ? (goalDone ? 'اكتمل هدف اليوم' : 'جلسة اليوم') : 'ابدأ من هنا');
   const title = el('h2', '', ay ? (mem(t.id) ? 'أكمل سورة ' + c.n : 'ابدأ سورة ' + c.n) : 'جلستك الأولى');
   box.append(eyebrow, title);
-  if (!ay) box.appendChild(el('p', '', 'سورة ' + c.n + '، من الآية الأولى. تستمع، ثم تكرّر، ثم تسمّع من حفظك. نحو خمس دقائق.'));
-  else box.appendChild(el('p', '', 'تكمل من الآية ' + AR(from + 1) + ' من ' + AR(c.v.length) + ' في سورة ' + c.n + '.'));
+  if (kind === 'x') box.appendChild(el('p', '', 'خطتك تجعل اليوم للراحة. إن أحببتَ فجلسة قصيرة أو مراجعة خفيفة لا بأس بها.'));
+  else if (kind === 'r') box.appendChild(el('p', '', 'اليوم للمراجعة: ثبّت ما حفظتَه. ' + (dueCount ? 'عندك ' + AR(dueCount) + ' للمراجعة.' : 'لا مراجعات مستحقة الآن.')));
+  else if (!ay) box.appendChild(el('p', '', 'سورة ' + c.n + '، من الآية الأولى. تستمع، ثم تكرّر، ثم تسمّع من حفظك. نحو خمس دقائق.'));
+  else if (kind === 'm') box.appendChild(el('p', '', 'تكمل من الآية ' + AR(from + 1) + ' من ' + AR(c.v.length) + ' في سورة ' + c.n + '.'));
   const steps = [];
   if (dueCount) steps.push('تبدأ بمراجعة قصيرة (' + AR(dueCount) + ')');
   if (weak) steps.push('وتثبّت ' + ayahs(weak) + ' ضعيفة');
   if (steps.length) { const ul = el('ul'); steps.forEach(s => { const li = el('li'); li.append(icon('check'), s); ul.appendChild(li) }); box.appendChild(ul) }
   const acts = el('div', 'acts');
-  acts.appendChild(btn(ay ? (goalDone ? 'جلسة إضافية' : 'ابدأ الجلسة') : 'ابدأ أول جلسة', 'btn', () => openSession(t.id)));
+  if (kind === 'r' && dueCount) acts.appendChild(link('#/review', 'ابدأ المراجعة', 'btn'));
+  else acts.appendChild(btn(ay ? (goalDone || kind !== 'm' ? 'جلسة إضافية' : 'ابدأ الجلسة') : 'ابدأ أول جلسة', 'btn', () => openSession(t.id)));
   acts.appendChild(link('#/surah/' + t.id, 'افتح السورة', 'btn ghost'));
   box.appendChild(acts);
   const fr = charImg(friendOf(), 'dbchar'); fr.width = fr.height = 72; box.appendChild(fr);
