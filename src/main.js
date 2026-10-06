@@ -208,5 +208,5 @@ startRouter();
 // someone who is already using the app (progress, or the installed app) lands on the dashboard, not on the landing page
 const atHome = () => ['', '#', '#/'].includes(location.hash);
 const launchHome = () => atHome() && (Object.keys(S.s).length > 0 || matchMedia('(display-mode: standalone)').matches);
-loadQuran().then(() => { if (launchHome()) location.replace('#/dashboard'); render(); initReminders(); announceBadges(); motionReady(); route(); if (!$('page-search').hidden) renderSearch() })
+loadQuran().then(() => { if (launchHome()) location.replace('#/dashboard'); render(); document.body.classList.add('dataready'); initReminders(); announceBadges(); motionReady(); route(); if (!$('page-search').hidden) renderSearch() })
   .catch(() => { searchUnavailable(); $('list').innerHTML = '<li class="empty">تعذّر تحميل نص المصحف. أعد فتح الصفحة للمحاولة مرة أخرى.</li>' });

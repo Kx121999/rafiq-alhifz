@@ -414,3 +414,11 @@ body.focusread #page-surah .tx{font-size:calc(2rem*var(--rs,1))}
 .arow .pl,.arow .bm,.arow .wk,.arow .tf{min-height:44px}
 .arow .bm{min-width:44px;justify-content:center}
 .sf-links a{min-width:44px;justify-content:center;padding-inline:8px}
+
+/* no layout jump: until the mushaf data has arrived and the first page is drawn, the footer waits and the dashboard keeps its room */
+body:not(.dataready) .appfoot{visibility:hidden}
+body:not(.dataready) #page-dashboard .dash{min-height:44rem}
+body:not(.dataready) #page-mushaf .list{min-height:60vh}
+#dbSub{min-height:1.7em}
+.phead p{min-height:1.5em}
+@media (max-width:899px){.dbsession{min-height:20.5rem}}
