@@ -33,6 +33,7 @@ import { renderPlan, onPlanChanged } from './plan.js';
 import { renderGames, onGameStars, resetGame } from './games.js';
 import { renderAchievements, renderCertificate } from './achievements.js';
 import { initKids, onKidsChange, renderKidBar, applyMode, announceBadges } from './kids.js';
+import { initParents, showParents } from './parents.js';
 
 function render() {
   if (!Q.length) return;
@@ -117,6 +118,7 @@ initSession({ mark: (id, i) => {
 }, review: () => { render() } });
 onPage('check', () => { view.cur = 0 });
 onPage('more', () => { view.cur = 0; renderMore() });
+onPage('parents', arg => { view.cur = 0; return showParents(arg) ? undefined : '/dashboard' });
 initCheck();
 $('printFamily').addEventListener('click', () => window.print());
 onPage('games', () => { view.cur = 0; resetGame(); render(); renderGames() });
@@ -198,7 +200,7 @@ $('startBtn').addEventListener('click', () => { if (needsTour()) openTour(); els
 $('howBtn').addEventListener('click', () => { const h = $('how'); h.scrollIntoView({ behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' }); h.querySelector('h2').focus({ preventScroll: true }) });
 
 /* ---------- boot ---------- */
-initGuard(); initCharacters(); initKids(); initReading(); initCompanion(); onKidsChange(render); initTour({ onDone: r => { renderKidBar(); render(); if (r && r.start) { go('/dashboard'); openSession(sessionTarget().id) } } }); initPlayer(); initPwa(); initSearch();
+initGuard(); initCharacters(); initKids(); initParents(); initReading(); initCompanion(); onKidsChange(render); initTour({ onDone: r => { renderKidBar(); render(); if (r && r.start) { go('/dashboard'); openSession(sessionTarget().id) } } }); initPlayer(); initPwa(); initSearch();
 setReminderContext(() => ({ reviewDue: Q.length ? dueList().length + weakList().length : 0, adhkarDone: id => azToday(id).d === 1 }));
 startRouter();
 // someone who is already using the app (progress, or the installed app) lands on the dashboard, not on the landing page

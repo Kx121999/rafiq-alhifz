@@ -51,7 +51,7 @@ export function backupSection(onChange) {
   });
 
   const acts = el('div', 'acts'); acts.append(exp, imp, file);
-  card.append(el('h3', '', 'النسخ الاحتياطي'), hint, acts, choice, msg);
+  card.append(el('h2', '', 'النسخ الاحتياطي'), hint, acts, choice, msg);
 
   // a kept copy from before an earlier replace
   const pt = restorePoint();

@@ -126,6 +126,7 @@ await scenario('backup export and import round trip', async () => {
   const { ctx, page, errors } = await open('#/dashboard', { seed: { 'hifz-tour-v1': '1', 'hifz-kids-v1': store([k]) },
     before: 'const o = URL.createObjectURL; URL.createObjectURL = b => { window.__blob = b; return o.call(URL, b) }' });
   await gate(page);
+  await page.evaluate(() => document.querySelector('[data-tab="data"]').click()); await wait(300);
   await clickText(page, 'تصدير نسخة احتياطية', '#parentBody button'); await wait(500);
   const text = await page.evaluate(async () => window.__blob ? await window.__blob.text() : '');
   const j = JSON.parse(text); ok(j.app === 'rafiq-alhifz' && j.kids.length === 1 && j.kids[0].S.s[112].m === '1111', 'the exported file is not a valid backup');
@@ -215,6 +216,32 @@ await scenario('whole surah mark and undo', async () => {
   await page.waitForSelector('#undoBar:not([hidden]) button', { timeout: 5000 });
   await page.evaluate(() => document.querySelector('#undoBar button').click()); await wait(500);
   d = await saved(page); ok(!d.kids[0].S.s[112] || !d.kids[0].S.s[112].m.includes('1'), 'undo did not put the surah back');
+  noErrors(errors); await ctx.close();
+});
+
+/* 12. a bad backup file is refused without touching anything; a PIN, once set, is what the gate asks for */
+await scenario('invalid import is refused; the PIN gate', async () => {
+  const k = kid({ S: { s: { 112: { m: '1111', d: ymd(2), i: 1 } }, goal: 5, day: ymd(), n: 4, streak: 1, last: ymd() } });
+  const { ctx, page, errors } = await open('#/dashboard', { seed: { 'hifz-tour-v1': '1', 'hifz-kids-v1': store([k]) } });
+  await gate(page);
+  ok(await page.evaluate(() => location.hash === '#/parents' && !!document.querySelector('#parentTabs')), 'the parents page did not open after the gate');
+  await page.evaluate(() => document.querySelector('[data-tab="data"]').click()); await wait(300);
+  const fs = await import('node:fs'), bad = join(process.env.TMPDIR || process.env.TEMP || '/tmp', 'rafiq-e2e-bad.json');
+  fs.writeFileSync(bad, '{"app":"rafiq-alhifz","version":1,"kids":"not a list"}');
+  await (await page.$('#parentBody input[type=file]')).uploadFile(bad); await wait(700);
+  ok(await page.evaluate(() => /ليس نسخة احتياطية/.test(document.getElementById('parentBody').textContent) && !/إضافتهم/.test(document.getElementById('parentBody').textContent)), 'a bad file was not refused with a clear message');
+  let d = await saved(page); ok(d.kids.length === 1 && d.kids[0].S.s[112].m === '1111', 'the data changed after a refused import');
+  // set a PIN, lock, and the gate now asks for it
+  await page.evaluate(() => document.querySelector('[data-tab="settings"]').click()); await wait(300);
+  await page.type('#pinNew', '2468'); await clickText(page, 'اضبط الرمز', '#parentBody button'); await wait(500);
+  ok(await page.evaluate(() => !!localStorage.getItem('hifz-pin-v1') && !localStorage.getItem('hifz-pin-v1').includes('2468')), 'the PIN is missing or stored as plain digits');
+  await clickText(page, 'اقفل ركن الأهل', '#parentBody button'); await wait(400);
+  await page.evaluate(() => document.getElementById('parentBtn').click()); await wait(300);
+  ok(await page.evaluate(() => document.getElementById('gate').open && document.getElementById('gateQ').textContent.includes('رمز')), 'the gate does not ask for the PIN');
+  await page.type('#gateA', '1111'); await page.evaluate(() => document.getElementById('gateForm').requestSubmit()); await wait(400);
+  ok(await page.evaluate(() => location.hash !== '#/parents' && !document.getElementById('gateErr').hidden), 'a wrong PIN got in');
+  await page.evaluate(() => { document.getElementById('gateA').value = '' }); await page.type('#gateA', '2468'); await page.evaluate(() => document.getElementById('gateForm').requestSubmit()); await wait(500);
+  ok(await page.evaluate(() => location.hash === '#/parents'), 'the right PIN did not open the parents page');
   noErrors(errors); await ctx.close();
 });
 

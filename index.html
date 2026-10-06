@@ -101,6 +101,7 @@
       <a href="#/ramadan" data-nav="ramadan"><svg class="ic " aria-hidden="true" focusable="false"><use href="#i-moon"/></svg><span>رمضان</span></a>
       <a href="#/shop" data-nav="shop"><svg class="ic " aria-hidden="true" focusable="false"><use href="#i-bag"/></svg><span>المتجر</span></a>
       <p class="navhead">للأهل</p>
+      <a href="#/parents" data-nav="parents"><svg class="ic " aria-hidden="true" focusable="false"><use href="#i-shield"/></svg><span>ركن الأهل</span></a>
       <a href="#/report" data-nav="report"><svg class="ic " aria-hidden="true" focusable="false"><use href="#i-chart"/></svg><span>التقارير</span></a>
       <a href="#/family" data-nav="family"><svg class="ic " aria-hidden="true" focusable="false"><use href="#i-users"/></svg><span>تقرير العائلة</span></a>
       <a href="#/share" data-nav="share"><svg class="ic " aria-hidden="true" focusable="false"><use href="#i-share"/></svg><span>بطاقة الإنجاز</span></a>
@@ -382,6 +383,13 @@
     <button type="button" class="btn focusexit" id="focusExit"><svg class="ic" aria-hidden="true" focusable="false"><use href="#i-x"/></svg><span>إنهاء القراءة المركّزة</span></button>
   </main>
 
+  <!-- ركن الأهل -->
+  <main class="page" id="page-parents" data-page="parents" tabindex="-1" hidden>
+    <header class="phead"><div><h1 class="ptitle">ركن الأهل</h1><p>الأطفال والمتابعة والإعدادات والبيانات</p></div><button type="button" class="btn" id="parentsLock"><svg class="ic " aria-hidden="true" focusable="false"><use href="#i-lock"/></svg>اقفل</button></header>
+    <nav class="chips ptabs" id="parentTabs" aria-label="أقسام ركن الأهل"></nav>
+    <div id="parentBody" class="parentbody"></div>
+  </main>
+
   <!-- عن المنصة -->
   <main class="page" id="page-about" data-page="about" tabindex="-1" hidden>
     <header class="phead"><div><h1 class="ptitle">عن المنصة</h1><p>من نحن وكيف تعمل</p></div></header>
@@ -443,10 +451,10 @@
   <form method="dialog" id="gateForm">
     <img class="char dlgchar" src="/chars/nujum.svg" alt="" width="72" height="72">
     <h2 id="gateT">ركن الأهل</h2>
-    <p class="note">للكبار فقط. أجب عن هذا السؤال للدخول:</p>
+    <p class="note">للكبار فقط.</p>
     <p class="q" id="gateQ"></p>
-    <input class="search" id="gateA" type="number" inputmode="numeric" autocomplete="off" aria-label="الإجابة">
-    <p class="err" id="gateErr" role="alert" hidden>إجابة غير صحيحة، حاول مرة أخرى.</p>
+    <input class="search" id="gateA" type="number" inputmode="numeric" autocomplete="off" aria-label="الإجابة أو الرمز">
+    <p class="err" id="gateErr" role="alert" hidden></p>
     <div class="acts">
       <button type="submit" class="btn primary" id="gateOk">دخول</button>
       <button type="button" class="btn" data-close>إلغاء</button>
@@ -454,16 +462,6 @@
   </form>
 </dialog>
 
-<dialog id="parent" class="dlg wide" aria-labelledby="parentT">
-  <img class="char dlgchar" src="/mascot.svg" alt="" width="72" height="72">
-  <h2 id="parentT">ركن الأهل</h2>
-  <div id="parentBody"></div>
-  <div class="acts">
-    <button type="button" class="btn" id="addKid">+ إضافة طفل</button>
-    <button type="button" class="btn primary" data-close>تم</button>
-  </div>
-  <p class="note">التقدّم محفوظ على هذا الجهاز وهذا المتصفح فقط، ولا يُرسل إلى أي مكان.</p>
-</dialog>
 
 <script type="module" src="/src/main.js"></script>
 </body>

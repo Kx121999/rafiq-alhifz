@@ -1,12 +1,9 @@
 // Child profiles: the switcher bar, rewards (stars and badges), and the parent corner behind a math gate.
-import { $, AR, day, charImg } from './util.js';
+import { $, AR } from './util.js';
 import { Q } from './data.js';
 import { announce } from './motion.js';
-import { S, mem, gameStars, azStats, streakNow, friendsFor, shopTheme, shopFrame, weeksDone, famWeeks, ramBest, kids, activeKid, switchKid, addKid, updateKid, removeKid, save, applyImport, ICONS, MODES } from './state.js';
-import { backupSection } from './backupui.js';
-import { go } from './router.js';
+import { mem, gameStars, azStats, streakNow, shopTheme, shopFrame, weeksDone, famWeeks, ramBest, kids, activeKid, switchKid, save } from './state.js';
 import { applyReading } from './reading.js';
-import { deviceSection } from './devicepanel.js';
 
 let onChange = () => {};
 export const onKidsChange = fn => { onChange = fn };
@@ -94,75 +91,12 @@ export function announceBadges() {
   BADGES.filter(b => now.has(b.name) && !before.has(b.name)).forEach(b => announce('وسام جديد: ' + b.icon + ' ' + b.name + '!'));
 }
 
-/* ---------- parent corner ---------- */
-let answer = 0;
-function openGate() {
-  const a = 3 + Math.floor(Math.random() * 7), b = 3 + Math.floor(Math.random() * 7);
-  answer = a * b; $('gateQ').textContent = AR(a) + ' × ' + AR(b) + ' = ؟';
-  $('gateA').value = ''; $('gateErr').hidden = true; $('gate').showModal(); $('gateA').focus();
-}
-
-function renderParent() {
-  const box = $('parentBody'); box.textContent = '';
-  const act = activeKid();
-  kids().forEach(k => {
-    const card = el('section', 'kcard'); card.dataset.id = k.id;
-    const name = el('input', 'search'); name.value = k.name; name.maxLength = 20; name.setAttribute('aria-label', 'اسم الطفل');
-    name.addEventListener('change', () => { updateKid(k.id, { ...k, name: name.value.trim() || k.name }); name.value = k.name; refresh(false) });
-    const icons = el('div', 'icons');
-    ICONS.forEach(ic => {
-      const b = el('button', 'chip', ic); b.type = 'button'; b.setAttribute('aria-pressed', ic === k.icon); b.setAttribute('aria-label', 'الرمز ' + ic);
-      b.addEventListener('click', () => { updateKid(k.id, { ...k, icon: ic }); refresh(true) });
-      icons.appendChild(b);
-    });
-    const modes = el('div', 'icons');
-    Object.entries(MODES).forEach(([m, label]) => {
-      const b = el('button', 'chip', label); b.type = 'button'; b.setAttribute('aria-pressed', m === k.mode);
-      b.addEventListener('click', () => { updateKid(k.id, { ...k, mode: m }); refresh(true) });
-      modes.appendChild(b);
-    });
-    const friends = el('div', 'icons friends'); friends.setAttribute('role', 'group'); friends.setAttribute('aria-label', 'صديق ' + k.name);
-    friendsFor(k).forEach(f => {
-      const b = el('button', 'chip friendchip'); b.type = 'button';
-      b.setAttribute('aria-pressed', f.id === (k.friend || 'rafiq')); b.setAttribute('aria-label', 'الصديق ' + f.name);
-      b.append(charImg(f.id), el('span', '', f.name));
-      b.addEventListener('click', () => { updateKid(k.id, { ...k, friend: f.id }); refresh(true) });
-      friends.appendChild(b);
-    });
-    const foot = el('div', 'acts');
-    const rep = el('button', 'btn', 'تقرير الأسبوع'); rep.type = 'button';
-    rep.addEventListener('click', () => { if (!act || k.id !== act.id) switchKid(k.id); $('parent').close(); go('/report') });
-    foot.appendChild(rep);
-    if (!act || k.id !== act.id) { const sw = el('button', 'btn', 'تحويل إلى ' + k.name); sw.type = 'button'; sw.addEventListener('click', () => { switchKid(k.id); refresh(true) }); foot.appendChild(sw) }
-    if (kids().length > 1) {
-      const del = el('button', 'btn danger', 'حذف'); del.type = 'button';
-      del.addEventListener('click', () => {
-        if (confirm('حذف ملف «' + k.name + '» وكل تقدّمه نهائيًا؟ لا يمكن التراجع.')) { removeKid(k.id); refresh(true) }
-      });
-      foot.appendChild(del);
-    }
-    card.append(el('h3', '', k.icon + ' ' + k.name), name, icons, modes, friends, foot);
-    box.appendChild(card);
-  });
-  box.appendChild(deviceSection());
-  box.appendChild(backupSection(() => refresh(true)));
-}
-
-function refresh(rerenderParent) { applyMode(); renderKidBar(); if (rerenderParent) renderParent(); onChange() }
+/** After a change to a child (name, mode, friend, the active child): repaint what depends on it, then tell the pages. */
+export function refreshKids() { applyMode(); renderKidBar(); onChange() }
 
 export function initKids() {
-  $('kids').addEventListener('click', e => { const b = e.target.closest('.kid'); if (!b) return; switchKid(b.dataset.id); refresh(false) });
-  $('parentBtn').addEventListener('click', openGate);
-  $('gateForm').addEventListener('submit', e => {
-    e.preventDefault();
-    if (Number($('gateA').value) === answer) { $('gate').close(); renderParent(); $('parent').showModal() }
-    else { $('gateErr').hidden = false; $('gateA').select() }
-  });
-  $('addKid').addEventListener('click', () => {
-    const n = kids().length + 1;
-    addKid({ name: 'طفل ' + AR(n), icon: ICONS[n % ICONS.length], mode: 'reader' }); refresh(true);
-  });
+  $('kids').addEventListener('click', e => { const b = e.target.closest('.kid'); if (!b) return; switchKid(b.dataset.id); refreshKids() });
   document.querySelectorAll('dialog [data-close]').forEach(b => b.addEventListener('click', () => b.closest('dialog').close()));
   document.querySelectorAll('dialog').forEach(d => d.addEventListener('close', () => { save(); renderKidBar(); onChange() }));
-  refresh(false);
+  refreshKids();
 }
